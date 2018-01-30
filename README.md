@@ -6,7 +6,8 @@ After this operation has been completed the 'Exploit' component of the program w
 
 The available Metasploit modules have been selected to facilitate Remote Code Execution and to attempt to gain Reverse TCP Shells and/or Meterpreter sessions. Workspace, local host and local port for MSF facilitated back connections are configured through the dialog that comes up before the 'Exploit' component is started.
 
-*Operational Security Consideration*
+**Operational Security Consideration**
+
 Receiving back connections on your local machine might not be the best idea from an OPSEC standpoint. Instead consider running this tool from a VPS that has all the dependencies required, available.
 
 ## Usage
