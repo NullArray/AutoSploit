@@ -12,7 +12,8 @@ Receiving back connections on your local machine might not be the best idea from
 ## Usage
 
 Clone the repo.
-`https://github.com/NullArray/AutoSploit.git`
+
+`git clone https://github.com/NullArray/AutoSploit.git`
 
 After which it can be started from the terminal with `python autosploit.py`. After which you can select one of five actions. Please see the option summary below.
 ```
