@@ -46,7 +46,8 @@ Should you find you do not have these installed get them with pip like so.
 pip install shodan
 pip install blessings
 ```
-Since the program invokes functionality from the Metasploit Framework you need to have this installed get it from Rapid7 by clicking [here](https://www.rapid7.com/products/metasploit/).
+Since the program invokes functionality from the Metasploit Framework you need to have this installed also. 
+Get it from Rapid7 by clicking [here](https://www.rapid7.com/products/metasploit/).
 
 ### Note
 While this isn't exactly a Beta release it is an early release nonetheless as such the tool might be subject to changes in the future. If you happen to encounter a bug or would like to contribute to the tool's improvement please feel free to [Open a Ticket](https://github.com/NullArray/AutoSploit/issues) or [Submit a Pull Request](https://github.com/NullArray/AutoSploit/pulls)
