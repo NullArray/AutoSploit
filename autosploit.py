@@ -289,11 +289,18 @@ def main():
 			print "\n[" + t.green("+") + "]Welcome to AutoSploit. Please select an action."
 			print """
 		
-1. Usage		3. View Hosts		5. Quit
-2. Gather Hosts		4. Exploit 					
-									"""
+0. Ethics               2. Gather Hosts         4. Exploit
+1. Usage                3. View Hosts           5. Quit
+                                               
+                                                                        """
 
-			action = raw_input("\n<" + t.cyan("AUTOSPLOIT") + ">$ ")
+                        action = raw_input("\n<" + t.cyan("AUTOSPLOIT") + ">$ ")
+
+                        #Pull Request from @AriSaastamoinen
+                        if action == '0':
+                                print "\"Consider if playing Xbox would be a wiser choice before proceeding...\""
+                                time.sleep(1.5)
+                                break
 		
 			if action == '1':
 				usage()
