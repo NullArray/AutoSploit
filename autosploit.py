@@ -422,4 +422,4 @@ if __name__=="__main__":
 		path = os.path.abspath("api.p")	
 		print "\n[" + t.green("+") + "]Your API key was loaded from " + path
 		
-		main()
+	main()
