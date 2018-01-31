@@ -411,7 +411,8 @@ if __name__=="__main__":
 	
 		path = os.path.abspath("api.p")
 		print "[" + t.green("+") + "]\nYour API key has been saved to " + path
-	
+		
+		main()
 	else:
 		try:
 			SHODAN_API_KEY = pickle.load(open( "api.p", "rb" ))
@@ -422,4 +423,4 @@ if __name__=="__main__":
 		path = os.path.abspath("api.p")	
 		print "\n[" + t.green("+") + "]Your API key was loaded from " + path
 		
-	main()
+		main()
