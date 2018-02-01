@@ -357,7 +357,7 @@ if __name__=="__main__":
 
 	postgresql = cmdline("sudo service postgresql status | grep active")
 	if "Active: inactive" in postgresql:
-		print "\n[" + t.red("!") + "]Warning. Hueristics indicate Postgresql Service is offline"
+		print "\n[" + t.red("!") + "]Warning. Heuristics indicate Postgresql Service is offline"
 
 		start_pst = raw_input("\n[" + t.magenta("?") + "]Start Postgresql Service? [Y]es/[N]o: ").lower()
 		if start_pst == 'y':
@@ -380,7 +380,7 @@ if __name__=="__main__":
 
 	apache = cmdline("service apache2 status | grep active")
 	if "Active: inactive" in apache:
-		print "\n[" + t.red("!") + "]Warning. Hueristics indicate Apache Service is offline"
+		print "\n[" + t.red("!") + "]Warning. Heuristics indicate Apache Service is offline"
 		
 		start_ap = raw_input("\n[" + t.magenta("?") + "]Start Apache Service? [Y]es/[N]o: ").lower()
 		if start_ap == 'y':
