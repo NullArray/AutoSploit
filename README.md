@@ -12,7 +12,7 @@ Receiving back connections on your local machine might not be the best idea from
 
 ## Usage
 
-Clone the repo. Or deploy via Docker. Details for which can be found (here)[https://github.com/NullArray/AutoSploit/tree/master/Docker] Special thanks to (Khast3x)[https://github.com/khast3x] for their contribution in this regard.
+Clone the repo. Or deploy via Docker. Details for which can be found [here](https://github.com/NullArray/AutoSploit/tree/master/Docker) Special thanks to [Khast3x](https://github.com/khast3x) for their contribution in this regard.
 
 `git clone https://github.com/NullArray/AutoSploit.git`
 
