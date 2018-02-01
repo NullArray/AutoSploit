@@ -1,0 +1,3 @@
+blessings==1.6.1
+retrying==1.3.3
+shodan==1.7.7
