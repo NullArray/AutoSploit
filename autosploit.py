@@ -249,7 +249,7 @@ def settings():
 		local_port = False
 
 	# Check if settings are not null
-	if workspace == False or local_host == False or local_port == False:
+	if workspace is False or local_host is False or local_port is False:
 		configured = None
 		print "\n[" + t.red("!") + "]Warning. LPORT, LHOST and/or workspace cannot be null"
 		print "[" + t.green("+") + "]Restarting MSF Settings module."
