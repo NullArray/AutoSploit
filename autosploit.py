@@ -21,7 +21,7 @@ toolbar_width = 60
 
 # Logo
 def logo():
-	print t.cyan("""
+    print t.cyan("""
                               _____     _       _____     _     _ _   
 #--Author : Vector/NullArray |  _  |_ _| |_ ___|   __|___| |___|_| |_ 
 #--Twitter: @Real__Vector    |     | | |  _| . |__   | . | | . | |  _|
