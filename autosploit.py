@@ -30,7 +30,7 @@ def logo():
 ##############################################
 """)   
 
-# Usage and legal
+# Usage and legal.
 def usage():
     os.system("clear")
     logo()
