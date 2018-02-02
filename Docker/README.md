@@ -9,7 +9,8 @@ cd Autosploit/Docker
 # nano database.yml
 docker network create -d bridge haknet
 docker run --network haknet --name msfdb -e POSTGRES_PASSWORD=s3cr3t -d postgres
-docker run -it -p 80:80 -p 443:443 -p 4444:4444 autosploit
+docker build -t autosploit .
+docker run -it --network haknet -p 80:80 -p 443:443 -p 4444:4444 autosploit
 ```
 
 
@@ -58,5 +59,6 @@ Building will be faster if done on a hosted server as it benefits from the -grad
 git clone https://github.com/NullArray/AutoSploit.git
 cd Autosploit/Docker
 nano database.yml # Exemple configuration should work fine
-docker run -it -p 80:80 -p 443:443 -p 4444:4444 autosploit
+docker build -t autosploit .
+docker run -it --network haknet -p 80:80 -p 443:443 -p 4444:4444 autosploit
 ```
