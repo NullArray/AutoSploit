@@ -136,7 +136,32 @@ def exploit(query):
 					os.system(template)
 	else:
 		print "[" + t.red("!") + "]Unhandled Option. Defaulting to Main Menu"
-
+		
+# Import a text file containing ip addresses @hackabus && calski
+def import_IoT(clobber=True):	
+	print 
+	
+	file_path = raw_input("Please enter the file path // ex: root/Desktop/file.txt ")
+	try:
+		path_exists = os.stat(file_path)
+		time.sleep(0.5)
+		if clobber:
+			print "Overwriting hosts.txt with IP list"
+			with open(file_path, 'r') as iotfile:
+				with open('hosts.txt', 'wb') as hostfile:
+					for address in iotfile:
+						hostfile.write(address)
+		else:
+			print "Appending hosts.txt with IP list"
+			with open(file_path, 'r') as iotfile:
+				with open('hosts.txt', 'ab') as hostfile:
+					for address in iotfile:
+						hostfile.write(address)					
+	except:
+		print
+		time.sleep(0.5) 
+		print "This path does not exist, please try again"
+	
 
 # Function to gather target hosts from Shodan 
 def targets(clobber=True):
@@ -296,10 +321,9 @@ def main():
 			print "\n[" + t.green("+") + "]Welcome to AutoSploit. Please select an action."
 			print """
 		
-1. Usage		3. View Hosts		5. Quit
-2. Gather Hosts		4. Exploit 					
-									"""
-
+1. Usage		3. Import IoT Hosts	5. View Hosts
+2. Gather Hosts		4. Input Host Manually	6. Exploit		666. Quit
+                                                                        """
 			action = raw_input("\n<" + t.cyan("AUTOSPLOIT") + ">$ ")
 		
 			if action == '1':
@@ -311,14 +335,15 @@ def main():
 				else:
 					append = raw_input("\n[" + t.magenta("?") + "]Append hosts to file or overwrite? [A/O]: ").lower()
 			
-					if append == 'a':
+			#fixed overwrite issue with capital letters
+					if append == 'a' or append == 'A':
 						targets(False)
-					elif append == 'o':
+					elif append == 'o' or append == 'O':
 						targets(True)
 					else:
 						print "\n[" + t.red("!") + "]Unhandled Option."
 			
-			elif action == '3':
+			elif action == '5':
 				if not os.path.isfile("hosts.txt"):
 					print "\n[" + t.red("!") + "]Warning. AutoSploit failed to detect host file."
 			
@@ -332,7 +357,7 @@ def main():
 							
 					print "[" + t.green("+") + "]Done.\n"
 					
-			elif action == '4':
+			elif action == '6':
 				if not os.path.isfile("hosts.txt"):
 					print "\n[" + t.red("!") + "]Warning. AutoSploit failed to detect host file."
 					print "Please make sure to gather a list of targets" 
@@ -344,9 +369,64 @@ def main():
 				elif configured == False:
 					settings()
 					
-			elif action == '5':
+			elif action == '666':
 				print "\n[" + t.red("!") + "]Exiting AutoSploit..."
 				break
+			
+			#adding single IP to host.txt @hackabus && calski
+			
+			elif action == '3':
+				append = raw_input("\n[" + t.magenta("?") + "]Append hosts to file or overwrite? [A/O]: ")
+				
+				if append == 'a' or append == 'A':
+					import_IoT(False)
+				elif append == 'o' or append == 'O':
+					import_IoT(True)
+				else:
+					print "\n[" + t.red("!") + "]Unhandled Option."
+			elif action == '4':
+				IP = raw_input ("Enter Single IPv4: ")
+				
+				#checking ip is valid and only contains numbers 0-255 @hackabus && calski
+				
+				time.sleep(0.5)
+				try:
+				 	quartet1 = int(IP[0:IP.index('.')])				
+					IP = IP[IP.index('.')+1:]
+					quartet2 = int(IP[0:IP.index('.')])					
+					IP = IP[IP.index('.')+1:]
+					quartet3 = int(IP[0:IP.index('.')])					
+					IP = IP[IP.index('.')+1:]
+					quartet4 = int(IP)								
+					
+					IP = str(quartet1) + "." + str(quartet2) + "." + str(quartet3) + "." + str(quartet4)
+										
+					time.sleep(0.5)
+					if   quartet1 < 0 or quartet1 > 255:
+						print "This is not a valid IP"
+					elif quartet2 < 0 or quartet2 > 255:
+						print "This is not a valid IP"
+					elif quartet3 < 0 or quartet3 > 255:
+						print "This is not a valid IP"
+					elif quartet4 < 0 or quartet4 > 255:
+						print "This is not a valid IP"
+					elif IP == "127.0.0.1":
+						print "This will exploit yourself you nerd"
+					else:
+						append = raw_input("\n[" + t.magenta("?") + "]Append hosts to file or overwrite? [A/O]: ")
+						time.sleep(0.5)
+						if append == 'a' or append == 'A':
+							with open("hosts.txt", "ab") as hostfile:				
+								hostfile.write(IP + "\n")
+						elif append == 'o' or append == 'O':
+							with open("hosts.txt", "wb") as hostfile:				
+								hostfile.write(IP + "\n")
+						else:
+							print "\n[" + t.red("!") + "]Unhandled Option."
+							
+							 
+				except:
+					print "That is not a valid IP"
 				
 			else:
 				print "\n[" + t.red("!") + "]Unhandled Option."
