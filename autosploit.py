@@ -321,8 +321,8 @@ def main():
 			print "\n[" + t.green("+") + "]Welcome to AutoSploit. Please select an action."
 			print """
 		
-1. Usage		3. Import IoT Hosts	5. View Hosts
-2. Gather Hosts		4. Input Host Manually	6. Exploit		666. Quit
+1. Usage		3. Import Host List	5. View Hosts
+2. Gather Hosts		4. Input Single Host	6. Exploit		666. Quit
                                                                         """
 			action = raw_input("\n<" + t.cyan("AUTOSPLOIT") + ">$ ")
 		
