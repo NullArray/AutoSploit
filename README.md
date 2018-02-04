@@ -2,7 +2,7 @@
 
 As the name might suggest AutoSploit attempts to automate the exploitation of remote hosts. Targets are collected automatically as well by employing the Shodan.io API. The program allows the user to enter their platform specific search query such as; `Apache`, `IIS`, etc, upon which a list of candidates will be retrieved.                           
 
-After this operation has been completed the 'Exploit' component of the program will go about the business of attempting to exploit these targets by running a series of Metasploit modules against them. Which Metasploit modules will be employed in this manner is determined by programatically comparing the name of the module to the initial search query. However, I have added functionality to run all available modules against the targets in a 'Hail Mary' type of attack as well.
+After this operation has been completed the 'Exploit' component of the program will go about the business of attempting to exploit these targets by running a series of Metasploit modules against them. Which Metasploit modules will be employed in this manner is determined by programmatically comparing the name of the module to the initial search query. However, I have added functionality to run all available modules against the targets in a 'Hail Mary' type of attack as well.
 
 The available Metasploit modules have been selected to facilitate Remote Code Execution and to attempt to gain Reverse TCP Shells and/or Meterpreter sessions. Workspace, local host and local port for MSF facilitated back connections are configured through the dialog that comes up before the 'Exploit' component is started.
 
@@ -12,7 +12,7 @@ Receiving back connections on your local machine might not be the best idea from
 
 ## Usage
 
-Clone the repo.
+Clone the repo. Or deploy via Docker. Details for which can be found [here](https://github.com/NullArray/AutoSploit/tree/master/Docker) Special thanks to [Khast3x](https://github.com/khast3x) for their contribution in this regard.
 
 `git clone https://github.com/NullArray/AutoSploit.git`
 

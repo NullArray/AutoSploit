@@ -24,7 +24,7 @@ toolbar_width = 60
 
 # Logo
 def logo():
-	print(t.cyan("""
+    print(t.cyan("""
                               _____     _       _____     _     _ _
 #--Author : Vector/NullArray |  _  |_ _| |_ ___|   __|___| |___|_| |_
 #--Twitter: @Real__Vector    |     | | |  _| . |__   | . | | . | |  _|
@@ -33,7 +33,7 @@ def logo():
 ##############################################
 """))
 
-# Usage
+# Usage and legal.
 def usage():
     os.system("clear")
     logo()
@@ -65,6 +65,13 @@ def usage():
 |4. Exploit        | Configure MSF and Start exploiting gathered targets|
 |5. Quit           | Exits AutoSploit.                                  |
 +------------------+----------------------------------------------------+
+|                         Legal Disclaimer                              |
++-----------------------------------------------------------------------+
+| Usage of AutoSploit for attacking targets without prior mutual consent| 
+| is illegal. It is the end user's responsibility to obey all applicable| 
+| local, state and federal laws. Developers assume no liability and are |
+| not responsible for any misuse or damage caused by this program!      |
++-----------------------------------------------------------------------+
 """)
 
 # Function that allows us to store system command
@@ -225,7 +232,6 @@ def settings():
 	print("your external Facing IP & Port need to be reachable...")
 	time.sleep(1.5)
 
-
 	workspace = raw_input("\n[" + t.magenta("?") + "]Please set the Workspace name: ")
 	if not workspace == "":
 		print("[" + t.green("+") + "]Workspace set to: " + workspace)
@@ -279,7 +285,6 @@ def main():
 		print("\n[" + t.red("!") + "]Critical. API setup failed.\n")
 		print(e)
 		sys.exit(0)
-
 
 	try:
 		while True:
@@ -360,7 +365,7 @@ if __name__=="__main__":
 
 	postgresql = cmdline("sudo service postgresql status | grep active")
 	if "Active: inactive" in postgresql:
-		print("\n[" + t.red("!") + "]Warning. Hueristics indicate Postgresql Service is offline")
+		print("\n[" + t.red("!") + "]Warning. Heuristics indicate Postgresql Service is offline")
 
 		start_pst = raw_input("\n[" + t.magenta("?") + "]Start Postgresql Service? [Y]es/[N]o: ").lower()
 		if start_pst == 'y':
@@ -383,8 +388,8 @@ if __name__=="__main__":
 
 	apache = cmdline("service apache2 status | grep active")
 	if "Active: inactive" in apache:
-		print("\n[" + t.red("!") + "]Warning. Hueristics indicate Apache Service is offline")
-
+		print("\n[" + t.red("!") + "]Warning. Heuristics indicate Apache Service is offline")
+	
 		start_ap = raw_input("\n[" + t.magenta("?") + "]Start Apache Service? [Y]es/[N]o: ").lower()
 		if start_ap == 'y':
 			os.system("sudo service apache2 start")
