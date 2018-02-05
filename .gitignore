@@ -1,0 +1,4 @@
+*.pyc
+.idea/*
+api.p
+hosts.txt
