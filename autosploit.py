@@ -20,6 +20,13 @@ local_port = ""
 local_host = ""
 configured = False
 toolbar_width = 60
+modules_path = "%s/etc/modules.txt" % os.getcwd()
+usage_path = "%s/etc/usage" % os.getcwd()
+autosploit_options = {
+    1: "Usage", 2: "Gather Hosts",
+    3: "View Hosts", 4: "Exploit",
+    5: "Quit"
+}
 
 
 # Logo
@@ -36,44 +43,11 @@ def logo():
 
 # Usage and legal.
 def usage():
+    global usage_path
     os.system("clear")
     logo()
-    print """
-+-----------------------------------------------------------------------+
-|            AutoSploit General Usage and Information                   |
-+-----------------------------------------------------------------------+
-|As the name suggests AutoSploit attempts to automate the exploitation  |
-|of remote hosts. Targets are collected by employing the Shodan.io API. |
-|                                                                       |
-|The 'Gather Hosts' option will open a dialog from which you can        |
-|enter platform specific search queries such as 'Apache' or 'IIS'.      |
-|Upon doing so a list of candidates will be retrieved and saved to      |
-|hosts.txt in the current working directory.                            |
-|After this operation has been completed the 'Exploit' option will      |
-|go about the business of attempting to exploit these targets by        |
-|running a range of Metasploit modules against them.                    |
-|                                                                       |
-|Workspace, local host and local port for MSF facilitated               |
-|back connections are configured through the dialog that comes up       |
-|before the 'Exploit' module is started.                                |
-|                                                                       |
-+------------------+----------------------------------------------------+
-|     Option       |                   Summary                          |
-+------------------+----------------------------------------------------+
-|1. Usage          | Display this informational message.                |
-|2. Gather Hosts   | Query Shodan for a list of platform specific IPs.  |
-|3. View Hosts     | Print gathered IPs/RHOSTS.                         |
-|4. Exploit        | Configure MSF and Start exploiting gathered targets|
-|5. Quit           | Exits AutoSploit.                                  |
-+------------------+----------------------------------------------------+
-|                         Legal Disclaimer                              |
-+-----------------------------------------------------------------------+
-| Usage of AutoSploit for attacking targets without prior mutual consent| 
-| is illegal. It is the end user's responsibility to obey all applicable| 
-| local, state and federal laws. Developers assume no liability and are |
-| not responsible for any misuse or damage caused by this program!	|
-+-----------------------------------------------------------------------+
-"""
+    with open(usage_path) as usage_retval:
+        print(usage_retval.read())
 
 
 # Function that allows us to store system command
@@ -91,6 +65,7 @@ def exploit(query):
     global workspace
     global local_port
     global local_host
+    global modules_path
 
     os.system("clear")
     logo()
@@ -106,7 +81,7 @@ def exploit(query):
     sys.stdout.flush()
     sys.stdout.write("\b" * (toolbar_width + 1))
 
-    with open("modules.txt", "rb") as infile:
+    with open(modules_path, "rb") as infile:
         for i in xrange(toolbar_width):
             time.sleep(0.1)
             for lines in infile:
@@ -224,16 +199,15 @@ def settings():
     os.system("clear")
     logo()
 
-    print "[" + t.green("+") + "]MSF Settings\n"
-    print "In order to proceed with the exploit module some MSF"
+    print "[" + t.green("+") + "]Metasploit Settings:"
+    print "In order to proceed with the exploit module some metasploit"
     print "settings need to be configured."
-    time.sleep(1.5)
 
-    print "\n[" + t.green("+") + "]Note.\n"
-    print "Please make sure your Network is configured properly.\n"
+    print "\n[" + t.green("+") + "]Note:"
+    print "Please make sure your Network is configured properly."
     print "In order to handle incoming Reverse Connections"
     print "your external Facing IP & Port need to be reachable..."
-    time.sleep(1.5)
+    time.sleep(3)
 
     workspace = raw_input("\n[" + t.magenta("?") + "]Please set the Workspace name: ")
     if not workspace == "":
@@ -282,6 +256,7 @@ def main():
     global query
     global configured
     global api
+    global autosploit_options
 
     try:
         api = shodan.Shodan(SHODAN_API_KEY)
@@ -299,11 +274,9 @@ def main():
                 settings()
 
             print "\n[" + t.green("+") + "]Welcome to AutoSploit. Please select an action."
-            print """
-		
-1. Usage		3. View Hosts		5. Quit
-2. Gather Hosts		4. Exploit 					
-									"""
+
+            for i in autosploit_options.keys():
+                print("%d. %s" % (i, autosploit_options[i]))
 
             action = raw_input("\n<" + t.cyan("AUTOSPLOIT") + ">$ ")
 
@@ -332,8 +305,8 @@ def main():
                     time.sleep(2)
 
                     with open("hosts.txt", "rb") as infile:
-                        for line in infile:
-                            print "[" + t.cyan("-") + "]" + line
+                        for i, line in enumerate(infile, start=1):
+                            print "[" + t.cyan(str(i)) + "]" + line.strip()
 
                     print "[" + t.green("+") + "]Done.\n"
 
