@@ -66,9 +66,9 @@ def usage():
 |2. Gather Hosts   | Query Shodan for a list of platform specific IPs.  |
 |3. Custom Hosts   | Load in a custom list of IPs/Rhosts                |
 |4. Single Host    | Add a single host to list and/or exploit directly  |
-|4. View Hosts     | Print gathered IPs/RHOSTS.                         |
-|5. Exploit        | Configure MSF and Start exploiting gathered targets|
-|6. Quit           | Exits AutoSploit.                                  |
+|5. View Hosts     | Print gathered IPs/RHOSTS.                         |
+|6. Exploit        | Configure MSF and Start exploiting gathered targets|
+|7. Quit           | Exits AutoSploit.                                  |
 +------------------+----------------------------------------------------+
 |                         Legal Disclaimer                              |
 +-----------------------------------------------------------------------+
