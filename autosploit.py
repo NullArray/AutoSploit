@@ -50,7 +50,6 @@ def usage():
         print(info.read())
 
 
-
 def cmdline(command):
     """
     Function that allows us to store system command output in a variable.
