@@ -212,8 +212,7 @@ def settings(single=None):
         if single is not None:
             exploit(None, single)
             # TEST print
-            print "De waarde van 'single' is" +repr(single)
-            print 'we moete nu de exploit module in met de juiste waarde'
+            print "value of 'single' is" +repr(single)
             # TEST print
 
         if not os.path.isfile("hosts.txt"):
