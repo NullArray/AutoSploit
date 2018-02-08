@@ -116,7 +116,7 @@ def exploit(query=None, single=None):
 
         # Progress bar
 	sys.stdout.write("[%s]" % (" " * toolbar_width))
-    sys.stdout.flush()
+        sys.stdout.flush()
 	sys.stdout.write("\b" * (toolbar_width + 1))
 
         with open(modules_path, "rb") as infile:
