@@ -2,6 +2,17 @@ Docker deployment instructions
 =====
 
 ## tl;dr
+
+Using [docker-compose](https://docs.docker.com/compose/install/):
+
+```bash
+git clone https://github.com/NullArray/AutoSploit.git
+cd Autosploit/Docker
+docker-compose run --rm autosploit
+```
+
+Using just Docker:
+
 ```bash
 git clone https://github.com/NullArray/AutoSploit.git
 cd Autosploit/Docker
