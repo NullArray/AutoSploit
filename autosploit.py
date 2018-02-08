@@ -141,8 +141,8 @@ def exploit(query=None, single=None):
         print("[{}]Sorting modules relevant to the specified platform.".format(t.green("+")))
         print("[{}]This may take a while...\n\n\n".format(t.green("+")))
 
-        # Progress bar
-        sys.stdout.write("[%s]" % (" " * toolbar_width))
+    # Progress bar
+    sys.stdout.write("[%s]" % (" " * toolbar_width))
     sys.stdout.flush()
     sys.stdout.write("\b" * (toolbar_width + 1))
 
@@ -239,8 +239,7 @@ def settings(single=None):
         if single is not None:
             exploit(None, single)
             # TEST print
-            print "De waarde van 'single' is" +repr(single)
-            print 'we moete nu de exploit module in met de juiste waarde'
+            print "value of 'single' is" +repr(single)
             # TEST print
 
         if not os.path.isfile("hosts.txt"):
