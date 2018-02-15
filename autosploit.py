@@ -18,13 +18,16 @@ TODO LIST:
 import os
 import sys
 import time
+import shlex
 import pickle
+import threading
+import subprocess
+
 import shodan
 
 # idk if you're going to need this since retrying is a decorator (see line 410)
 # from retrying import retry
 from blessings import Terminal
-from subprocess import PIPE, Popen
 
 t = Terminal()
 
@@ -39,11 +42,10 @@ toolbar_width = 60
 version = "1.4.0"
 usage_and_legal_path = "{}/etc/general".format(os.getcwd())
 modules_path = "{}/etc/modules.txt".format(os.getcwd())
+stop_animation = False
 autosploit_opts = {
     1: "usage and legal", 2: "gather hosts", 3: "custom hosts",
     4: "add single host", 5: "view gathered hosts", 6: "exploit gathered hosts",
-    # changing quit to 99 so that we can keep adding without having to change
-    # the numbers
     99: "quit"
 }
 
@@ -58,6 +60,22 @@ def logo(line_sep="#--", space=" " * 30):
 {sep1}Version: {v_num}                                    |_|
 ##############################################
 """.format(sep1=line_sep, v_num=version, space_sep=space)))
+
+
+def animation(text):
+    global stop_animation
+    i = 0
+    while not stop_animation:
+        temp_text = list(text)
+        if i >= len(temp_text):
+            i = 0
+        temp_text[i] = temp_text[i].upper()
+        temp_text = ''.join(temp_text)
+        sys.stdout.write("\033[96m\033[1m{}...\r\033[0m".format(temp_text))
+        sys.stdout.flush()
+        i += 1
+        time.sleep(0.1)
+    else: pass
 
 
 def usage():
@@ -78,13 +96,11 @@ def cmdline(command):
     I intend to have the issue resolved by Version 1.5.0. 
     """
 
-    # TODO:/
-    # split the command by shlex, this will help with
-    # most command injection sequences.
+    command = shlex.split(command)
 
-    process = Popen(
+    process = subprocess.Popen(
         args=command,
-        stdout=PIPE,
+        stdout=subprocess.PIPE,
         shell=True
     )
     return process.communicate()[0]
@@ -97,6 +113,7 @@ def exploit(query=None, single=None):
     global local_port
     global local_host
     global modules_path
+    global stop_animation
     print("\033[H\033[J")  # Clear terminal
 
     logo()
@@ -112,17 +129,17 @@ def exploit(query=None, single=None):
         proceed = raw_input("[" + t.magenta("?") + "]Continue? [Y]es/[N]o: ").lower()
 
         if proceed == 'y':
-            print("\n\n\n[{}]Loading modules...".format(t.green("+")))
-            # Progress bar
-            sys.stdout.write("[%s]" % (" " * toolbar_width))
-            sys.stdout.flush()
-            sys.stdout.write("\b" * (toolbar_width + 1))
+            thread = threading.Thread(target=animation, args=("loading modules", ))
+            thread.daemon = True
+            thread.start()
 
             with open(modules_path, "rb") as infile:
                 for i in xrange(toolbar_width):
                     time.sleep(0.1)
                     for lines in infile:
                         all_modules.append(lines)
+
+            stop_animation = True
 
             print("\n\n\n[{}]Done. Launching exploits.".format(t.green("+")))
             # TODO:/
@@ -138,25 +155,21 @@ def exploit(query=None, single=None):
             print("[{}]Unhandled Option. Defaulting to Main Menu".format(t.red("!")))
 
     else:
-        print("[{}]Sorting modules relevant to the specified platform.".format(t.green("+")))
-        print("[{}]This may take a while...\n\n\n".format(t.green("+")))
 
-    # Progress bar
-    sys.stdout.write("[%s]" % (" " * toolbar_width))
-    sys.stdout.flush()
-    sys.stdout.write("\b" * (toolbar_width + 1))
+        thread = threading.Thread(target=animation, args=(
+            "sorting modules by relevance, this may take awhile",
+        ))
+        thread.daemon = True
+        thread.start()
 
-    with open(modules_path, "rb") as infile:
-        for i in xrange(toolbar_width):
-            time.sleep(0.1)
-            for lines in infile:
-                all_modules.append(lines)
-                if query in lines:
-                    sorted_modules.append(lines)
-
-    # update the bar
-    sys.stdout.write('\033[94m' + "|" + '\033[0m')
-    sys.stdout.flush()
+        with open(modules_path, "rb") as infile:
+            for i in xrange(toolbar_width):
+                time.sleep(0.1)
+                for lines in infile:
+                    all_modules.append(lines)
+                    if query in lines:
+                        sorted_modules.append(lines)
+        stop_animation = True
 
     print("\n\n\n[{}]AutoSploit sorted the following MSF modules based search query relevance.\n".format(t.green("+")))
     # Print out the sorted modules
@@ -256,6 +269,7 @@ def settings(single=None):
 def targets(clobber=True):
     """Function to gather target host(s) from Shodan."""
     global query
+    global stop_animation
 
     print("\033[H\033[J")  # Clear terminal
     logo()
@@ -280,10 +294,9 @@ def targets(clobber=True):
         print("\n[{}]Critical. An error was raised with the following error message.\n".format(t.red("!")))
         sys.exit()  # must use an integer with sys.exit()
 
-     # Setup progress bar
-    sys.stdout.write("[%s]" % (" " * toolbar_width))
-    sys.stdout.flush()
-    sys.stdout.write("\b" * (toolbar_width + 1))
+    thread = threading.Thread(target=animation, args=("collecting results", ))
+    thread.daemon = True
+    thread.start()
 
     # TODO:/
     # edit the clobber function to work properly
@@ -294,11 +307,8 @@ def targets(clobber=True):
                 for service in result['matches']:
                     log.write("{}{}".format(service['ip_str'], os.linesep))
 
-            # update the bar
-            sys.stdout.write('\033[94m' + "|" + '\033[0m')
-            sys.stdout.flush()
-
-            hostpath = os.path.abspath("hosts.txt")
+        hostpath = os.path.abspath("hosts.txt")
+        stop_animation = True
 
         print("\n\n\n[{}]Done.".format(t.green("+")))
         print("[{}]Host list saved to {}".format(t.green("+"), hostpath))
@@ -311,11 +321,8 @@ def targets(clobber=True):
                     log.write(service['ip_str'])
                     log.write("\n")
 
-        # update the bar
-        sys.stdout.write('\033[94m' + "|" + '\033[0m')
-        sys.stdout.flush()
-
         hostpath = os.path.abspath("hosts.txt")
+        stop_animation = True
 
     print("\n\n\n[{}]Done.".format(t.green("+")))
     print("[{}]Hosts appended to list at ".format(t.green("+"), hostpath))
