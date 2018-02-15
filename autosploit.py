@@ -3,7 +3,7 @@
 Autosploit Core, beta development version
 
 TODO LIST:
- - Splitting the subprocess calls with shlex line #72
+ - Splitting the subprocess calls with shlex line #72 (done)
  - Fix the exploit issue line #125
  - Fixing targets line #261
  - Fix clobber function line #281
