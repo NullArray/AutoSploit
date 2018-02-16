@@ -1,9 +1,9 @@
-version: '3'
+version:         '3'
 
 services:
   autosploit:
     build:
-      context: .
+      context:   .
     ports:
       - 80:80
       - 443:433
@@ -13,7 +13,7 @@ services:
     depends_on:
       - postgres
   postgres:
-    image: postgres
+    image:       postgres
     environment:
       - POSTGRES_PASSWORD=s3cr3t
     networks:
@@ -23,8 +23,7 @@ services:
 
 networks:
   haknet:
-    driver: bridge
+    driver:      bridge
 
 volumes:
   db:
-
