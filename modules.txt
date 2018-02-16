@@ -1,4 +1,4 @@
-exploit/windows/firewall/blackice_pam_icq; exploit -j;
+exploit/windows/firewall/blackice_pam_icq
 exploit/windows/ftp/ms09_053_ftpd_nlst
 exploit/windows/http/amlibweb_webquerydll_app
 exploit/windows/http/ektron_xslt_exec_ws
