@@ -22,11 +22,11 @@ After which it can be started from the terminal with `python autosploit.py`. Aft
 +------------------+----------------------------------------------------+
 |     Option       |                   Summary                          |
 +------------------+----------------------------------------------------+
-|1\. Usage          | Display this informational message.                |
-|2\. Gather Hosts   | Query Shodan for a list of platform specific IPs.  |
-|3\. View Hosts     | Print gathered IPs/RHOSTS.                         |
-|4\. Exploit        | Configure MSF and Start exploiting gathered targets|
-|5\. Quit           | Exits AutoSploit.                                  |
+|1. Usage          | Display this informational message.                |
+|2. Gather Hosts   | Query Shodan for a list of platform specific IPs.  |
+|3. View Hosts     | Print gathered IPs/RHOSTS.                         |
+|4. Exploit        | Configure MSF and Start exploiting gathered targets|
+|5. Quit           | Exits AutoSploit.                                  |
 +------------------+----------------------------------------------------+
 ```
 
@@ -34,7 +34,7 @@ After which it can be started from the terminal with `python autosploit.py`. Aft
 
 The Metasploit modules available with this tool are selected for RCE. You can find them in the `modules.txt` file that is included in this repo. Should you wish to add more or other modules please do so in the following format.
 
-```
+```bash
 use exploit/linux/http/netgear_wnr2000_rce;exploit -j;
 ```
 
@@ -51,9 +51,14 @@ blessings
 
 Should you find you do not have these installed get them with pip like so.
 
+```bash
+pip install shodan blessings
 ```
-pip install shodan
-pip install blessings
+
+or
+
+```bash
+pip install -r requirements.txt
 ```
 
 Since the program invokes functionality from the Metasploit Framework you need to have this installed also. Get it from Rapid7 by clicking [here](https://www.rapid7.com/products/metasploit/).
