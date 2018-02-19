@@ -4,6 +4,7 @@ Autosploit Core, beta development version
 
 TODO LIST:
  - Splitting the subprocess calls with shlex line #72 (done)
+ - Add the ability to read in modules list as JSON, if .txt file is provided convert to JSON before processing
  - Fix the exploit issue line #125
  - Fixing targets line #261
  - Fix clobber function line #281
@@ -18,6 +19,7 @@ TODO LIST:
 import os
 import sys
 import time
+import json # Added in preparation of implementing JSON support
 import shlex
 import pickle
 import threading
