@@ -275,8 +275,7 @@ def settings(single=None):
             # targets.
             exploit(query)
 
-
-def targets(clobber=True):
+def targets(clobber=True, hostLimit = -1):
     """Function to gather target host(s) from Shodan."""
     global query
     global stop_animation
@@ -318,10 +317,14 @@ def targets(clobber=True):
             for _ in xrange(toolbar_width):
                 time.sleep(0.1)
                 for service in result['matches']:
-                    log.write("{}{}".format(service['ip_str'], os.linesep))
+                    if hostLimit > 0 or hostLimit < 0:
+                        log.write("{}{}".format(service['ip_str'], os.linesep))
+                        hostLimit -= 1
+                    else:
+                        break
+            hostpath = os.path.abspath("hosts.txt")
+            stop_animation = True
 
-        hostpath = os.path.abspath("hosts.txt")
-        stop_animation = True
 
         print("\n\n\n[{}]Done.".format(t.green("+")))
         print("[{}]Host list saved to {}".format(t.green("+"), hostpath))
@@ -490,17 +493,21 @@ def main():
 
             if action == '1':
                 usage()
+  
             elif action == '2':
+                hostLimit = -1
+                limitYN = raw_input("\n[" + t.magenta("?") + "]Limit number of hosts? [y/n]: ").lower()
+                if limitYN == 'y':
+                    hostLimit = input("\n[" + t.magenta("?") + "]How many?: ")
                 if not os.path.isfile("hosts.txt"):
-                    targets(True)
+                    targets(True, hostLimit)
                 else:
                     append = raw_input(
                         "\n[" + t.magenta("?") + "]Append hosts to file or overwrite? [A/O]: ").lower()
-
                     if append == 'a':
-                        targets(False)
+                        targets(False, hostLimit)
                     elif append == 'o':
-                        targets(True)
+                        targets(True, hostLimit)
                     else:
                         print("\n[{}]Unhandled Option.".format(t.red("!")))
             elif action == '3':
