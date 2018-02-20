@@ -177,7 +177,6 @@ def exploit(query=None, single=None):
                 module_list = (sorted_modules if choice == 's' else all_modules)
                 for module in module_list:
                     runModule(workspace, local_host, local_port, rhosts, module)
-                    cmdline(template)
     else:
         print("[{}]Unhandled Option. Defaulting to Main Menu".format(t.red("!")))
 
