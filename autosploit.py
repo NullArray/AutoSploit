@@ -4,7 +4,7 @@ Autosploit Core, beta development version
 
 TODO LIST:
  - Splitting the subprocess calls with shlex line #72 (done)
- - Add the ability to read in modules list as JSON, if .txt file is provided convert to JSON before processing
+ - Add the ability to read in modules list as JSON, if .txt file is provided convert to JSON before processing (done)
  - Fix the exploit issue line #125
  - Fixing targets line #261
  - Fix clobber function line #281
@@ -19,17 +19,18 @@ TODO LIST:
 import os
 import sys
 import time
-import json # Added in preparation of implementing JSON support
 import shlex
 import pickle
 import threading
 import subprocess
 
 import shodan
-
 # idk if you're going to need this since retrying is a decorator (see line 410)
 # from retrying import retry
 from blessings import Terminal
+
+from lib.jsonize import load_exploits
+
 
 t = Terminal()
 
@@ -43,7 +44,7 @@ configured = False
 toolbar_width = 60
 version = "1.4.0"
 usage_and_legal_path = "{}/etc/general".format(os.getcwd())
-modules_path = "{}/etc/modules.txt".format(os.getcwd())
+loaded_exploits = load_exploits("{}/etc/json".format(os.getcwd()))
 stop_animation = False
 autosploit_opts = {
     1: "usage and legal", 2: "gather hosts", 3: "custom hosts",
@@ -115,7 +116,7 @@ def exploit(query=None, single=None):
     global workspace
     global local_port
     global local_host
-    global modules_path
+    global loaded_exploits
     global stop_animation
     print("\033[H\033[J")  # Clear terminal
 
@@ -138,11 +139,8 @@ def exploit(query=None, single=None):
             thread.daemon = True
             thread.start()
 
-            with open(modules_path, "rb") as infile:
-                for i in xrange(toolbar_width):
-                    time.sleep(0.1)
-                    for lines in infile:
-                        all_modules.append(lines)
+            for mod in loaded_exploits:
+                all_modules.append(mod)
 
             stop_animation = True
 
@@ -167,13 +165,9 @@ def exploit(query=None, single=None):
         thread.daemon = True
         thread.start()
 
-        with open(modules_path, "rb") as infile:
-            for i in xrange(toolbar_width):
-                time.sleep(0.1)
-                for lines in infile:
-                    all_modules.append(lines)
-                    if query in lines:
-                        sorted_modules.append(lines)
+        for mod in loaded_exploits:
+            all_modules.append(mod)
+
         stop_animation = True
 
     print("\n\n\n[{}]AutoSploit sorted the following MSF modules based search query relevance.\n".format(

