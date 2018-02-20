@@ -7,7 +7,7 @@ TODO LIST:
  - Add the ability to read in modules list as JSON, if .txt file is provided convert to JSON before processing (done)
  - Fix the exploit function issue line #119
  - Fixing targets line #261
- - Fix clobber function line #281
+ - Fix clobber function line #281 (done)
  - Custom list importing line #317
  - Single target attacking line #366
  - Fix the non-existing host path reference line #409
@@ -261,7 +261,7 @@ def write_hosts(ips, overwrite):
         else:
             host_list.write(ips)
 
-def targets(shodan_if, clobber=True):
+def targets(shodan_if):
     """Function to gather target host(s) from Shodan."""
     global query
     global stop_animation
