@@ -254,14 +254,12 @@ def settings(single=None):
             exploit(query)
 
 def write_hosts(ips, overwrite):
-    if overwrite:
-        host_list = open("hosts.txt", "ab")
-    else:
-        host_list = open("hosts.txt", "wb")
-    
-    host_list.writelines(ips)
-        
-    
+    host_opts = ("wb" if overwrite else "ab")
+    with open("hosts.txt", host_opts) as host_list:
+        if isinstance(ips,list):
+            host_list.writelines(ips)
+        else:
+            host_list.write(ips)
 
 def targets(shodan_if, clobber=True):
     """Function to gather target host(s) from Shodan."""
@@ -303,7 +301,7 @@ def targets(shodan_if, clobber=True):
 # TODO:/
 # custom list importing needs to be done here.
 # could be possible to import the custom list via argparse
-def import_custom(clobber=True):
+def import_custom():
     """
     Function to import custom host list.
     """
@@ -319,36 +317,15 @@ def import_custom(clobber=True):
         with open(file_path, "rb") as infile:
             for line in infile:
                 custom_list.append(line.strip())
-
     except IOError as e:
         print("\n[{}]Critical. An IO error was raised.".format(t.red("!")))
         print("Please make sure to enter a valid path.")
+        return None
 
-    if clobber:
-        print("[{}]Writing data to 'hosts.txt'...".format(t.green("+")))
-        with open('hosts.txt', 'wb') as outfile:
-            for rhosts in custom_list:
-                outfile.write("{}{}".format(rhosts, os.linesep))
-
-        hostpath = os.path.abspath("hosts.txt")
-
-        print("\n\n\n[{}]Done.".format(t.green("+")))
-        print("[{}]Host list saved to {}".format(t.green("+"), hostpath))
-
-    else:
-        print("[{}]Appending data to 'hosts.txt'...".format(t.green("+")))
-
-    with open("hosts.txt", 'ab') as outfile:
-        for rhosts in outfile:
-            outfile.write("{}{}".format(rhosts, os.linesep))
-
-        hostpath = os.path.abspath("hosts.txt")
-
-        print("\n\n\n[{}]Done.".format(t.green("+")))
-        print("[{}]Host list saved to {}".format(t.green("+"), hostpath))
+    return custom_list
 
 
-def single_target():
+def get_single_target():
     # TODO:/
     # create the single target attacking, this will need a single target passed
     # to it in order to work properly, I'm assuming this for when you find
@@ -385,31 +362,9 @@ def single_target():
     elif IP == "127.0.0.1":
         print("[{}]Critical. Invalid IPv4 address.".format(t.red("!")))
     else:
-        # TODO:/
-        # host path is not referenced anywhere near here
-        print("\n[{}]Host set to {}".format(t.green("+"), repr(hostpath)))
         time.sleep(1)
+        return IP 
 
-        print("\n\n[{}]Append the IP to the host file or pass to exploit module directly?.".format(
-            t.green("+")))
-        choice = raw_input(
-            "\n[" + t.magenta("?") + "]Append or Pass for immediate exploitation? [A/P]: ").lower()
-
-        if choice == 'a':
-            with open("hosts.txt", "ab") as outfile:
-                outfile.write(IP)
-
-            hostpath = os.path.abspath("hosts.txt")
-            print("[{}]Host added to {}".format(t.green("+"), hostpath))
-
-        elif choice == 'p':
-            if configured:
-                exploit(None, IP)
-            else:
-                settings(IP)
-
-        else:
-            print("\n[{}]Unhandled Option.".format(t.red("!")))
 
 def get_shodan():
     tries = 0
@@ -465,20 +420,37 @@ def main():
                     else:
                         print("\n[{}]Unhandled Option.".format(t.red("!")))
             elif action == '3':
-                if not os.path.isfile("hosts.txt"):
-                    import_custom(True)
+                custom_list = import_custom()
+                if custom_list == None:
+                    print("\n[{}]Failed to import custom list.".format(t.cyan("-")))
                 else:
                     append = raw_input(
                         "\n[" + t.magenta("?") + "]Append hosts to file or overwrite? [a/o]: ").lower()
-
                     if append == 'a':
-                        import_custom(False)
+                        write_hosts(custom_list, False)
                     elif append == 'o':
-                        import_custom(True)
+                        write_hosts(custom_list, True)
                     else:
                         print("\n[{}]Unhandled Option.".format(t.red("!")))
             elif action == '4':
-                single_target()
+                IP = get_single_target()
+                print("\n[{}]Host set to {}".format(t.green("+"), IP))
+                print("\n\n[{}]Append the IP to the host file or pass to exploit module directly?.".format(
+                    t.green("+")))
+                choice = raw_input(
+                    "\n[" + t.magenta("?") + "]Append or Pass for immediate exploitation? [A/P]: ").lower()
+                
+                if choice == 'a':
+                    write_hosts(IP, False)
+                
+                elif choice == 'p':
+                    if not configured:
+                        settings(IP)
+                    exploit(None, IP)
+                
+                else:
+                    print("\n[{}]Unhandled Option.".format(t.red("!")))
+            
             elif action == '5':
                 if not os.path.isfile("hosts.txt"):
                     print(
@@ -491,7 +463,8 @@ def main():
                         for line in infile:
                             print("[{}]{}".format(t.cyan("-"), line))
 
-                        print("\n[{}]Done.".format(t.green("+")))
+                print("\n[{}]Done.".format(t.green("+")))
+            
             elif action == '6':
                 if not os.path.isfile("hosts.txt"):
                     print(
@@ -499,10 +472,9 @@ def main():
                     print("Please make sure to gather a list of targets")
                     print("by selecting the 'Gather Hosts' option")
                     print("before executing the 'Exploit' module.")
-
                 elif configured:
                     exploit(query)
-                elif configured is False:
+                else:
                     settings()
             elif action == '99':
                 print("\n[{}]Exiting AutoSploit...".format(t.red("!")))
@@ -512,7 +484,6 @@ def main():
 
     except KeyboardInterrupt:
         print("\n[{}]Critical. User aborted.".format(t.red("!")))
-        sys.exit(0)
 
 
 if __name__ == "__main__":
