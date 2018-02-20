@@ -5,7 +5,7 @@ Autosploit Core, beta development version
 TODO LIST:
  - Splitting the subprocess calls with shlex line #72 (done)
  - Add the ability to read in modules list as JSON, if .txt file is provided convert to JSON before processing (done)
- - Fix the exploit function issue line #133
+ - Fix the exploit function issue line #119
  - Fixing targets line #261
  - Fix clobber function line #281
  - Custom list importing line #317
