@@ -35,7 +35,6 @@ from lib.jsonize import load_exploits
 t = Terminal()
 
 # Global vars
-api = ""
 query = ""
 workspace = ""
 local_port = ""
@@ -180,7 +179,6 @@ def exploit(query=None, single=None):
     else:
         print("[{}]Unhandled Option. Defaulting to Main Menu".format(t.red("!")))
 
-
 def settings(single=None):
     """Function to define Metasploit settings."""
     global workspace
@@ -255,14 +253,27 @@ def settings(single=None):
             # targets.
             exploit(query)
 
+def write_hosts(ips, overwrite):
+    if overwrite:
+        host_list = open("hosts.txt", "ab")
+    else:
+        host_list = open("hosts.txt", "wb")
+    
+    host_list.writelines(ips)
+        
+    
 
-def targets(clobber=True):
+def targets(shodan_if, clobber=True):
     """Function to gather target host(s) from Shodan."""
     global query
     global stop_animation
 
     print("\033[H\033[J")  # Clear terminal
     logo()
+
+    if(shodan_if == None):
+        print("[{}]Cannot run target search without a shodan API key.".format(t.red("!")))
+        return
 
     print("[{}]Please provide your platform specific search query.".format(t.green("+")))
     print("[{}]I.E. 'IIS' will return a list of IPs belonging to IIS servers.".format(
@@ -281,45 +292,13 @@ def targets(clobber=True):
     time.sleep(1)
 
     try:
-        result = api.search(query)
+        result = shodan_if.search(query)
     except Exception as e:
         print("\n[{}]Critical. An error was raised with the following error message.\n".format(
             t.red("!")))
         sys.exit()  # must use an integer with sys.exit()
 
-    thread = threading.Thread(target=animation, args=("collecting results", ))
-    thread.daemon = True
-    thread.start()
-
-    # TODO:/
-    # edit the clobber function to work properly
-    if clobber:
-        with open('hosts.txt', 'wb') as log:
-            for _ in xrange(toolbar_width):
-                time.sleep(0.1)
-                for service in result['matches']:
-                    log.write("{}{}".format(service['ip_str'], os.linesep))
-
-        hostpath = os.path.abspath("hosts.txt")
-        stop_animation = True
-
-        print("\n\n\n[{}]Done.".format(t.green("+")))
-        print("[{}]Host list saved to {}".format(t.green("+"), hostpath))
-
-    else:
-        with open("hosts.txt", "ab") as log:
-            for i in xrange(toolbar_width):
-                time.sleep(0.1)
-                for service in result['matches']:
-                    log.write(service['ip_str'])
-                    log.write("\n")
-
-        hostpath = os.path.abspath("hosts.txt")
-        stop_animation = True
-
-    print("\n\n\n[{}]Done.".format(t.green("+")))
-    print("[{}]Hosts appended to list at ".format(t.green("+"), hostpath))
-
+    return result['matches']
 
 # TODO:/
 # custom list importing needs to be done here.
@@ -432,27 +411,29 @@ def single_target():
         else:
             print("\n[{}]Unhandled Option.".format(t.red("!")))
 
+def get_shodan():
+    tries = 0
+    while(tries < 3):
+        print("\n[{}]Please provide your Shodan.io API key.".format(t.green("+")))
+        try:
+            SHODAN_API_KEY = raw_input("API key: ")
+            return shodan.Shodan(API_KEY)
+        except Exception as e:
+            print("Failed to parse API key. Is it valid?")
+            tries+=1
+    
+    return None;
 
 def main():
     """Main menu."""
     global query
     global configured
-    global api
     global autosploit_opts
 
-    # TODO:/
-    # commenting this out for now, guessing we need to create a retry function
-    # so that we don't have to add another requirement
-    # @retry(stop_max_attempt_number=3)
-    def try_shodan():
-        try:
-            api = shodan.Shodan(SHODAN_API_KEY)
-        except Exception as e:
-            print("\n[{}]Critical. API setup failed: {}\n".format(t.red("!"), e))
-            # sys.exit(e)
-            return api
-
-    api = try_shodan()
+    shodan_if = get_shodan()
+    if shodan_if == None:
+        print("\n[{}]Couldn't retrieve the API key. Shodan search operations will not work if you do not have this key.".format(
+            t.green("+")))
     try:
         while True:
             # Make sure a misconfiguration in the MSF settings
@@ -471,16 +452,16 @@ def main():
             if action == '1':
                 usage()
             elif action == '2':
+                targets = get_targets(shodan_if) 
                 if not os.path.isfile("hosts.txt"):
-                    targets(True)
+                    write_hosts(targets, True)
                 else:
                     append = raw_input(
-                        "\n[" + t.magenta("?") + "]Append hosts to file or overwrite? [A/O]: ").lower()
-
+                        "\n[" + t.magenta("?") + "]Append hosts to file or overwrite? [a/o]: ").lower()
                     if append == 'a':
-                        targets(False)
+                        write_hosts(targets, False)
                     elif append == 'o':
-                        targets(True)
+                        write_hosts(targets, True)
                     else:
                         print("\n[{}]Unhandled Option.".format(t.red("!")))
             elif action == '3':
@@ -488,7 +469,7 @@ def main():
                     import_custom(True)
                 else:
                     append = raw_input(
-                        "\n[" + t.magenta("?") + "]Append hosts to file or overwrite? [A/O]: ").lower()
+                        "\n[" + t.magenta("?") + "]Append hosts to file or overwrite? [a/o]: ").lower()
 
                     if append == 'a':
                         import_custom(False)
@@ -519,10 +500,10 @@ def main():
                     print("by selecting the 'Gather Hosts' option")
                     print("before executing the 'Exploit' module.")
 
-            if configured:
-                exploit(query)
-            elif configured is False:
-                settings()
+                elif configured:
+                    exploit(query)
+                elif configured is False:
+                    settings()
             elif action == '99':
                 print("\n[{}]Exiting AutoSploit...".format(t.red("!")))
                 return
@@ -597,25 +578,4 @@ if __name__ == "__main__":
             print("[{}]Apache2 Service Started...".format(t.green("+")))
             time.sleep(1.5)
 
-    # We will check if the shodan api key has been saved before, if not we are going to prompt
-    # for it and save it to a file
-    if not os.path.isfile("api.p"):
-        print("\n[{}]Please provide your Shodan.io API key.".format(t.green("+")))
-
-        SHODAN_API_KEY = raw_input("API key: ")
-        pickle.dump(SHODAN_API_KEY, open("api.p", "wb"))
-        path = os.path.abspath("api.p")
-        print("[{}]\nYour API key has been saved to {}".format(t.green("+"), path))
-        main()
-
-    else:
-        try:
-            SHODAN_API_KEY = pickle.load(open("api.p", "rb"))
-        except IOError as e:
-            print("\n[{}]Critical. An IO error was raised while attempting to read API data.\n{}".format(
-                t.red("!"), e))
-
-        path = os.path.abspath("api.p")
-        print("\n[{}]Your API key was loaded from {}".format(t.green("+"), path))
-
-        main()
+    main()
