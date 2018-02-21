@@ -23,7 +23,9 @@ import shlex
 import pickle
 import threading
 import subprocess
-
+import json
+import requests
+import censysSearch
 import shodan
 # idk if you're going to need this since retrying is a decorator (see line 410)
 # from retrying import retry
@@ -344,6 +346,7 @@ def targets(clobber=True, hostLimit = -1):
     print("[{}]Hosts appended to list at ".format(t.green("+"), hostpath))
 
 
+
 # TODO:/
 # custom list importing needs to be done here.
 # could be possible to import the custom list via argparse
@@ -481,6 +484,7 @@ def main():
             # Make sure a misconfiguration in the MSF settings
             # Doesn't execute main menu loop but returns us to the
             # appropriate function for handling those settings
+
             if configured is None:
                 settings()
 
@@ -493,23 +497,56 @@ def main():
 
             if action == '1':
                 usage()
-  
             elif action == '2':
                 hostLimit = -1
                 limitYN = raw_input("\n[" + t.magenta("?") + "]Limit number of hosts? [y/n]: ").lower()
                 if limitYN == 'y':
                     hostLimit = input("\n[" + t.magenta("?") + "]How many?: ")
-                if not os.path.isfile("hosts.txt"):
-                    targets(True, hostLimit)
-                else:
-                    append = raw_input(
-                        "\n[" + t.magenta("?") + "]Append hosts to file or overwrite? [A/O]: ").lower()
-                    if append == 'a':
-                        targets(False, hostLimit)
-                    elif append == 'o':
+                searchOption = input("\nSelect an option:\n1. Search Shodan\n2. Search Censys\n3. Search Shodan and Censys ")
+                if searchOption == 1:
+                    if not os.path.isfile("hosts.txt"):
                         targets(True, hostLimit)
                     else:
-                        print("\n[{}]Unhandled Option.".format(t.red("!")))
+                        append = raw_input(
+                            "\n[" + t.magenta("?") + "]Append hosts to file or overwrite? [A/O]: ").lower()
+                        if append == 'a':
+                            targets(False, hostLimit)
+                        elif append == 'o':
+                            targets(True, hostLimit)
+                        else:
+                            print("\n[{}]Unhandled Option.".format(t.red("!")))
+                elif searchOption == 2:
+                    if not os.path.isfile("hosts.txt"):
+                        censysSearch.censysTargets(True, hostLimit)
+                    else:
+                        append = raw_input(
+                            "\n[" + t.magenta("?") + "]Append hosts to file or overwrite? [A/O]: ").lower()
+                        if append == 'a':
+                            censysSearch.censysTargets(False, hostLimit)
+                        elif append == 'o':
+                            censysSearch.censysTargets(True, hostLimit)
+                        else:
+                            print("\n[{}]Unhandled Option.".format(t.red("!")))
+                elif searchOption == 3:
+                    if not os.path.isfile("hosts.txt"):
+                        targets(True, hostLimit)
+                        censysSearch.censysTargets(False, hostLimit)
+                    else:
+                        append = raw_input(
+                            "\n[" + t.magenta("?") + "]Append hosts to file or overwrite? [A/O]: ").lower()
+                        if append == 'a':
+                            targets(False, hostLimit)
+                            censysSearch.censysTargets(False, hostLimit)
+                        elif append == 'o':
+                            targets(True, hostLimit)
+                            censysSearch.censysTargets(False, hostLimit)
+                        else:
+                            print("\n[{}]Unhandled Option.".format(t.red("!")))
+
+                else:
+                    print("\n[{}]Unhandled Option.".format(t.red("!")))
+
+
             elif action == '3':
                 if not os.path.isfile("hosts.txt"):
                     import_custom(True)

@@ -2,3 +2,5 @@
 .idea/*
 api.p
 hosts.txt
+secret.p
+uid.p
