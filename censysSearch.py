@@ -4,13 +4,16 @@ import sys
 import time
 import pickle
 import threading
-import subprocess
-import json
-import requests
-import autosploit
-from blessings import Terminal
 
-t = Terminal()
+import requests
+
+import autosploit
+from lib.settings import PLATFORM_PROMPT
+from lib.output import (
+    info,
+    error,
+)
+
 
 def censysTargets(clobber=True, hostLimit=-1):
     """Function to gather target host(s) from Censys."""
@@ -24,66 +27,62 @@ def censysTargets(clobber=True, hostLimit=-1):
     autosploit.logo()
 
     if not os.path.isfile("uid.p"):
-        print("[{}]Please provide your Censys API ID.".format(t.green("+")))
+        info("Please provide your Censys API ID.")
 
         UID = raw_input("API ID: ")
         pickle.dump(UID, open("uid.p", "wb"))
         path = os.path.abspath("uid.p")
-        print("[{}]\nYour API ID has been saved to {}".format(t.green("+"), path))
+        info("Your API ID has been saved to {}".format(path))
 
     else:
         try:
             UID = pickle.load(open("uid.p", "rb"))
         except IOError as e:
-            print("\n[{}]Critical. An IO error was raised while attempting to read API data.\n{}".format(
-                t.red("!"), e))
+            error("Critical. An IO error was raised while attempting to read API data.{}".format(str(e)))
 
         path = os.path.abspath("uid.p")
-        print("\n[{}]Your API ID was loaded from {}".format(t.green("+"), path))
+        info("Your API ID was loaded from {}".format(path))
 
     if not os.path.isfile("secret.p"):
-        print("[{}]Please provide your Censys Secret key.".format(t.green("+")))
+        info("Please provide your Censys Secret key.")
 
         SECRET = raw_input("Secret key: ")
         pickle.dump(UID, open("secret.p", "wb"))
         path = os.path.abspath("secret.p")
-        print("[{}]\nYour Secret key has been saved to {}".format(t.green("+"), path))
+        info("Your Secret key has been saved to {}".format(path))
 
     else:
         try:
             SECRET = pickle.load(open("secret.p", "rb"))
         except IOError as e:
-            print("\n[{}]Critical. An IO error was raised while attempting to read Secret key data.\n{}".format(
-                t.red("!"), e))
+            error("Critical. An IO error was raised while attempting to read Secret key data.{}".format(e))
 
         path = os.path.abspath("secret.p")
-        print("\n[{}]Your Secret key was loaded from {}".format(t.green("+"), path))
+        info("Your Secret key was loaded from {}".format(path))
 
-    print("[{}]Please provide your platform specific search query.".format(t.green("+")))
-    print("[{}]I.E. 'IIS' will return a list of IPs belonging to IIS servers.".format(
-    t.green("+")))
+    info("Please provide your platform specific search query.")
+    info("I.E. 'IIS' will return a list of IPs belonging to IIS servers.")
 
     while True:
-        query = raw_input("\n<" + t.cyan("PLATFORM") + ">$ ")
+        query = raw_input(PLATFORM_PROMPT)
         if query == "":
-            print("[{}]Query cannot be null.".format(t.red("!")))
+            error("Query cannot be null.")
         else:
             break
-    params = {'query' : query}
-    print("[{}]Please stand by while results are being collected...\n\n\n".format(
-        t.green("+")))
+    params = {'query': query}
+    info("Please stand by while results are being collected...")
     time.sleep(1)
 
     try:
         response = requests.post(API_URL, json = params, auth=(UID, SECRET))
     except Exception as e:
-        print("\n[{}]Critical. An error was raised with the following error message.\n".format(t.red("!")))
+        error("Critical. An error was raised with the following error message. '{}'".format(str(e)))
+
+    result = response.json()
 
     if response.status_code != 200:
         print(result.json()["error"])
         sys.exit(1)
-
-    result = response.json()
 
     thread = threading.Thread(target=autosploit.animation, args=("collecting results", ))
     thread.daemon = True
@@ -103,8 +102,8 @@ def censysTargets(clobber=True, hostLimit=-1):
                         break
             autosploit.hostpath = os.path.abspath("hosts.txt")
             autosploit.stop_animation = True
-        print("\n\n\n[{}]Done.".format(t.green("+")))
-        print("[{}]Host list saved to {}".format(t.green("+"), autosploit.hostpath))
+        info("Done.")
+        info("Host list saved to {}".format(autosploit.hostpath))
     else:
         with open("hosts.txt", "ab") as log:
             for i in xrange(autosploit.toolbar_width):
@@ -117,5 +116,5 @@ def censysTargets(clobber=True, hostLimit=-1):
                         break
             autosploit.hostpath = os.path.abspath("hosts.txt")
             autosploit.stop_animation = True
-        print("\n\n\n[{}]Done.".format(t.green("+")))
-        print("[{}]Hosts appended to list at ".format(t.green("+"), autosploit.hostpath))
+        info("Done.")
+        info("Hosts appended to list at {}".format(autosploit.hostpath))
