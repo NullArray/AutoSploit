@@ -29,10 +29,13 @@ import shodan
 
 from lib.jsonize import load_exploits
 from lib.cmdline.cmd import AutoSploitParser
+from lib.banner import banner_main
 from lib.settings import (
     validate_ip_addr,
+    check_services,
     PLATFORM_PROMPT,
-    AUTOSPLOIT_PROMPT
+    AUTOSPLOIT_PROMPT,
+    AUTOSPLOIT_TERM_OPTS
 )
 from lib.output import (
     info,
@@ -50,27 +53,14 @@ local_port = ""
 local_host = ""
 configured = False
 toolbar_width = 60
-version = "1.4.0"
 usage_and_legal_path = "{}/etc/general".format(os.getcwd())
 loaded_exploits = load_exploits("{}/etc/json".format(os.getcwd()))
 stop_animation = False
-autosploit_opts = {
-    1: "usage and legal", 2: "gather hosts", 3: "custom hosts",
-    4: "add single host", 5: "view gathered hosts", 6: "exploit gathered hosts",
-    99: "quit"
-}
 
 
 def logo(line_sep="#--", space=" " * 30):
     """Logo."""
-    global version
-    print("""\033[1m\033[36m{space_sep}_____     _       _____     _     _ _
-{sep1}Author : Vector/NullArray |  _  |_ _| |_ ___|   __|___| |___|_| |_
-{sep1}Twitter: @Real__Vector    |     | | |  _| . |__   | . | | . | |  _|
-{sep1}Type   : Mass Exploiter   |__|__|___|_| |___|_____|  _|_|___|_|_|
-{sep1}Version: {v_num}                                    |_|
-##############################################\033[0m
-""".format(sep1=line_sep, v_num=version, space_sep=space))
+    print banner_main()
 
 
 def animation(text):
@@ -428,7 +418,6 @@ def main():
     global query
     global configured
     global api
-    global autosploit_opts
 
     # TODO:/
     # commenting this out for now, guessing we need to create a retry function
@@ -453,8 +442,8 @@ def main():
                 settings()
 
             info("Welcome to AutoSploit. Please select an action.")
-            for i in autosploit_opts.keys():
-                print("{}. {}".format(i, autosploit_opts[i].title()))
+            for i in AUTOSPLOIT_TERM_OPTS.keys():
+                print("{}. {}".format(i, AUTOSPLOIT_TERM_OPTS[i].title()))
 
             action = raw_input(AUTOSPLOIT_PROMPT)
 
@@ -568,16 +557,21 @@ if __name__ == "__main__":
     info("Initializing AutoSploit...")
     info("One moment please while we check the Postgresql and Apache services...")
 
-    postgresql = cmdline("sudo service postgresql status | grep active")
-    if "Active: inactive" in postgresql:
-        warning("Warning. Heuristic tests have indicated PostgreSQL Service is offline")
+    # postgresql = cmdline("sudo service postgresql status | grep active")
+    postgresql = check_services("postgre")
+    if not postgresql:
 
+        def start_postgresql():
+            # we're going to import it here because we don't need it anywhere else
+            from lib.settings import START_POSTGRESQL_PATH
+
+            cmd = shlex.split("sudo sh {}".format(START_POSTGRESQL_PATH))
+            cmdline(cmd)
+
+        warning("Warning. Heuristic tests have indicated PostgreSQL Service is offline")
         start_pst = prompt("Start Postgresql Service? [Y]es/[N]o")
         if start_pst == 'y':
-            os.system("sudo service postgresql start")
-            info("Postgresql Service Started...")
-            time.sleep(1.5)
-
+            start_postgresql()
         elif start_pst == 'n':
             error("AutoSploit's MSF related operations require this service to be active.")
             error("Aborted.")
@@ -585,20 +579,24 @@ if __name__ == "__main__":
             sys.exit(0)
         else:
             warning("Unhandled Option. Defaulting to starting the service.")
-            os.system("sudo service postgresql start")
-
-            info("Postgresql Service Started...")
+            start_postgresql()
             time.sleep(1.5)
 
-    apache = cmdline("service apache2 status | grep active")
-    if "Active: inactive" in apache:
+    apache = check_services("apache2")
+    if not apache:
+
+        def start_apache():
+            # same as above
+            from lib.settings import START_APACHE_PATH
+
+            cmd = shlex.split("sudo sh {}".format(START_APACHE_PATH))
+            cmdline(cmd)
+
         warning("Warning. Heruistic tests indicated that Apache Service is offline")
 
         start_ap = prompt("Start Apache Service? [Y]es/[N]o")
         if start_ap == 'y':
-            os.system("sudo service apache2 start")
-
-            info("[{}]Apache2 Service Started...")
+            start_apache()
             time.sleep(1.5)
 
         elif start_ap == 'n':
@@ -608,12 +606,7 @@ if __name__ == "__main__":
             sys.exit(0)
         else:
             warning("Unhandled Option. Defaulting to starting the service.")
-            os.system("sudo service apache2 start")
-            # TODO:/
-            # Should really add another check here to make sure it started,
-            # possible to use `psutils` to check the running tasks for autosploit
-
-            info("Apache2 Service Started...")
+            start_apache()
             time.sleep(1.5)
 
     # We will check if the shodan api key has been saved before, if not we are going to prompt

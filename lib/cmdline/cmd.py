@@ -36,7 +36,7 @@ class AutoSploitParser(argparse.ArgumentParser):
             ethics_file = "{}/etc/text_files/ethics.lst".format(os.getcwd())
             with open(ethics_file) as ethics:
                 ethic = random.choice(ethics.readlines()).strip()
-                print("Your ethic for the day:\n\n{}".format(ethic))
+                print("Here we have an ethical lesson for you:\n\n{}".format(ethic))
                 sys.exit(0)
         if opt.exploitList:
             try:
