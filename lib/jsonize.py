@@ -3,10 +3,8 @@ import json
 import string
 import random
 
-
-import blessings
-
-t = blessings.Terminal()
+import lib.output
+import lib.settings
 
 
 def random_file_name(acceptable=string.ascii_letters, length=7):
@@ -31,11 +29,10 @@ def load_exploits(path, node="exploits"):
     retval = []
     file_list = os.listdir(path)
     if len(file_list) != 1:
-        print("\n[{}] total of {} files discovered select one".format(
-                t.green("+"), len(file_list)))
+        lib.output.info("total of {} exploit files discovered for use, select one".format(len(file_list)))
         for i, f in enumerate(file_list, start=1):
             print("{}. {}".format(i, f[:-5]))
-        action = raw_input("\n<" + t.cyan("AUTOSPLOIT") + ">$ ")
+        action = raw_input(lib.settings.AUTOSPLOIT_PROMPT)
         selected_file = file_list[int(action) - 1]
     else:
         selected_file = file_list[0]
