@@ -3,6 +3,9 @@ import sys
 import random
 import argparse
 
+import lib.jsonize
+import lib.output
+
 
 class AutoSploitParser(argparse.ArgumentParser):
 
@@ -35,3 +38,11 @@ class AutoSploitParser(argparse.ArgumentParser):
                 ethic = random.choice(ethics.readlines()).strip()
                 print("Your ethic for the day:\n\n{}".format(ethic))
                 sys.exit(0)
+        if opt.exploitList:
+            try:
+                lib.output.info("converting {} to JSON format".format(opt.exploitList))
+                done = lib.jsonize.text_file_to_dict(opt.exploitList)
+                lib.output.info("converted successfully and saved under {}".format(done))
+            except IOError as e:
+                lib.output.error("caught IOError '{}' check the file path and try again".format(str(e)))
+            sys.exit(0)
