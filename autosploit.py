@@ -23,8 +23,6 @@ import shlex
 import pickle
 import threading
 import subprocess
-import json
-import requests
 import censysSearch
 import shodan
 # idk if you're going to need this since retrying is a decorator (see line 410)
@@ -32,6 +30,7 @@ import shodan
 from blessings import Terminal
 
 from lib.jsonize import load_exploits
+from lib.cmdline.cmd import AutoSploitParser
 
 
 t = Terminal()
@@ -598,6 +597,12 @@ def main():
 
 
 if __name__ == "__main__":
+
+    if len(sys.argv) > 1:
+        opts = AutoSploitParser().optparser()
+        AutoSploitParser().single_run_args(opts)
+
+
     logo()
 
     print("[{}]Initializing AutoSploit...".format(t.green("+")))
