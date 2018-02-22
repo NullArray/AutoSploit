@@ -289,12 +289,11 @@ def targets(clobber=True, hostLimit = -1):
     print("[{}]I.E. 'IIS' will return a list of IPs belonging to IIS servers.".format(
         t.green("+")))
 
-    # /TODO:
-    # fix this, seems to be some issues with it, I could be wrong though
     while True:
         query = raw_input("\n<" + t.cyan("PLATFORM") + ">$ ")
         if query == "":
             print("[{}]Query cannot be null.".format(t.red("!")))
+        else:
             break
 
     print("[{}]Please stand by while results are being collected...\n\n\n".format(
