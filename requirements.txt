@@ -1,3 +1,2 @@
 shodan==1.7.7
-blessings==1.6.1
 requests==2.18.4
