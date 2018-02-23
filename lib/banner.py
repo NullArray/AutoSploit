@@ -55,12 +55,33 @@ def banner_3():
         green="\033[1m\033[32m", end="\033[0m", vnum=VERSION
     ))
 
+    
+def banner_4():
+    print(r"""
+{red}    .__.    ,     __.   .     , 	{end}
+{red}    [__]. .-+- _ (__ ._ | _ *-+-	{end}
+{red}    |  |(_| | (_).__)[_)|(_)| | 	{end}
+{red}                 |          		{end}
+{red}          _ ._  _ , _ ._			{end}
+{red}         (_ ' ( `  )_  .__)		{end}
+{red}       ( (  (    )   `)  ) _)		{end}
+{red}      (__ (_   (_ . _) _) ,__)		{end}
+{red}          `~~`\ ' . /`~~`			{end}
+{red}               ;   ;				{end}
+{red}               /   \				{end}
+{red} _____________/_ __ \_____________ {end}
+
+{blue}--------The Nuclear Option--------{end}
+{blue}-----+v({red}{vnum}{end})   +-----{end}
+{blue}-----------NullArray/Eku----------{end}	  
+{blue}__________________________________{end}
+	""".format(vnum=VERSION, blue="\033[36m", red="\033[31m", end="\033[0m"))
 
 def banner_main():
     """
     grab a random banner each run
     """
     banners = [
-        banner_3, banner_2, banner_1
+        banner_4 banner_3, banner_2, banner_1
     ]
     return random.choice(banners)()
