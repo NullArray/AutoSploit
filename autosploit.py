@@ -13,6 +13,7 @@ TODO LIST:
  - Fix the non-existing host path reference line #409
  - Create a retry decorator with a max of 5 min of 3 line #436
  - Add a secondary check to make sure autosploit is running line #535
+ - Implement the API packages into the flow (api_calls, will create a `main` class or function for it)
 """
 
 import os
@@ -58,12 +59,19 @@ loaded_exploits = load_exploits("{}/etc/json".format(os.getcwd()))
 stop_animation = False
 
 
-def logo(line_sep="#--", space=" " * 30):
-    """Logo."""
-    print banner_main()
+def logo():
+    """
+    display a random banner from the banner.py file
+    """
+    print(banner_main())
 
 
 def animation(text):
+    """
+    display an animation while working, this will be
+    single threaded so that it will not screw with the
+    current running process
+    """
     global stop_animation
     i = 0
     while not stop_animation:
