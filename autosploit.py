@@ -34,6 +34,7 @@ from lib.banner import banner_main
 from lib.settings import (
     validate_ip_addr,
     check_services,
+    load_api_keys,
     PLATFORM_PROMPT,
     AUTOSPLOIT_PROMPT,
     AUTOSPLOIT_TERM_OPTS
@@ -605,20 +606,17 @@ if __name__ == "__main__":
         start_ap = prompt("Start Apache Service? [Y]es/[N]o")
         if start_ap == 'y':
             start_apache()
-            time.sleep(1.5)
-
         elif start_ap == 'n':
             error("AutoSploit's MSF related operations require this service to be active.")
             error("Aborted.")
-            time.sleep(1.5)
             sys.exit(0)
         else:
             warning("Unhandled Option. Defaulting to starting the service.")
             start_apache()
-            time.sleep(1.5)
 
     # We will check if the shodan api key has been saved before, if not we are going to prompt
     # for it and save it to a file
+    # load_api_keys()
     if not os.path.isfile("api.p"):
         info("Please provide your Shodan.io API key.")
 

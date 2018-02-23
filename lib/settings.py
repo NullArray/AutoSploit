@@ -12,6 +12,10 @@ START_POSTGRESQL_PATH = "{}/etc/scripts/start_postgre.sh".format(os.getcwd())
 START_APACHE_PATH = "{}/etc/scripts/start_apache.sh".format(os.getcwd())
 PLATFORM_PROMPT = "\n{}@\033[36mPLATFORM\033[0m$ ".format(getpass.getuser())
 AUTOSPLOIT_PROMPT = "\n\033[31m{}\033[0m@\033[36mautosploit\033[0m# ".format(getpass.getuser())
+API_KEYS = {
+    "censys": "{}/etc/tokens/censys.key".format(os.getcwd()),
+    "shodan": "{}/etc/tokens/shodan.key".format(os.getcwd())
+}
 API_URLS = {
     "shodan": "https://api.shodan.io/shodan/host/search?key={token}&query={query}",
     "censys": "https://censys.io/api/v1/search/ipv4",
@@ -73,3 +77,31 @@ def write_to_file(data_to_write, filename, mode="a+"):
             log.write(data_to_write)
     lib.output.info("successfully wrote info to '{}'".format(filename))
     return filename
+
+
+def load_api_keys(path="{}/etc/tokens".format(os.getcwd())):
+
+    """
+    load the API keys from their .key files
+    """
+
+    def makedir(dir):
+        """
+        make the directory if it does not exist
+        """
+        if not os.path.exists(dir):
+            os.mkdir(dir)
+
+    makedir(path)
+    for key in API_KEYS.keys():
+        if not os.path.isfile(API_KEYS[key]):
+            access_token = lib.output.prompt("enter your {} API token".format(key.title()), lowercase=False)
+            with open(API_KEYS[key], "a+") as log:
+                log.write(access_token.strip())
+        else:
+            lib.output.info("{} API token loaded from {}".format(key.title(), API_KEYS[key]))
+    api_tokens = {
+        "censys": open(API_KEYS["censys"]).read(),
+        "shodan": open(API_KEYS["shodan"]).read()
+    }
+    return api_tokens
