@@ -556,11 +556,11 @@ def main():
 
 if __name__ == "__main__":
 
+    logo()
+
     if len(sys.argv) > 1:
         opts = AutoSploitParser().optparser()
         AutoSploitParser().single_run_args(opts)
-
-    logo()
 
     info("Initializing AutoSploit...")
     info("One moment please while we check the Postgresql and Apache services...")
