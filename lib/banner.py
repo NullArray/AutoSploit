@@ -61,14 +61,14 @@ def banner_4():
 {red}    .__.    ,     __.   .     , 	{end}
 {red}    [__]. .-+- _ (__ ._ | _ *-+-	{end}
 {red}    |  |(_| | (_).__)[_)|(_)| | 	{end}
-{red}                 |          		{end}
-{red}          _ ._  _ , _ ._			{end}
-{red}         (_ ' ( `  )_  .__)		{end}
-{red}       ( (  (    )   `)  ) _)		{end}
-{red}      (__ (_   (_ . _) _) ,__)		{end}
-{red}          `~~`\ ' . /`~~`			{end}
-{red}               ;   ;				{end}
-{red}               /   \				{end}
+{red}                 |          	{end}
+{red}          _ ._  _ , _ ._		{end}
+{red}         (_ ' ( `  )_  .__)	{end}
+{red}       ( (  (    )   `)  ) _)	{end}
+{red}      (__ (_   (_ . _) _) ,__)	{end}
+{red}          `~~`\ ' . /`~~`		{end}
+{red}               ;   ;		{end}
+{red}               /   \		{end}
 {red} _____________/_ __ \_____________ {end}
 
 {blue}--------The Nuclear Option--------{end}
