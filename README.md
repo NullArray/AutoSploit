@@ -56,7 +56,7 @@ While this isn't exactly a Beta release it is an early release nonetheless as su
 I've been working on the new version of the tool in an open source capacity with the help of a number of developers 
 that have expressed an interest in doing so. The new version will include extra features such as the ability to load in a custom target and exploit list among many more enhancements. If you would like to keep up to date on all the most recent developments be sure to check out the [Development Branch](https://github.com/NullArray/AutoSploit/tree/dev-beta)
 
-If you wish to contribute to the development of this project please be sure to read the [CONTRIBUTING.md](https://github.com/NullArray/AutoSploit/blob/master/CONTRIBUTING.md) before you get started as it contains our contribution guidelines.
+If you wish to contribute to the development of this project please be sure to read [CONTRIBUTING.md](https://github.com/NullArray/AutoSploit/blob/master/CONTRIBUTING.md) before you get started as it contains our contribution guidelines.
 
 Thanks in advance.
 
