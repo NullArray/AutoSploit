@@ -557,6 +557,63 @@ def main():
 
 if __name__ == "__main__":
 
+    '''from api_calls import (
+        shodan,
+        censys,
+        zoomeye
+    )
+    from lib.settings import (
+        load_api_keys,
+        API_URLS,
+        AUTOSPLOIT_PROMPT
+    )
+
+    from lib.output import (
+        prompt,
+        info,
+        warning
+    )
+
+    tokens = load_api_keys()
+
+    possible_apis = API_URLS.keys()
+
+    def get_query():
+        query = prompt("enter your search query")
+        return query
+
+    selected = False
+    info_msg = "searching {} API with query '{}'"
+    info("pick a search engine")
+    for i, api in enumerate(sorted(possible_apis), start=1):
+        print("{}. {}".format(i, api))
+
+    while not selected:
+        choice = raw_input(AUTOSPLOIT_PROMPT)
+        try:
+            choice = int(choice)
+            if choice == 1:
+                selected = True
+                query = get_query()
+                info(info_msg.format("Shodan", query))
+                censys.CensysAPIHook(tokens["censys"][1], tokens["censys"][0], query).censys()
+            elif choice == 2:
+                selected = True
+                query = get_query()
+                info(info_msg.format("Censys", query))
+                shodan.ShodanAPIHook(tokens["shodan"][0], query).shodan()
+            elif choice == 3:
+                query = get_query()
+                selected = True
+                info("ZoomEye token will be loaded automatically")
+                info(info_msg.format("Zoomeye", query))
+                zoomeye.ZoomEyeAPIHook(query).zoomeye()
+            else:
+                warning("choice must be between 1-{}".format(len(API_URLS.keys())))
+        except:
+            warning("choice must be integer not string")'''
+
+
     logo()
 
     if len(sys.argv) > 1:
