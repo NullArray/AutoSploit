@@ -13,6 +13,10 @@ from lib.settings import (
 
 class ShodanAPIHook(object):
 
+    """
+    Shodan API hook, saves us from having to install another dependency
+    """
+
     def __init__(self, token, query, proxy=None):
         self.token = token
         self.query = query
@@ -20,6 +24,9 @@ class ShodanAPIHook(object):
         self.host_file = HOST_FILE
 
     def shodan(self):
+        """
+        connect to the API and grab all IP addresses associated with the provided query
+        """
         discovered_shodan_hosts = set()
         try:
             req = requests.get(API_URLS["shodan"].format(query=self.query, token=self.token))

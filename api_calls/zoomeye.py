@@ -15,6 +15,11 @@ from lib.settings import (
 
 class ZoomEyeAPIHook(object):
 
+    """
+    API hook for the ZoomEye API, in order to connect you need to provide a phone number
+    so we're going to use some 'lifted' credentials to login for us
+    """
+
     def __init__(self, query):
         self.query = query
         self.host_file = HOST_FILE
@@ -23,6 +28,9 @@ class ZoomEyeAPIHook(object):
 
     @staticmethod
     def __decode(filepath):
+        """
+        we all know what this does
+        """
         with open(filepath) as f:
             data = f.read()
             token, n = data.split(":")
@@ -31,6 +39,11 @@ class ZoomEyeAPIHook(object):
         return token.strip()
 
     def __get_auth(self):
+        """
+        get the authorization for the authentication token, you have to login
+        before you can access the API, this is where the 'lifted' creds come into
+        play.
+        """
         username = self.__decode(self.user_file)
         password = self.__decode(self.pass_file)
         data = {"username": username, "password": password}
@@ -39,6 +52,10 @@ class ZoomEyeAPIHook(object):
         return token
 
     def zoomeye(self):
+        """
+        connect to the API and pull all the IP addresses that are associated with the
+        given query
+        """
         discovered_zoomeye_hosts = set()
         try:
             token = self.__get_auth()
@@ -48,8 +65,8 @@ class ZoomEyeAPIHook(object):
             _json_data = req.json()
             for item in _json_data["matches"]:
                 if len(item["ip"]) > 1:
-                    # TODO:/ grab all the IP addresses when there's more then 1
-                    discovered_zoomeye_hosts.add(str(item["ip"][0]))
+                    for ip in item["ip"]:
+                        discovered_zoomeye_hosts.add(ip)
                 else:
                     discovered_zoomeye_hosts.add(str(item["ip"][0]))
             write_to_file(discovered_zoomeye_hosts, self.host_file)

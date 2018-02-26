@@ -11,6 +11,10 @@ from lib.settings import (
 
 class CensysAPIHook(object):
 
+    """
+    Censys API hook
+    """
+
     def __init__(self, identity, token, query):
         self.id = identity
         self.token = token
@@ -18,6 +22,9 @@ class CensysAPIHook(object):
         self.host_file = HOST_FILE
 
     def censys(self):
+        """
+        connect to the Censys API and pull all IP addresses from the provided query
+        """
         discovered_censys_hosts = set()
         try:
             req = requests.post(API_URLS["censys"], auth=(self.id, self.token), json={"query": self.query})
