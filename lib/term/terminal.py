@@ -1,6 +1,5 @@
 import os
 import sys
-# import threading
 
 import lib.settings
 import lib.output
@@ -8,9 +7,6 @@ import lib.exploitation.exploiter
 import api_calls.shodan
 import api_calls.zoomeye
 import api_calls.censys
-
-
-stop_animation = False
 
 
 class AutoSploitTerminal(object):
@@ -109,8 +105,6 @@ class AutoSploitTerminal(object):
 
         option 2 must be provided
         """
-        global stop_animation
-
         choice_dict = {
             1: api_calls.shodan.ShodanAPIHook,
             2: api_calls.zoomeye.ZoomEyeAPIHook,
@@ -118,7 +112,7 @@ class AutoSploitTerminal(object):
         }
         searching = False
         if given_choice is None:
-            lib.output.info("please choose an API to gather from (choosing two "
+            lib.output.info("please choose an API to gather from (choosing two or more "
                             "separate by comma IE; 1,2)")
             for i, api in enumerate(lib.settings.API_URLS.keys(), start=1):
                 print("{}. {}".format(i, api.title()))
@@ -128,23 +122,14 @@ class AutoSploitTerminal(object):
         while not searching:
             try:
                 choice = int(choice)
-                # t = threading.Thread(
-                #     target=lib.settings.animation,
-                #     args=("performing lookup for provided query '{}'".format(query),)
-                # )
-                # t.daemon = True
-                # t.start()
                 if choice == 1:
                     choice_dict[choice](self.tokens["shodan"][0], query).shodan()
-                    # stop_animation = True
                     break
                 elif choice == 2:
                     choice_dict[choice](query).zoomeye()
-                    # stop_animation = True
                     break
                 elif choice == 3:
                     choice_dict[choice](self.tokens["censys"][1], self.tokens["censys"][0], query).censys()
-                    # stop_animation = True
                     break
                 else:
                     lib.output.warning("invalid option provided")

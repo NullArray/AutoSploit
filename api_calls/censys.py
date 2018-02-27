@@ -1,10 +1,9 @@
 import requests
+import threading
 
+import lib.settings
+from lib.output import error
 from lib.errors import AutoSploitAPIConnectionError
-from lib.output import (
-    error,
-    info
-)
 from lib.settings import (
     HOST_FILE,
     API_URLS,
@@ -28,9 +27,9 @@ class CensysAPIHook(object):
         """
         connect to the Censys API and pull all IP addresses from the provided query
         """
-        info("searching Censys with given query '{}'".format(self.query))
         discovered_censys_hosts = set()
         try:
+            lib.settings.start_animation("searching Censys with given query '{}'".format(self.query))
             req = requests.post(API_URLS["censys"], auth=(self.id, self.token), json={"query": self.query})
             json_data = req.json()
             for item in json_data["results"]:

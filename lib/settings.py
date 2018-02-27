@@ -4,7 +4,7 @@ import time
 import socket
 import getpass
 import tempfile
-import subprocess
+# import subprocess
 
 import psutil
 
@@ -73,7 +73,10 @@ def write_to_file(data_to_write, filename, mode="a+"):
     """
     write data to a specified file, if it exists, ask to overwrite
     """
+    global stop_animation
+
     if os.path.exists(filename):
+        stop_animation = True
         is_append = lib.output.prompt("would you like to (a)ppend or (o)verwrite the file")
         if is_append == "o":
             mode = "w"
@@ -162,7 +165,6 @@ def animation(text):
     single threaded so that it will not screw with the
     current running process
     """
-    # TODO:/ this will not stop when stop animation is True
     global stop_animation
     i = 0
     while not stop_animation:
@@ -177,5 +179,11 @@ def animation(text):
         sys.stdout.flush()
         i += 1
         time.sleep(0.1)
-    else:
-        print("\n")
+
+
+def start_animation(text):
+    import threading
+
+    t = threading.Thread(target=animation, args=(text,))
+    t.daemon = True
+    t.start()

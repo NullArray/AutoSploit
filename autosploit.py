@@ -22,11 +22,8 @@ import time
 import shlex
 import pickle
 import threading
-import subprocess
 import censysSearch
 import shodan
-# idk if you're going to need this since retrying is a decorator (see line 410)
-# from retrying import retry
 
 from lib.jsonize import load_exploits
 from lib.cmdline.cmd import AutoSploitParser
