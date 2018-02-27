@@ -4,11 +4,9 @@ import json
 
 import requests
 
+from lib.settings import start_animation
 from lib.errors import AutoSploitAPIConnectionError
-from lib.output import (
-    error,
-    info
-)
+from lib.output import error
 from lib.settings import (
     API_URLS,
     HOST_FILE,
@@ -59,7 +57,7 @@ class ZoomEyeAPIHook(object):
         connect to the API and pull all the IP addresses that are associated with the
         given query
         """
-        info("searching ZoomEye with given query '{}'".format(self.query))
+        start_animation("searching ZoomEye with given query '{}'".format(self.query))
         discovered_zoomeye_hosts = set()
         try:
             token = self.__get_auth()
