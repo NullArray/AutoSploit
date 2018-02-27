@@ -1,16 +1,22 @@
 import os
+import sys
+import time
 import socket
 import getpass
+import tempfile
+import subprocess
 
 import psutil
 
 import lib.output
-import api_calls
+import lib.banner
 
 
 HOST_FILE = "{}/hosts.txt".format(os.getcwd())
+USAGE_AND_LEGAL_PATH = "{}/etc/text_files/general".format(os.getcwd())
 START_POSTGRESQL_PATH = "{}/etc/scripts/start_postgre.sh".format(os.getcwd())
 START_APACHE_PATH = "{}/etc/scripts/start_apache.sh".format(os.getcwd())
+QUERY_FILE_PATH = tempfile.NamedTemporaryFile(delete=False).name
 PLATFORM_PROMPT = "\n{}@\033[36mPLATFORM\033[0m$ ".format(getpass.getuser())
 AUTOSPLOIT_PROMPT = "\n\033[31m{}\033[0m@\033[36mautosploit\033[0m# ".format(getpass.getuser())
 API_KEYS = {
@@ -31,15 +37,21 @@ AUTOSPLOIT_TERM_OPTS = {
     99: "quit"
 }
 
+stop_animation = False
+
 
 def validate_ip_addr(provided):
     """
     validate an IP address to see if it is real or not
     """
-    try:
-        socket.inet_aton(provided)
-        return True
-    except:
+    not_acceptable = ("0.0.0.0", "127.0.0.1", "255.255.255.255")
+    if provided not in not_acceptable:
+        try:
+            socket.inet_aton(provided)
+            return True
+        except:
+            return False
+    else:
         return False
 
 
@@ -110,3 +122,60 @@ def load_api_keys(path="{}/etc/tokens".format(os.getcwd())):
         "shodan": (open(API_KEYS["shodan"][0]).read(), )
     }
     return api_tokens
+
+
+def cmdline(command):
+    """
+    Function that allows us to store system command output in a variable.
+    We'll change this later in order to solve the potential security
+    risk that arises when passing untrusted input to the shell.
+
+    I intend to have the issue resolved by Version 1.5.0.
+    """
+
+    os.system(command)
+    '''process = subprocess.call(
+        args=" ".join(command),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        shell=True
+    )
+    return process'''
+
+
+def check_for_msf():
+    in_env = os.getenv("msfconsole", False)
+    if not in_env:
+        return False
+
+
+def logo():
+    """
+    display a random banner from the banner.py file
+    """
+    print(lib.banner.banner_main())
+
+
+def animation(text):
+    """
+    display an animation while working, this will be
+    single threaded so that it will not screw with the
+    current running process
+    """
+    # TODO:/ this will not stop when stop animation is True
+    global stop_animation
+    i = 0
+    while not stop_animation:
+        if stop_animation is True:
+            print("\n")
+        temp_text = list(text)
+        if i >= len(temp_text):
+            i = 0
+        temp_text[i] = temp_text[i].upper()
+        temp_text = ''.join(temp_text)
+        sys.stdout.write("\033[96m\033[1m{}...\r\033[0m".format(temp_text))
+        sys.stdout.flush()
+        i += 1
+        time.sleep(0.1)
+    else:
+        print("\n")

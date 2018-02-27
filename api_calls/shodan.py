@@ -3,7 +3,10 @@ import json
 import requests
 
 from lib.errors import AutoSploitAPIConnectionError
-from lib.output import error
+from lib.output import (
+    error,
+    info
+)
 from lib.settings import (
     API_URLS,
     HOST_FILE,
@@ -27,6 +30,7 @@ class ShodanAPIHook(object):
         """
         connect to the API and grab all IP addresses associated with the provided query
         """
+        info("searching Shodan with given query '{}'".format(self.query))
         discovered_shodan_hosts = set()
         try:
             req = requests.get(API_URLS["shodan"].format(query=self.query, token=self.token))

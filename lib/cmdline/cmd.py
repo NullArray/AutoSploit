@@ -25,6 +25,10 @@ class AutoSploitParser(argparse.ArgumentParser):
                             help="provide a text file to convert into JSON and save for later use")
         parser.add_argument("-E", "--exploit", metavar="EXPLOIT", dest="singleExploit",
                             help="pass a single exploit in the same format as the JSON file(s)")
+        parser.add_argument("--ruby-exec", action="store_true", dest="rubyExecutableNeeded",
+                            help="if you need to run the Ruby executable with MSF use this")
+        parser.add_argument("--msf-path", metavar="MSF-PATH", dest="pathToFramework",
+                            help="pass the path to your framework if it is not in your ENV PATH")
         parser.add_argument("--ethics", action="store_true", dest="displayEthics",
                             help=argparse.SUPPRESS)  # easter egg!
         opts = parser.parse_args()
