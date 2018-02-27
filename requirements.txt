@@ -1,3 +1,2 @@
-shodan==1.7.7
 requests==2.18.4
 psutil==5.3.0
