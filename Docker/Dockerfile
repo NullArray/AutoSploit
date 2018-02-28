@@ -8,7 +8,7 @@ RUN apt update && apt install -y postgresql \
 								 git \
 								 metasploit-framework
 
-RUN git clone https://github.com/NullArray/AutoSploit.git && pip install shodan blessings
+RUN git clone https://github.com/NullArray/AutoSploit.git && pip install requests psutil
 COPY database.yml /root/.msf4/database.yml
 WORKDIR AutoSploit
 EXPOSE 80 443 4444

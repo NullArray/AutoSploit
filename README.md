@@ -45,14 +45,14 @@ With each new module on it's own line.
 AutoSploit depends on the following Python2.7 modules.
 
 ```
-shodan
-blessings
+requests
+psutil
 ```
 
 Should you find you do not have these installed get them with pip like so.
 
 ```bash
-pip install shodan blessings
+pip install requests psutil
 ```
 
 or
