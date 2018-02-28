@@ -1,6 +1,6 @@
 # Contributing
 
-All contributions to Autosploit are not only welcomed, but highly appreciated, please keep in mind the following while making a pull request:
+All contributions to AutoSploit are not only welcomed, but highly appreciated, please keep in mind the following while making a pull request:
 
  - Each request should make at least one logical change
  - All contributions should be forked from the `dev-beta` branch
