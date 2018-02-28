@@ -215,7 +215,6 @@ class AutoSploitTerminal(object):
         """
         main output of the terminal
         """
-        lib.output.info("welcome to AutoSploit, choose an option, type 99 to quit")
         selected = False
 
         try:

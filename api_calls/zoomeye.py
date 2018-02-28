@@ -6,7 +6,6 @@ import requests
 
 from lib.settings import start_animation
 from lib.errors import AutoSploitAPIConnectionError
-from lib.output import error
 from lib.settings import (
     API_URLS,
     HOST_FILE,
@@ -21,9 +20,11 @@ class ZoomEyeAPIHook(object):
     so we're going to use some 'lifted' credentials to login for us
     """
 
-    def __init__(self, query):
+    def __init__(self, query=None, proxy=None, agent=None, **kwargs):
         self.query = query
         self.host_file = HOST_FILE
+        self.proxy = proxy
+        self.user_agent = agent
         self.user_file = "{}/etc/text_files/users.lst".format(os.getcwd())
         self.pass_file = "{}/etc/text_files/passes.lst".format(os.getcwd())
 
@@ -61,9 +62,18 @@ class ZoomEyeAPIHook(object):
         discovered_zoomeye_hosts = set()
         try:
             token = self.__get_auth()
-            headers = {"Authorization": "JWT {}".format(str(token["access_token"]))}
+            if self.user_agent is None:
+                headers = {"Authorization": "JWT {}".format(str(token["access_token"]))}
+            else:
+                headers = {
+                    "Authorization": "JWT {}".format(str(token["access_token"])),
+                    "agent": self.user_agent["User-Agent"]
+                }
             params = {"query": self.query, "page": "1", "facet": "ipv4"}
-            req = requests.get(API_URLS["zoomeye"][1].format(query=self.query), params=params, headers=headers)
+            req = requests.get(
+                API_URLS["zoomeye"][1].format(query=self.query),
+                params=params, headers=headers, proxies=self.proxy
+            )
             _json_data = req.json()
             for item in _json_data["matches"]:
                 if len(item["ip"]) > 1:
@@ -74,6 +84,5 @@ class ZoomEyeAPIHook(object):
             write_to_file(discovered_zoomeye_hosts, self.host_file)
             return True
         except Exception as e:
-            error(AutoSploitAPIConnectionError(str(e)))
-            return False
+            raise AutoSploitAPIConnectionError(str(e))
 
