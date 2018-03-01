@@ -11,7 +11,7 @@ The new version of AutoSploit has a feature that allows you to set a proxy befor
 
 ## Usage
 
-Clone the repo. Or deploy via Docker. Details for which can be found [here](https://github.com/NullArray/AutoSploit/tree/master/Docker) Special thanks to [Khast3x](https://github.com/khast3x) for their contribution in this regard.
+Clone the repo. Or deploy via Docker. Details for which can be found [here](https://github.com/NullArray/AutoSploit/tree/master/Docker) 
 
 `git clone https://github.com/NullArray/AutoSploit.git`
 
@@ -103,6 +103,13 @@ pip install -r requirements.txt
 ```
 
 Since the program invokes functionality from the Metasploit Framework you need to have this installed also. Get it from Rapid7 by clicking [here](https://www.rapid7.com/products/metasploit/).
+
+## Acknowledgements
+
+Special thanks to [Ekultek](https://github.com/Ekultek) without whoms contributions to the project version 2.0 would have been a lot less spectacular.
+
+And thanks to [Khast3x](https://github.com/khast3x) for setting up Docker support.
+
 
 ### Note
 
