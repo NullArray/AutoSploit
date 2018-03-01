@@ -30,7 +30,7 @@ def main():
     service_names = ("postgresql", "apache")
     for service in list(service_names):
         if not check_services(service):
-            choice = prompt("it appears that service {} is not enabled, would you like us to enable it for you[y/N]")
+            choice = prompt("it appears that service {} is not enabled, would you like us to enable it for you[y/N]".format(service))
             if choice.lower().startswith("y"):
                 if "postgre" in service:
                     cmdline("sudo bash {}".format(START_POSTGRESQL_PATH))
