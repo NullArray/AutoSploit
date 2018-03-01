@@ -23,8 +23,10 @@ def banner_2():
 {blue}--+{end}           \_/\_/(____/           {blue}+--{end}
 {blue}--+{end}            {red}AutoSploit{end}            {blue}+--{end}
 {blue}--+{end}           NullArray/Eku          {blue}+--{end}
-{blue}--+{end}             v({red}{vnum}{end})             {blue}+--{end}
-    """.format(vnum=VERSION, blue="\033[36m", red="\033[31m", end="\033[0m")
+{blue}--+{end}{minor_space2}             v({red}{vnum}{end}){minor_space}             {blue}+--{end}
+    """.format(vnum=VERSION, blue="\033[36m", red="\033[31m", end="\033[0m",
+               minor_space=" " * 1 if len(VERSION) == 3 else "",
+               minor_space2=" " * 1 if len(VERSION) == 3 else "")
     return banner
 
 
@@ -78,7 +80,8 @@ def banner_4():
 {blue}-----+       v({red}{vnum}{end}{blue}){spacer}+-----{end}
 {blue}-----------NullArray/Eku----------{end}	  
 {blue}__________________________________{end}
-    """.format(vnum=VERSION, blue="\033[36m", red="\033[31m", end="\033[0m", spacer=" " * 9)
+    """.format(vnum=VERSION, blue="\033[36m", red="\033[31m", end="\033[0m",
+               spacer=" " * 9 if len(VERSION) == 3 else " " * 7)
     return banner
 
 
