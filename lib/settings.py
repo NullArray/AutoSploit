@@ -2,6 +2,8 @@ import os
 import sys
 import time
 import socket
+import random
+import platform
 import getpass
 import tempfile
 # import subprocess
@@ -12,17 +14,42 @@ import lib.output
 import lib.banner
 
 
+# path to the file containing all the discovered hosts
 HOST_FILE = "{}/hosts.txt".format(os.getcwd())
+
+# path to the folder containing all the JSON exploit modules
+EXPLOIT_FILES_PATH = "{}/etc/json".format(os.getcwd())
+
+# path to the usage and legal file
 USAGE_AND_LEGAL_PATH = "{}/etc/text_files/general".format(os.getcwd())
+
+# path to the bash script to stack the PostgreSQL service
 START_POSTGRESQL_PATH = "{}/etc/scripts/start_postgre.sh".format(os.getcwd())
+
+# path to the bash script to start the Apache service
 START_APACHE_PATH = "{}/etc/scripts/start_apache.sh".format(os.getcwd())
+
+# path to the file that will contain our query
 QUERY_FILE_PATH = tempfile.NamedTemporaryFile(delete=False).name
+
+# default HTTP User-Agent
+DEFAULT_USER_AGENT = "AutoSploit/{} (Language=Python/{}; Platform={})".format(
+    lib.banner.VERSION, sys.version.split(" ")[0], platform.platform().split("-")[0]
+)
+
+# the prompt for the platforms
 PLATFORM_PROMPT = "\n{}@\033[36mPLATFORM\033[0m$ ".format(getpass.getuser())
+
+# the prompt that will be used most of the time
 AUTOSPLOIT_PROMPT = "\n\033[31m{}\033[0m@\033[36mautosploit\033[0m# ".format(getpass.getuser())
+
+# all the paths to the API tokens
 API_KEYS = {
     "censys": ("{}/etc/tokens/censys.key".format(os.getcwd()), "{}/etc/tokens/censys.id".format(os.getcwd())),
     "shodan": ("{}/etc/tokens/shodan.key".format(os.getcwd()), )
 }
+
+# all the URLs that we will use while doing the searching
 API_URLS = {
     "shodan": "https://api.shodan.io/shodan/host/search?key={token}&query={query}",
     "censys": "https://censys.io/api/v1/search/ipv4",
@@ -31,6 +58,8 @@ API_URLS = {
         "https://api.zoomeye.org/web/search"
     )
 }
+
+# terminal options
 AUTOSPLOIT_TERM_OPTS = {
     1: "usage and legal", 2: "gather hosts", 3: "custom hosts",
     4: "add single host", 5: "view gathered hosts", 6: "exploit gathered hosts",
@@ -147,6 +176,9 @@ def cmdline(command):
 
 
 def check_for_msf():
+    """
+    check the ENV PATH for msfconsole
+    """
     in_env = os.getenv("msfconsole", False)
     if not in_env:
         return False
@@ -182,8 +214,65 @@ def animation(text):
 
 
 def start_animation(text):
-    import threading
+    """
+    start the animation until stop_animation is False
+    """
+    global stop_animation
 
-    t = threading.Thread(target=animation, args=(text,))
-    t.daemon = True
-    t.start()
+    if not stop_animation:
+        import threading
+
+        t = threading.Thread(target=animation, args=(text,))
+        t.daemon = True
+        t.start()
+    else:
+        lib.output.misc_info(text)
+
+
+def close(warning, status=1):
+    """
+    exit if there's an issue
+    """
+    lib.output.error(warning)
+    sys.exit(status)
+
+
+def grab_random_agent():
+    """
+    get a random HTTP User-Agent
+    """
+    user_agent_path = "{}/etc/text_files/agents.txt"
+    with open(user_agent_path.format(os.getcwd())) as agents:
+        return random.choice(agents.readlines()).strip()
+
+
+def configure_requests(proxy=None, agent=None, rand_agent=False):
+    """
+    configure the proxy and User-Agent for the requests
+    """
+    if proxy is not None:
+        proxy_dict = {
+            "http": proxy,
+            "https": proxy,
+            "ftp": proxy
+        }
+        lib.output.misc_info("setting proxy to: '{}'".format(proxy))
+    else:
+        proxy_dict = None
+
+    if agent is not None:
+        header_dict = {
+            "User-Agent": agent
+        }
+        lib.output.misc_info("setting HTTP User-Agent to: '{}'".format(agent))
+    elif rand_agent:
+        header_dict = {
+            "User-Agent": grab_random_agent()
+        }
+        lib.output.misc_info("setting HTTP User-Agent to: '{}'".format(header_dict["User-Agent"]))
+    else:
+        header_dict = {
+            "User-Agent": DEFAULT_USER_AGENT
+        }
+
+    return proxy_dict, header_dict

@@ -1,6 +1,6 @@
 import random
 
-VERSION = "1.4.0"
+VERSION = "2.0"
 
 
 def banner_1(line_sep="#--", space=" " * 30):
@@ -75,10 +75,10 @@ def banner_4():
 {red} _____________/_ __ \_____________ {end}
 
 {blue}--------The Nuclear Option--------{end}
-{blue}-----+v({red}{vnum}{end})   +-----{end}
+{blue}-----+       v({red}{vnum}{end}{blue}){spacer}+-----{end}
 {blue}-----------NullArray/Eku----------{end}	  
 {blue}__________________________________{end}
-	""".format(vnum=VERSION, blue="\033[36m", red="\033[31m", end="\033[0m")
+    """.format(vnum=VERSION, blue="\033[36m", red="\033[31m", end="\033[0m", spacer=" " * 9)
     return banner
 
 

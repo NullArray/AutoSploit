@@ -31,3 +31,11 @@ def warning(text):
             text
         )
     )
+
+
+def misc_info(text):
+    print(
+        "[\033[96mi\033[0m] {}".format(
+            text
+        )
+    )
