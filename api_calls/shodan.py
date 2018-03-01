@@ -28,7 +28,7 @@ class ShodanAPIHook(object):
         """
         connect to the API and grab all IP addresses associated with the provided query
         """
-        start_animation("search Shodan with given query '{}'".format(self.query))
+        start_animation("searching Shodan with given query '{}'".format(self.query))
         discovered_shodan_hosts = set()
         try:
             req = requests.get(

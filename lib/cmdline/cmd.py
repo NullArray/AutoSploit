@@ -3,8 +3,8 @@ import sys
 import random
 import argparse
 
-import lib.jsonize
 import lib.output
+import lib.jsonize
 import lib.settings
 import api_calls.censys
 import api_calls.shodan
@@ -22,16 +22,23 @@ class AutoSploitParser(argparse.ArgumentParser):
         """
         the options object for our parser
         """
-        parser = argparse.ArgumentParser()
+        parser = argparse.ArgumentParser(
+            usage="python autosploit.py -[c|z|s|a] -[q] QUERY\n"
+                  "{spacer}[-C] WORKSPACE LHOST LPORT [-e]\n"
+                  "{spacer}[--ruby-exec] [--msf-path] PATH [-E] EXPLOIT-FILE-PATH\n"
+                  "{spacer}[--rand-agent] [--proxy] PROTO://IP:PORT [-P] AGENT".format(
+                    spacer=" " * 28
+            )
+        )
         se = parser.add_argument_group("search engines", "possible search engines to use")
         se.add_argument("-c", "--censys", action="store_true", dest="searchCensys",
-                        help="use censys.io as the search engine gather hosts")
+                        help="use censys.io as the search engine to gather hosts")
         se.add_argument("-z", "--zoomeye", action="store_true", dest="searchZoomeye",
                         help="use zoomeye.org as the search engine to gather hosts")
         se.add_argument("-s", "--shodan", action="store_true", dest="searchShodan",
                         help="use shodan.io as the search engine to gather hosts")
         se.add_argument("-a", "--all", action="store_true", dest="searchAll",
-                        help="search all available search engines")
+                        help="search all available search engines to gather hosts")
 
         req = parser.add_argument_group("requests", "arguments to edit your requests")
         req.add_argument("--proxy", metavar="PROTO://IP:PORT", dest="proxyConfig",
@@ -46,7 +53,7 @@ class AutoSploitParser(argparse.ArgumentParser):
         exploit = parser.add_argument_group("exploits", "arguments to edit your exploits")
         exploit.add_argument("-E", "--exploit-file", metavar="PATH", dest="exploitList",
                              help="provide a text file to convert into JSON and save for later use")
-        exploit.add_argument("-C", "--config", nargs=3, metavar=("WORKSPACE", "RHOST", "RPORT"), dest="msfConfig",
+        exploit.add_argument("-C", "--config", nargs=3, metavar=("WORKSPACE", "LHOST", "LPORT"), dest="msfConfig",
                              help="set the configuration for MSF (IE -C default 127.0.0.1 8080)")
         exploit.add_argument("-e", "--exploit", action="store_true", dest="startExploit",
                              help="start exploiting the already gathered hosts")
@@ -113,7 +120,7 @@ class AutoSploitParser(argparse.ArgumentParser):
             ethics_file = "{}/etc/text_files/ethics.lst".format(os.getcwd())
             with open(ethics_file) as ethics:
                 ethic = random.choice(ethics.readlines()).strip()
-                print("Here we have an ethical lesson for you:\n\n{}".format(ethic))
+                lib.settings.close("Here we have an ethical lesson for you:\n\n{}".format(ethic))
         if opt.exploitList:
             try:
                 lib.output.info("converting {} to JSON format".format(opt.exploitList))
@@ -152,7 +159,9 @@ class AutoSploitParser(argparse.ArgumentParser):
             ).censys()
         if opt.startExploit:
             lib.exploitation.exploiter.AutoSploitExploiter(
-                open(lib.settings.HOST_FILE).readlines(),
                 opt.msfConfig,
                 loaded_modules,
+                open(lib.settings.HOST_FILE).readlines(),
+                ruby_exec=opt.rubyExecutableNeeded,
+                msf_path=opt.pathToFramework
             ).start_exploit()

@@ -3,6 +3,7 @@ import sys
 import time
 import socket
 import random
+import platform
 import getpass
 import tempfile
 # import subprocess
@@ -30,6 +31,11 @@ START_APACHE_PATH = "{}/etc/scripts/start_apache.sh".format(os.getcwd())
 
 # path to the file that will contain our query
 QUERY_FILE_PATH = tempfile.NamedTemporaryFile(delete=False).name
+
+# default HTTP User-Agent
+DEFAULT_USER_AGENT = "AutoSploit/{} (Language=Python/{}; Platform={})".format(
+    lib.banner.VERSION, sys.version.split(" ")[0], platform.platform().split("-")[0]
+)
 
 # the prompt for the platforms
 PLATFORM_PROMPT = "\n{}@\033[36mPLATFORM\033[0m$ ".format(getpass.getuser())
@@ -211,25 +217,39 @@ def start_animation(text):
     """
     start the animation until stop_animation is False
     """
-    import threading
+    global stop_animation
 
-    t = threading.Thread(target=animation, args=(text,))
-    t.daemon = True
-    t.start()
+    if not stop_animation:
+        import threading
+
+        t = threading.Thread(target=animation, args=(text,))
+        t.daemon = True
+        t.start()
+    else:
+        lib.output.misc_info(text)
 
 
 def close(warning, status=1):
+    """
+    exit if there's an issue
+    """
     lib.output.error(warning)
     sys.exit(status)
 
 
 def grab_random_agent():
+    """
+    get a random HTTP User-Agent
+    """
     user_agent_path = "{}/etc/text_files/agents.txt"
     with open(user_agent_path.format(os.getcwd())) as agents:
         return random.choice(agents.readlines()).strip()
 
 
 def configure_requests(proxy=None, agent=None, rand_agent=False):
+    """
+    configure the proxy and User-Agent for the requests
+    """
     if proxy is not None:
         proxy_dict = {
             "http": proxy,
@@ -244,12 +264,15 @@ def configure_requests(proxy=None, agent=None, rand_agent=False):
         header_dict = {
             "User-Agent": agent
         }
+        lib.output.misc_info("setting HTTP User-Agent to: '{}'".format(agent))
     elif rand_agent:
         header_dict = {
             "User-Agent": grab_random_agent()
         }
         lib.output.misc_info("setting HTTP User-Agent to: '{}'".format(header_dict["User-Agent"]))
     else:
-        header_dict = None
+        header_dict = {
+            "User-Agent": DEFAULT_USER_AGENT
+        }
 
     return proxy_dict, header_dict

@@ -18,8 +18,12 @@ class AutoSploitTerminal(object):
     def __init__(self, tokens):
         self.tokens = tokens
         self.usage_path = lib.settings.USAGE_AND_LEGAL_PATH
-        self.host_path = lib.settings.HOST_FILE
         self.sep = "-" * 30
+        try:
+            self.host_path = open(lib.settings.HOST_FILE).readlines()
+        except IOError:
+            lib.output.warning("no hosts file present, you need to gather some hosts")
+            self.host_path = lib.settings.HOST_FILE
 
     def usage_and_legal(self):
         """
@@ -64,10 +68,14 @@ class AutoSploitTerminal(object):
 
         option 5 must be provided
         """
-        lib.output.info("loading gathered hosts from {}".format(self.host_path))
-        with open(self.host_path) as hosts:
-            for host in hosts.readlines():
-                lib.output.info(host.strip())
+        lib.output.info("loading gathered hosts from '{}'".format(self.host_path))
+        try:
+            with open(self.host_path) as hosts:
+                for host in hosts.readlines():
+                    # should take care of some Unicode errors that occur
+                    lib.output.info(str(host.strip()))
+        except IOError:
+            lib.output.warning("hosts file doesn't exist, looks like you haven't gathered any")
 
     def add_single_host(self):
         """
@@ -98,7 +106,7 @@ class AutoSploitTerminal(object):
         assert isinstance(status, int)
         sys.exit(status)
 
-    def gather_hosts(self, query, given_choice=None):
+    def gather_hosts(self, query, given_choice=None, proxy=None, agent=None):
         """
         gather hosts from either Shodan, Zoomeye, Censys, or multiple
         by providing a comma between integers.
@@ -123,28 +131,34 @@ class AutoSploitTerminal(object):
             try:
                 choice = int(choice)
                 if choice == 1:
-                    choice_dict[choice](self.tokens["shodan"][0], query).shodan()
+                    choice_dict[choice](
+                        self.tokens["shodan"][0], query, proxy=proxy, agent=agent
+                    ).shodan()
                     break
                 elif choice == 2:
-                    choice_dict[choice](query).zoomeye()
+                    choice_dict[choice](query, proxy=proxy, agent=agent).zoomeye()
                     break
                 elif choice == 3:
-                    choice_dict[choice](self.tokens["censys"][1], self.tokens["censys"][0], query).censys()
+                    choice_dict[choice](
+                        self.tokens["censys"][1], self.tokens["censys"][0], query,
+                        proxy=proxy, agent=agent
+                    ).censys()
                     break
                 else:
-                    lib.output.warning("invalid option provided")
+                    lib.output.warning("invalid option provided, going back to main menu")
+                    break
             except (ValueError, KeyError):
                 if "," in choice:
                     for i in choice.split(","):
                         if int(i) in choice_dict.keys():
-                            self.gather_hosts(query, given_choice=int(i))
+                            self.gather_hosts(query, given_choice=int(i), proxy=proxy, agent=agent)
                         else:
                             lib.output.warning("invalid option, skipping")
                             break
                     break
                 else:
                     lib.output.warning("must be integer between 1-{} not string".format(len(lib.settings.API_URLS.keys())))
-                    self.gather_hosts(query)
+                    self.gather_hosts(query, proxy=proxy, agent=agent)
 
     def exploit_gathered_hosts(self, loaded_mods, hosts=None):
         """
@@ -155,10 +169,12 @@ class AutoSploitTerminal(object):
         ruby_exec = False
         msf_path = None
         if hosts is None:
-            hosts = open(self.host_path).readlines()
+            host_file = self.host_path
+        else:
+            host_file = open(hosts).readlines()
         if not lib.settings.check_for_msf():
             msf_path = lib.output.prompt(
-                "it appears that MSF is not in your PATH, provide the full path to it"
+                "it appears that MSF is not in your PATH, provide the full path to msfconsole"
             )
             ruby_exec = True
         lib.output.info(
@@ -172,9 +188,9 @@ class AutoSploitTerminal(object):
             lib.output.prompt("enter your LPORT", lowercase=False)
         )
         exploiter = lib.exploitation.exploiter.AutoSploitExploiter(
-            open(lib.settings.HOST_FILE).readlines(),
             configuration,
             loaded_mods,
+            hosts=host_file,
             ruby_exec=ruby_exec,
             msf_path=msf_path
         )
@@ -188,19 +204,19 @@ class AutoSploitTerminal(object):
             mods = lib.output.prompt("use relevant modules[y/N]")
             if mods.lower().startswith("n"):
                 lib.output.info("starting exploitation with all loaded modules (total of {})".format(len(loaded_mods)))
-                exploiter.start_exploit(loaded_mods, hosts)
+                exploiter.start_exploit()
             elif mods.lower().startswith("y"):
                 lib.output.info("starting exploitation with sorted modules (total of {})".format(len(sorted_mods)))
-                exploiter.start_exploit(sorted_mods, hosts)
+                exploiter.start_exploit()
         else:
             exploiter.view_sorted()
             mods = lib.output.prompt("use relevant modules[y/N]")
             if mods.lower().startswith("n"):
                 lib.output.info("starting exploitation with all loaded modules (total of {})".format(len(loaded_mods)))
-                exploiter.start_exploit(loaded_mods, hosts)
+                exploiter.start_exploit()
             elif mods.lower().startswith("y"):
                 lib.output.info("starting exploitation with sorted modules (total of {})".format(len(sorted_mods)))
-                exploiter.start_exploit(sorted_mods, hosts)
+                exploiter.start_exploit()
 
     def custom_host_list(self, mods):
         """
@@ -215,6 +231,26 @@ class AutoSploitTerminal(object):
         """
         main output of the terminal
         """
+
+        def __config_headers():
+            proxy = lib.output.prompt("enter your proxy (blank for none)", lowercase=False)
+            agent = lib.output.prompt(
+                "do you want to use a (p)ersonal user agent, a (r)andom one, or (d)efault"
+            )
+            if proxy == "" or proxy.isspace():
+                proxy = None
+            if agent.lower().startswith("p"):
+                agent = lib.output.prompt("enter your User-Agent", lowercase=False)
+            elif agent.lower().startswith("r"):
+                agent = lib.settings.grab_random_agent()
+            elif agent.lower().startswith("d"):
+                agent = None
+            else:
+                lib.output.warning("invalid argument, default will be selected")
+                agent = None
+            proxy, agent = lib.settings.configure_requests(proxy=proxy, agent=agent)
+            return proxy, agent
+
         selected = False
 
         try:
@@ -247,7 +283,10 @@ class AutoSploitTerminal(object):
                     elif choice == 2:
                         print(self.sep)
                         query = lib.output.prompt("enter your search query", lowercase=False)
-                        self.gather_hosts(query)
+                        with open(lib.settings.QUERY_FILE_PATH, "a+") as _query:
+                            _query.write(query)
+                        proxy, agent = __config_headers()
+                        self.gather_hosts(query, proxy=proxy, agent=agent)
                         print(self.sep)
                     elif choice == 1:
                         print(self.sep)
