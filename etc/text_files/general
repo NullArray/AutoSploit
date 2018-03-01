@@ -8,7 +8,7 @@
 | enter platform specific search queries such as 'Apache' or 'IIS'.      |
 | Upon doing so a list of candidates will be retrieved and saved to      |
 | hosts.txt in the current working directory.                            |
-| As of version 1.4.9 an option to load a custom list of hosts has been  |
+| Options to load a custom list of hosts has been                        |
 | included.                                                              |
 | After this operation has been completed the 'Exploit' option will      |
 | go about the business of attempting to exploit these targets by        |
