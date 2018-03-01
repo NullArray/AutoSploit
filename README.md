@@ -127,6 +127,8 @@ While this isn't exactly a Beta release, AutoSploit 2.0 is an early release none
 I've been working on the new version of the tool in an open source capacity with the help of a number of developers 
 that have expressed an interest in doing so. If you would like to keep up to date on all the most recent developments be sure to check out the [Development Branch](https://github.com/NullArray/AutoSploit/tree/dev-beta).
 
+If you would like to contribute to the development of this project please be sure to read [CONTRIBUTING.md](https://github.com/NullArray/AutoSploit/blob/master/CONTRIBUTING.md) as it contains our contribution guidelines.
+
 If you need some help understanding the code, or want to chat with some other AutoSploit community members, feel free to join our [Discord chat](https://discord.gg/9BeeZQk).
 
 ### Note
