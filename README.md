@@ -1,7 +1,6 @@
 # AutoSploit
 
-As the name might suggest AutoSploit attempts to automate the exploitation of remote hosts. Targets can be collected automatically through Shodan, Censys or Zoomeye. But options to add your custom targets and host lists have been included as well.
-The available Metasploit modules have been selected to facilitate Remote Code Execution and to attempt to gain Reverse TCP Shells and/or Meterpreter sessions. Workspace, local host and local port for MSF facilitated back connections are configured by filling out the dialog that comes up before the exploit component is started
+As the name might suggest AutoSploit attempts to automate the exploitation of remote hosts. Targets can be collected automatically through Shodan, Censys or Zoomeye. But options to add your custom targets and host lists have been included as well. The available Metasploit modules have been selected to facilitate Remote Code Execution and to attempt to gain Reverse TCP Shells and/or Meterpreter sessions. Workspace, local host and local port for MSF facilitated back connections are configured by filling out the dialog that comes up before the exploit component is started
 
 **Operational Security Consideration**
 
@@ -10,16 +9,17 @@ Receiving back connections on your local machine might not be the best idea from
 The new version of AutoSploit has a feature that allows you to set a proxy before you connect and a custom user-agent.
 
 # Helpful links
- - [Usage](https://github.com/NullArray/AutoSploit#usage)
- - [Dependencies](https://github.com/NullArray/AutoSploit#dependencies)
- - [User Manual](https://github.com/NullArray/AutoSploit/wiki)
- - [Shoutouts](https://github.com/NullArray/AutoSploit#acknowledgements)
- - [Development](https://github.com/NullArray/AutoSploit#active-development)
- - [Discord server](https://discord.gg/9BeeZQk)
+
+- [Usage](https://github.com/NullArray/AutoSploit#usage)
+- [Dependencies](https://github.com/NullArray/AutoSploit#dependencies)
+- [User Manual](https://github.com/NullArray/AutoSploit/wiki)
+- [Shoutouts](https://github.com/NullArray/AutoSploit#acknowledgements)
+- [Development](https://github.com/NullArray/AutoSploit#active-development)
+- [Discord server](https://discord.gg/9BeeZQk)
 
 ## Usage
 
-Clone the repo. Or deploy via Docker. Details for which can be found [here](https://github.com/NullArray/AutoSploit/tree/master/Docker) 
+Clone the repo. Or deploy via Docker. Details for which can be found [here](https://github.com/NullArray/AutoSploit/tree/master/Docker)
 
 `git clone https://github.com/NullArray/AutoSploit.git`
 
@@ -37,8 +37,7 @@ Starting the program with `python autosploit.py` will open an AutoSploit termina
 
 Choosing option `2` will prompt you for a platform specific search query. Enter `IIS` or `Apache` in example and choose a search engine. After doing so the collected hosts will be saved to be used in the `Exploit` component.
 
-As of version 2.0 AutoSploit can be started with a number of command line arguments/flags as well. Type `python autosploit.py -h` 
-to display all the options available to you. I've posted the options below as well for reference.
+As of version 2.0 AutoSploit can be started with a number of command line arguments/flags as well. Type `python autosploit.py -h` to display all the options available to you. I've posted the options below as well for reference.
 
 ```
 usage: python autosploit.py -[c|z|s|a] -[q] QUERY
@@ -88,7 +87,6 @@ misc arguments:
                         ENV PATH
 ```
 
-
 ## Dependencies
 
 AutoSploit depends on the following Python2.7 modules.
@@ -118,14 +116,11 @@ Special thanks to [Ekultek](https://github.com/Ekultek) without whoms contributi
 
 And thanks to [Khast3x](https://github.com/khast3x) for setting up Docker support.
 
-
-
 ### Active Development
 
-While this isn't exactly a Beta release, AutoSploit 2.0 is an early release nonetheless as such the tool might be subject to changes in the future. 
+While this isn't exactly a Beta release, AutoSploit 2.0 is an early release nonetheless as such the tool might be subject to changes in the future.
 
-I've been working on the new version of the tool in an open source capacity with the help of a number of developers 
-that have expressed an interest in doing so. If you would like to keep up to date on all the most recent developments be sure to check out the [Development Branch](https://github.com/NullArray/AutoSploit/tree/dev-beta).
+I've been working on the new version of the tool in an open source capacity with the help of a number of developers that have expressed an interest in doing so. If you would like to keep up to date on all the most recent developments be sure to check out the [Development Branch](https://github.com/NullArray/AutoSploit/tree/dev-beta).
 
 If you would like to contribute to the development of this project please be sure to read [CONTRIBUTING.md](https://github.com/NullArray/AutoSploit/blob/master/CONTRIBUTING.md) as it contains our contribution guidelines.
 
