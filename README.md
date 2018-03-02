@@ -87,6 +87,15 @@ misc arguments:
                         ENV PATH
 ```
 
+## Installation
+
+```bash
+git clone https://github.com/NullArray/AutoSploit
+cd AutoSploit
+chmod +x install.sh
+./install.sh
+```
+
 ## Dependencies
 
 AutoSploit depends on the following Python2.7 modules.
@@ -123,9 +132,9 @@ While this isn't exactly a Beta release, AutoSploit 2.0 is an early release none
 
 ### Active Development
 
-While this isn't exactly a Beta release, AutoSploit 2.0 is an early release nonetheless as such the tool might be subject to changes in the future. 
+While this isn't exactly a Beta release, AutoSploit 2.0 is an early release nonetheless as such the tool might be subject to changes in the future.
 
-I've been working on the new version of the tool in an open source capacity with the help of a number of developers 
+I've been working on the new version of the tool in an open source capacity with the help of a number of developers
 that have expressed an interest in doing so. If you would like to keep up to date on all the most recent developments be sure to check out the [Development Branch](https://github.com/NullArray/AutoSploit/tree/dev-beta).
 
 If you would like to contribute to the development of this project please be sure to read [CONTRIBUTING.md](https://github.com/NullArray/AutoSploit/blob/master/CONTRIBUTING.md) as it contains our contribution guidelines.

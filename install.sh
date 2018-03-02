@@ -45,8 +45,6 @@ function install() {
     esac
     echo "";
     echo "Installation Complete";
-    echo "Running AutoSploit";
-    python2.7 autosploit.py;
 }
 
 install;
