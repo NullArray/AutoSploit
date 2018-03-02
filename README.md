@@ -10,12 +10,12 @@ The new version of AutoSploit has a feature that allows you to set a proxy befor
 
 # Helpful links
 
-- [Usage](https://github.com/NullArray/AutoSploit#usage)
-- [Dependencies](https://github.com/NullArray/AutoSploit#dependencies)
-- [User Manual](https://github.com/NullArray/AutoSploit/wiki)
-- [Shoutouts](https://github.com/NullArray/AutoSploit#acknowledgements)
-- [Development](https://github.com/NullArray/AutoSploit#active-development)
-- [Discord server](https://discord.gg/9BeeZQk)
+ - [Usage](https://github.com/NullArray/AutoSploit#usage)
+ - [Dependencies](https://github.com/NullArray/AutoSploit#dependencies)
+ - [User Manual](https://github.com/NullArray/AutoSploit/wiki)
+ - [Shoutouts](https://github.com/NullArray/AutoSploit#acknowledgements)
+ - [Development](https://github.com/NullArray/AutoSploit#active-development)
+ - [Discord server](https://discord.gg/9BeeZQk)
 
 ## Usage
 
@@ -120,7 +120,13 @@ And thanks to [Khast3x](https://github.com/khast3x) for setting up Docker suppor
 
 While this isn't exactly a Beta release, AutoSploit 2.0 is an early release nonetheless as such the tool might be subject to changes in the future.
 
-I've been working on the new version of the tool in an open source capacity with the help of a number of developers that have expressed an interest in doing so. If you would like to keep up to date on all the most recent developments be sure to check out the [Development Branch](https://github.com/NullArray/AutoSploit/tree/dev-beta).
+
+### Active Development
+
+While this isn't exactly a Beta release, AutoSploit 2.0 is an early release nonetheless as such the tool might be subject to changes in the future. 
+
+I've been working on the new version of the tool in an open source capacity with the help of a number of developers 
+that have expressed an interest in doing so. If you would like to keep up to date on all the most recent developments be sure to check out the [Development Branch](https://github.com/NullArray/AutoSploit/tree/dev-beta).
 
 If you would like to contribute to the development of this project please be sure to read [CONTRIBUTING.md](https://github.com/NullArray/AutoSploit/blob/master/CONTRIBUTING.md) as it contains our contribution guidelines.
 

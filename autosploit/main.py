@@ -27,7 +27,8 @@ def main():
     logo()
     info("welcome to autosploit, give us a little bit while we configure")
     info("checking for services")
-    service_names = ("postgresql", "apache")
+    # according to ps aux, postgre and apache2 are the names of the services
+    service_names = ("postgres", "apache2")
     for service in list(service_names):
         if not check_services(service):
             choice = prompt("it appears that service {} is not enabled, would you like us to enable it for you[y/N]".format(service))
