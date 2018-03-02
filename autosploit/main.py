@@ -29,17 +29,17 @@ def main():
     info("checking for services")
     service_names = ("postgresql", "apache")
     for service in list(service_names):
-        if not check_services(service):
+        while not check_services(service):
             choice = prompt("it appears that service {} is not enabled, would you like us to enable it for you[y/N]".format(service))
             if choice.lower().startswith("y"):
                 if "postgre" in service:
                     cmdline("sudo bash {}".format(START_POSTGRESQL_PATH))
                 else:
                     cmdline("sudo bash {}".format(START_APACHE_PATH))
-                info("service started successfully")
             else:
                 error("service {} is required to be started for autosploit to run, exiting".format(service.title()))
                 sys.exit(1)
+        info("services started successfully")
 
     if len(sys.argv) > 1:
         info("attempting to load API keys")
