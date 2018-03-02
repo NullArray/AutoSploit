@@ -33,7 +33,7 @@ function installMSF() {
 
 function install() {
     case "$(uname -a)" in
-        *Debian*)
+        *Debian*|*Ubuntu*)
             installDebian;
             ;;
         *Fedora*)
