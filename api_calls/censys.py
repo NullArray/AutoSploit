@@ -12,6 +12,7 @@ class CensysAPIHook(ApiHook):
     def __init__(self, query=None, proxy=None, agent=None, identity=None, token=None, *args):
         ApiHook.__init__(self, query, proxy, agent,token)
         self.id = identity
+        self.request_method = requests.post;
 
     def sent_request(self):
         lib.settings.start_animation("searching Censys with given query '{}'".format(self.query))
@@ -24,5 +25,5 @@ class CensysAPIHook(ApiHook):
         write_to_file(discovered_hosts, self.host_file)
         return True
 
-    def pull_IP(self):
+    def pull_ip(self):
         self.parse_response(self.sent_request())

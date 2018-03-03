@@ -138,7 +138,7 @@ class AutoSploitTerminal(object):
                 if choice in choice_dict:
                     choice_dict[choice](
                         query, proxy, agent, params[choice][0], params[choice][1] 
-                    ).pull_IP()
+                    ).pull_ip()
                 else:
                     lib.output.warning("invalid option provided, going back to main menu")
                     break

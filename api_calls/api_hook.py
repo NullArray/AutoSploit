@@ -23,6 +23,8 @@ class ApiHook:
         self.user_agent = agent
         self.host_file = HOST_FILE
 
+        self.request_method = None;
+
     def sent_request(self, urls, auth_turpe=None, params=None, headers=None):
         """
         connect ro the API
@@ -30,7 +32,7 @@ class ApiHook:
         if not headers:
             headers=self.user_agent,
         try:
-            return requests.post(
+            return self.request_method(
                 urls,
                 auth=auth_turpe,
                 json={"query": self.query},
@@ -48,7 +50,7 @@ class ApiHook:
         """
         pass
     
-    def pull_IP(self):
+    def pull_ip(self):
         """
         connect to the API and pull all IP addresses from the provided query
         """

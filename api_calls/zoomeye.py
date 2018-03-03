@@ -12,6 +12,7 @@ class ZoomEyeAPIHook(ApiHook):
 
     def __init__(self, query=None, proxy=None, agent=None, *args):
         ApiHook.__init__(self, query, proxy, agent)
+        self.request_method = requests.get;
 
         cur_dir = os.getcwd();
         self.user_file = "{}/etc/text_files/users.lst".format(cur_dir)
@@ -66,5 +67,5 @@ class ZoomEyeAPIHook(ApiHook):
         write_to_file(discovered_zoomeye_hosts, self.host_file)
         return True
  
-    def pull_IP(self):
+    def pull_ip(self):
         self.parse_response(self.sent_request())
