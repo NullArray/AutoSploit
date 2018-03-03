@@ -5,7 +5,7 @@ import lib.settings
 import lib.output
 import lib.exploitation.exploiter
 import api_calls.shodan
-import api_calls.zoomeye
+import api_calls.zoomeye 
 import api_calls.censys
 
 
@@ -118,6 +118,11 @@ class AutoSploitTerminal(object):
             2: api_calls.zoomeye.ZoomEyeAPIHook,
             3: api_calls.censys.CensysAPIHook
         }
+        params = {
+                1: [self.tokens["shodan"][0], None],
+                2: [None, None],
+                3: [self.tokens["censys"][1], self.tokens["censys"][0]]
+            }
         searching = False
         if given_choice is None:
             lib.output.info("please choose an API to gather from (choosing two or more "
@@ -130,20 +135,10 @@ class AutoSploitTerminal(object):
         while not searching:
             try:
                 choice = int(choice)
-                if choice == 1:
+                if choice in choice_dict:
                     choice_dict[choice](
-                        self.tokens["shodan"][0], query, proxy=proxy, agent=agent
-                    ).shodan()
-                    break
-                elif choice == 2:
-                    choice_dict[choice](query, proxy=proxy, agent=agent).zoomeye()
-                    break
-                elif choice == 3:
-                    choice_dict[choice](
-                        self.tokens["censys"][1], self.tokens["censys"][0], query,
-                        proxy=proxy, agent=agent
-                    ).censys()
-                    break
+                        query, proxy, agent, params[choice][0], params[choice][1] 
+                    ).pull_ip()
                 else:
                     lib.output.warning("invalid option provided, going back to main menu")
                     break
