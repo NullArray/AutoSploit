@@ -1,46 +1,28 @@
-import json
+"""
+using C headers style
+"""
+from api_calls.api_hook import *
 
-import requests
-
-from lib.settings import start_animation
-from lib.errors import AutoSploitAPIConnectionError
-from lib.settings import (
-    API_URLS,
-    HOST_FILE,
-    write_to_file
-)
-
-
-class ShodanAPIHook(object):
-
+class ShodanAPIHook(ApiHook):
     """
     Shodan API hook, saves us from having to install another dependency
     """
 
-    def __init__(self, token=None, query=None, proxy=None, agent=None, **kwargs):
-        self.token = token
-        self.query = query
-        self.proxy = proxy
-        self.user_agent = agent
-        self.host_file = HOST_FILE
+    def __init__(self,  query=None, proxy=None, agent=None, token=None, *args):
+        ApiHook.__init__(self, query, proxy, agent, token)
 
-    def shodan(self):
-        """
-        connect to the API and grab all IP addresses associated with the provided query
-        """
-        start_animation("searching Shodan with given query '{}'".format(self.query))
-        discovered_shodan_hosts = set()
-        try:
-            req = requests.get(
-                API_URLS["shodan"].format(query=self.query, token=self.token),
-                proxies=self.proxy, headers=self.user_agent
-            )
-            json_data = json.loads(req.content)
-            for match in json_data["matches"]:
-                discovered_shodan_hosts.add(match["ip_str"])
-            write_to_file(discovered_shodan_hosts, self.host_file)
-            return True
-        except Exception as e:
-            raise AutoSploitAPIConnectionError(str(e))
+    def sent_request(self):
+        lib.settings.start_animation("searching Shodan with given query '{}'".format(self.query))
+        return ApiHook.sent_request(
+                self,
+                API_URLS["shodan"].format(query=self.query, token=self.token))
+ 
+    def parse_response(self, resp):
+        json_data = json.loads(resp.content)
+        for match in json_data["matches"]:
+            discovered_shodan_hosts.add(match["ip_str"])
+        write_to_file(discovered_shodan_hosts, self.host_file)
+        return True
 
-
+    def pull_IP(self):
+        self.parse_response(self.sent_request())
