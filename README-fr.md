@@ -7,7 +7,8 @@ Les modules Metasploit disponibles ont été sélectionnés afin de faciliter l'
 Workspace, local host and local port for MSF facilitated back connections are configured by filling out the dialog that comes up before the exploit component is started
 --!>
 
-**Ne soyez pas stupides** <!-- OPSEC ? Don't know that --!>
+<!-- OPSEC ? Don't know this --!>
+**Ne soyez pas stupides** 
 
 Recevoir les connexions de vos victimes directement sur votre ordinateur n'est pas vraiment une bonne idée. Vous devriez considérer l'option de dépenser quelques euros dans un VPS ( ou VPN ).
 
