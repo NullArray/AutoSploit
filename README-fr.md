@@ -143,8 +143,6 @@ pip install -r requirements.txt
 
 Comme le programme invoque des fonctionalités du Metasploit, vous devez l'avoir installé au préalable. Vous pouvez en obtenir une copie depuis le site de Rapid7 en cliquant [ici](https://www.rapid7.com/products/metasploit/).
 
-<!-- since this README will not be presented to a lot of peoples and the project is constantly growing, ignoring the acknowledgments --!>
-
 ### Développement
 
 Même si AutoSploit n'est pas vraiment en Béta, il est sujet à des changements dans le futur.
