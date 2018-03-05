@@ -18,7 +18,8 @@ from lib.settings import (
     cmdline,
     EXPLOIT_FILES_PATH,
     START_APACHE_PATH,
-    START_POSTGRESQL_PATH
+    START_POSTGRESQL_PATH,
+    SERVICE_NAMES
 )
 from lib.jsonize import load_exploits
 
@@ -31,12 +32,12 @@ def main():
     info("welcome to autosploit, give us a little bit while we configure")
     misc_info("checking for disabled services")
     # according to ps aux, postgre and apache2 are the names of the services
-    service_names = ("postgres", "apache2")
-    for service in list(service_names):
+    #SERVICE_NAMES = ("postgres", "apache2")
+    for service in list(SERVICE_NAMES):
         while not check_services(service):
             choice = prompt(
                 "it appears that service {} is not enabled, would you like us to enable it for you[y/N]".format(
-                    service.title()
+                    service[0].title()
                 )
             )
             if choice.lower().startswith("y"):

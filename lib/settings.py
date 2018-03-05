@@ -67,6 +67,8 @@ AUTOSPLOIT_TERM_OPTS = {
     99: "quit"
 }
 
+SERVICE_NAMES = (["postgres"], ["apache2", "httpd"])
+
 stop_animation = False
 
 
@@ -93,8 +95,9 @@ def check_services(service_name):
         running_proc = psutil.Process(pid)
         all_processes.add(" ".join(running_proc.cmdline()).strip())
     for proc in list(all_processes):
-        if service_name in proc:
-            return True
+        for service in service_name:
+            if service in proc:
+                return True
     return False
 
 
