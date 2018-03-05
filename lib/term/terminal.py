@@ -176,7 +176,6 @@ class AutoSploitTerminal(object):
             msf_path = lib.output.prompt(
                 "it appears that MSF is not in your PATH, provide the full path to msfconsole"
             )
-            ruby_exec = True
         lib.output.info(
             "you will need to do some configuration to MSF.\n"
             "please keep in mind that sending connections back to "
