@@ -15,7 +15,7 @@ La nouvelle version d'AutoSploit permet néanmoins de définir un proxy et un Us
  - [Installation](https://github.com/NullArray/AutoSploit/README-fr.md#Installation)
  - [Dépendances](https://github.com/NullArray/AutoSploit/README-fr.md#Dépendances))
  - [Wiki](https://github.com/NullArray/AutoSploit/wiki)
-   - [Extensive usage breakdown](https://github.com/NullArray/AutoSploit/wiki/Usage#usage-options)
+   - [Options d'usage extensif](https://github.com/NullArray/AutoSploit/wiki/Usage#usage-options)
    - [Captures d'écran](https://github.com/NullArray/AutoSploit/wiki/Examples-and-images)
    - [Rapporter un bug, donner une idée](https://github.com/NullArray/AutoSploit/wiki/Bugs-and-ideas#bugs)
    - [Lignes directrices du développement](https://github.com/NullArray/AutoSploit/wiki/Development-information#development-of-autosploit)
