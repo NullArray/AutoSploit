@@ -31,8 +31,6 @@ def main():
     logo()
     info("welcome to autosploit, give us a little bit while we configure")
     misc_info("checking for disabled services")
-    # according to ps aux, postgre and apache2 are the names of the services
-    #SERVICE_NAMES = ("postgres", "apache2")
     for service in list(SERVICE_NAMES):
         while not check_services(service):
             choice = prompt(
