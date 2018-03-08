@@ -19,9 +19,11 @@ class AutoSploitParser(argparse.ArgumentParser):
 
     @staticmethod
     def optparser():
+
         """
-        the options object for our parser
+        the options function for our parser, it will put everything into play
         """
+
         parser = argparse.ArgumentParser(
             usage="python autosploit.py -[c|z|s|a] -[q] QUERY\n"
                   "{spacer}[-C] WORKSPACE LHOST LPORT [-e]\n"

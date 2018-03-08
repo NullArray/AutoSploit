@@ -11,20 +11,50 @@ The new version of AutoSploit has a feature that allows you to set a proxy befor
 # Helpful links
 
  - [Usage](https://github.com/NullArray/AutoSploit#usage)
+ - [Installing](https://github.com/NullArray/AutoSploit#Installation)
  - [Dependencies](https://github.com/NullArray/AutoSploit#dependencies)
  - [User Manual](https://github.com/NullArray/AutoSploit/wiki)
+   - [Extensive usage breakdown](https://github.com/NullArray/AutoSploit/wiki/Usage#usage-options)
+   - [Screenshots](https://github.com/NullArray/AutoSploit/wiki/Examples-and-images)
+   - [Reporting bugs/ideas](https://github.com/NullArray/AutoSploit/wiki/Bugs-and-ideas#bugs)
+   - [Development guidelines](https://github.com/NullArray/AutoSploit/wiki/Development-information#development-of-autosploit)
  - [Shoutouts](https://github.com/NullArray/AutoSploit#acknowledgements)
  - [Development](https://github.com/NullArray/AutoSploit#active-development)
  - [Discord server](https://discord.gg/9BeeZQk)
+ 
+# Installation
+
+Installing AutoSploit is very simple, you can find the latest stable release [here](https://github.com/NullArray/AutoSploit/releases/tag/2.0). You can also download the master branch as a [zip](https://github.com/NullArray/AutSploit/zipball/master) or [tarball](https://github.com/NullArray/AutSploit/tarball/master) or follow one of the below methods;
+
+###### Cloning
+
+```bash
+sudo -s << EOF
+git clone https://github.com/NullArray/Autosploit.git
+cd AutoSploit
+pip2 install -r requirements.txt
+python2 autosploit.py
+EOF
+```
+
+###### Docker
+
+```bash
+sudo -s << EOF
+git clone https://github.com/NullArray/AutoSploit.git
+cd AutoSploit/Docker
+docker network create -d bridge haknet
+docker run --network haknet --name msfdb -e POSTGRES_PASSWORD=s3cr3t -d postgres
+docker build -t autosploit .
+docker run -it --network haknet -p 80:80 -p 443:443 -p 4444:4444 autosploit
+EOF
+```
+
+More information on running Docker can be found [here](https://github.com/NullArray/AutoSploit/tree/master/Docker)
 
 ## Usage
 
-Clone the repo. Or deploy via Docker. Details for which can be found [here](https://github.com/NullArray/AutoSploit/tree/master/Docker)
-
-`git clone https://github.com/NullArray/AutoSploit.git`
-
 Starting the program with `python autosploit.py` will open an AutoSploit terminal session. The options for which are as follows.
-
 ```
 1. Usage And Legal
 2. Gather Hosts
@@ -129,7 +159,6 @@ And thanks to [Khast3x](https://github.com/khast3x) for setting up Docker suppor
 
 While this isn't exactly a Beta release, AutoSploit 2.0 is an early release nonetheless as such the tool might be subject to changes in the future.
 
-
 ### Active Development
 
 While this isn't exactly a Beta release, AutoSploit 2.0 is an early release nonetheless as such the tool might be subject to changes in the future.
@@ -139,7 +168,9 @@ that have expressed an interest in doing so. If you would like to keep up to dat
 
 If you would like to contribute to the development of this project please be sure to read [CONTRIBUTING.md](https://github.com/NullArray/AutoSploit/blob/master/CONTRIBUTING.md) as it contains our contribution guidelines.
 
-If you need some help understanding the code, or want to chat with some other AutoSploit community members, feel free to join our [Discord chat](https://discord.gg/9BeeZQk).
+Please, also, be sure to read our [contribution standards](https://github.com/NullArray/AutoSploit/wiki/Development-information#contribution-standards) before sending pull requests
+
+If you need some help understanding the code, or want to chat with some other AutoSploit community members, feel free to join our [Discord server](https://discord.gg/9BeeZQk).
 
 ### Note
 
