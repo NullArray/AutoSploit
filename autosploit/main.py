@@ -29,6 +29,13 @@ def main():
 
     logo()
     info("welcome to autosploit, give us a little bit while we configure")
+
+    # verify if we are running python 2.X
+    misc_info("checking python version")
+    if not sys.version_info[0] == 2:    # if we are not running a python version 2.X
+        error("Your Python installation seems to be incompatible with AutoSploit. You should try using Python 2.x")
+        exit()
+
     misc_info("checking for disabled services")
     # according to ps aux, postgre and apache2 are the names of the services
     service_names = ("postgres", "apache2")
