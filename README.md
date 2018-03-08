@@ -1,7 +1,6 @@
 # AutoSploit
 
-As the name might suggest AutoSploit attempts to automate the exploitation of remote hosts. Targets can be collected automatically through Shodan, Censys or Zoomeye. But options to add your custom targets and host lists have been included as well.
-The available Metasploit modules have been selected to facilitate Remote Code Execution and to attempt to gain Reverse TCP Shells and/or Meterpreter sessions. Workspace, local host and local port for MSF facilitated back connections are configured by filling out the dialog that comes up before the exploit component is started
+As the name might suggest AutoSploit attempts to automate the exploitation of remote hosts. Targets can be collected automatically through Shodan, Censys or Zoomeye. But options to add your custom targets and host lists have been included as well. The available Metasploit modules have been selected to facilitate Remote Code Execution and to attempt to gain Reverse TCP Shells and/or Meterpreter sessions. Workspace, local host and local port for MSF facilitated back connections are configured by filling out the dialog that comes up before the exploit component is started
 
 **Operational Security Consideration**
 
@@ -68,8 +67,7 @@ Starting the program with `python autosploit.py` will open an AutoSploit termina
 
 Choosing option `2` will prompt you for a platform specific search query. Enter `IIS` or `Apache` in example and choose a search engine. After doing so the collected hosts will be saved to be used in the `Exploit` component.
 
-As of version 2.0 AutoSploit can be started with a number of command line arguments/flags as well. Type `python autosploit.py -h` 
-to display all the options available to you. I've posted the options below as well for reference.
+As of version 2.0 AutoSploit can be started with a number of command line arguments/flags as well. Type `python autosploit.py -h` to display all the options available to you. I've posted the options below as well for reference.
 
 ```
 usage: python autosploit.py -[c|z|s|a] -[q] QUERY
@@ -119,6 +117,14 @@ misc arguments:
                         ENV PATH
 ```
 
+## Installation
+
+```bash
+git clone https://github.com/NullArray/AutoSploit
+cd AutoSploit
+chmod +x install.sh
+./install.sh
+```
 
 ## Dependencies
 
@@ -149,12 +155,15 @@ Special thanks to [Ekultek](https://github.com/Ekultek) without whoms contributi
 
 And thanks to [Khast3x](https://github.com/khast3x) for setting up Docker support.
 
+### Active Development
+
+While this isn't exactly a Beta release, AutoSploit 2.0 is an early release nonetheless as such the tool might be subject to changes in the future.
 
 ### Active Development
 
-While this isn't exactly a Beta release, AutoSploit 2.0 is an early release nonetheless as such the tool might be subject to changes in the future. 
+While this isn't exactly a Beta release, AutoSploit 2.0 is an early release nonetheless as such the tool might be subject to changes in the future.
 
-I've been working on the new version of the tool in an open source capacity with the help of a number of developers 
+I've been working on the new version of the tool in an open source capacity with the help of a number of developers
 that have expressed an interest in doing so. If you would like to keep up to date on all the most recent developments be sure to check out the [Development Branch](https://github.com/NullArray/AutoSploit/tree/dev-beta).
 
 If you would like to contribute to the development of this project please be sure to read [CONTRIBUTING.md](https://github.com/NullArray/AutoSploit/blob/master/CONTRIBUTING.md) as it contains our contribution guidelines.
