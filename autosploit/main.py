@@ -2,6 +2,8 @@ import sys
 
 import psutil
 
+import platform
+
 from lib.cmdline.cmd import AutoSploitParser
 from lib.term.terminal import AutoSploitTerminal
 from lib.output import (
@@ -31,7 +33,12 @@ def main():
     info("welcome to autosploit, give us a little bit while we configure")
     misc_info("checking for disabled services")
     # according to ps aux, postgre and apache2 are the names of the services
-    service_names = ("postgres", "apache2")
+
+    if platform.system() == "Darwin":
+        service_names = ("postgres","httpd")
+    elif platform.system() == "Linux":
+        service_names = ("postgres", "apache2")
+
     for service in list(service_names):
         while not check_services(service):
             choice = prompt(
@@ -42,9 +49,22 @@ def main():
             if choice.lower().startswith("y"):
                 try:
                     if "postgre" in service:
-                        cmdline("sudo bash {}".format(START_POSTGRESQL_PATH))
+                        if platform.system() == "Linux":
+                            cmdline("sudo bash {}".format(START_POSTGRESQL_PATH))
+                        elif platform.system() == "Darwin":
+                            cmdline("brew services start postgresql")
+                        else:
+                            error("Currently not supporting windows")
+                            sys.exit(1)
                     else:
-                        cmdline("sudo bash {}".format(START_APACHE_PATH))
+                        if platform.system() == "Linux":
+                            cmdline("sudo bash {}".format(START_APACHE_PATH))
+                        elif platform.system() == "Darwin":
+                            cmdline("sudo apachectl start")
+                        else:
+                            error("Currently not supporting windows")
+                            sys.exit(1)
+
                     # moving this back because it was funky to see it each run
                     info("services started successfully")
                 # this tends to show up when trying to start the services
