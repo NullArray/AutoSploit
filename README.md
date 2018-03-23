@@ -21,7 +21,7 @@ The new version of AutoSploit has a feature that allows you to set a proxy befor
  - [Shoutouts](https://github.com/NullArray/AutoSploit#acknowledgements)
  - [Development](https://github.com/NullArray/AutoSploit#active-development)
  - [Discord server](https://discord.gg/9BeeZQk)
- - [README translations]()
+ - [README translations](https://github.com/NullArray/AutoSploit#translations)
  
 # Installation
 
@@ -181,5 +181,5 @@ Thanks in advance.
 
 ## Translations
 
- - [FR]()
- - [ZH]()
+ - [FR](https://github.com/NullArray/AutoSploit/blob/master/.github/.translations/README-fr.md)
+ - [ZH](https://github.com/NullArray/AutoSploit/blob/master/.github/.translations/README-zh.md)
