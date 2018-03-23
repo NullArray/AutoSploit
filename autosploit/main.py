@@ -34,7 +34,7 @@ def main():
     # according to ps aux, postgre and apache2 are the names of the services on Linux systems
     service_names = ("postgres", "apache2")
     if "darwin" in platform_running.lower():
-        service_names = ("postgres", "apache2")
+        service_names = ("postgres", "apachectl")
 
     for service in list(service_names):
         while not check_services(service):
@@ -59,10 +59,13 @@ def main():
                 except psutil.NoSuchProcess:
                     pass
             else:
+                process_start_command = "`sudo service {} start`"
+                if "darwin" in platform_running.lower():
+                    process_start_command = "`brew services start {}`"
                 close(
                     "service {} is required to be started for autosploit to run successfully (you can do it manually "
-                    "by using the command `sudo service {} start`), exiting".format(
-                        service.title(), service
+                    "by using the command {}), exiting".format(
+                        service.title(), process_start_command.format(service)
                     )
                 )
 
