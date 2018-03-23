@@ -85,14 +85,22 @@ def check_services(service_name):
     """
     check to see if certain services ar started
     """
-    all_processes = set()
-    for pid in psutil.pids():
-        running_proc = psutil.Process(pid)
-        all_processes.add(" ".join(running_proc.cmdline()).strip())
-    for proc in list(all_processes):
-        if service_name in proc:
-            return True
-    return False
+    try:
+        all_processes = set()
+        for pid in psutil.pids():
+            running_proc = psutil.Process(pid)
+            all_processes.add(" ".join(running_proc.cmdline()).strip())
+        for proc in list(all_processes):
+            if service_name in proc:
+                return True
+        return False
+    except psutil.ZombieProcess as e:
+        # zombie processes appear to happen on macOS for some reason
+        # so we'll just kill them off
+        pid = str(e).split("=")[-1].split(")")[0]
+        os.kill(int(pid), 0)
+        return True
+
 
 
 def write_to_file(data_to_write, filename, mode="a+"):
