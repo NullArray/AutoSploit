@@ -1,7 +1,5 @@
 import sys
-
 import psutil
-
 import platform
 
 from lib.cmdline.cmd import AutoSploitParser
@@ -20,7 +18,8 @@ from lib.settings import (
     cmdline,
     EXPLOIT_FILES_PATH,
     START_APACHE_PATH,
-    START_POSTGRESQL_PATH
+    START_POSTGRESQL_PATH,
+    START_POSTGRESQL_OSX_PATH
 )
 from lib.jsonize import load_exploits
 
@@ -52,6 +51,7 @@ def main():
                         if platform.system() == "Linux":
                             cmdline("sudo bash {}".format(START_POSTGRESQL_PATH))
                         elif platform.system() == "Darwin":
+                            #cmdline("sudo bash {}".format(START_POSTGRESQL_OSX_PATH))
                             cmdline("brew services start postgresql")
                         else:
                             error("Currently not supporting windows")
