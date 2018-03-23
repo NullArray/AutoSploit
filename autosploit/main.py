@@ -18,6 +18,7 @@ from lib.settings import (
     cmdline,
     EXPLOIT_FILES_PATH,
     START_APACHE_PATH,
+    START_APACHE_OSX_PATH,
     START_POSTGRESQL_PATH,
     START_POSTGRESQL_OSX_PATH
 )
@@ -51,8 +52,7 @@ def main():
                         if platform.system() == "Linux":
                             cmdline("sudo bash {}".format(START_POSTGRESQL_PATH))
                         elif platform.system() == "Darwin":
-                            #cmdline("sudo bash {}".format(START_POSTGRESQL_OSX_PATH))
-                            cmdline("brew services start postgresql")
+                            cmdline("sudo bash {}".format(START_POSTGRESQL_OSX_PATH))
                         else:
                             error("Currently not supporting windows")
                             sys.exit(1)
@@ -60,7 +60,7 @@ def main():
                         if platform.system() == "Linux":
                             cmdline("sudo bash {}".format(START_APACHE_PATH))
                         elif platform.system() == "Darwin":
-                            cmdline("sudo apachectl start")
+                            cmdline("sudo bash {}".format(START_APACHE_OSX_PATH))
                         else:
                             error("Currently not supporting windows")
                             sys.exit(1)
