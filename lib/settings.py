@@ -27,8 +27,14 @@ USAGE_AND_LEGAL_PATH = "{}/etc/text_files/general".format(CUR_DIR)
 # path to the bash script to stack the PostgreSQL service
 START_POSTGRESQL_PATH = "{}/etc/scripts/start_postgre.sh".format(CUR_DIR)
 
+# path to the bash script to stack the PostgreSQL service on OSX
+START_POSTGRESQL_OSX_PATH = "{}/etc/scripts/start_postgre_osx.sh".format(CUR_DIR)
+
 # path to the bash script to start the Apache service
 START_APACHE_PATH = "{}/etc/scripts/start_apache.sh".format(CUR_DIR)
+
+# path to the bash script to start the Apache service on OSX
+START_APACHE_PATH = "{}/etc/scripts/start_apache_osx.sh".format(CUR_DIR)
 
 # path to the file that will contain our query
 QUERY_FILE_PATH = tempfile.NamedTemporaryFile(delete=False).name
