@@ -7,7 +7,6 @@ from lib.term.terminal import AutoSploitTerminal
 from lib.output import (
     info,
     warning,
-    error,
     prompt,
     misc_info
 )
@@ -16,11 +15,9 @@ from lib.settings import (
     load_api_keys,
     check_services,
     cmdline,
+    close,
     EXPLOIT_FILES_PATH,
-    START_APACHE_PATH,
-    START_APACHE_OSX_PATH,
-    START_POSTGRESQL_PATH,
-    START_POSTGRESQL_OSX_PATH
+    START_SERVICES_PATH
 )
 from lib.jsonize import load_exploits
 
@@ -31,12 +28,12 @@ def main():
 
     logo()
     info("welcome to autosploit, give us a little bit while we configure")
+    misc_info("checking your running platform")
+    platform_running = platform.system()
     misc_info("checking for disabled services")
-    # according to ps aux, postgre and apache2 are the names of the services
-
-    if platform.system() == "Darwin":
-        service_names = ("postgres","httpd")
-    elif platform.system() == "Linux":
+    # according to ps aux, postgre and apache2 are the names of the services on Linux systems
+    service_names = ("postgres", "apache2")
+    if "darwin" in platform_running.lower():
         service_names = ("postgres", "apache2")
 
     for service in list(service_names):
@@ -48,22 +45,12 @@ def main():
             )
             if choice.lower().startswith("y"):
                 try:
-                    if "postgre" in service:
-                        if platform.system() == "Linux":
-                            cmdline("sudo bash {}".format(START_POSTGRESQL_PATH))
-                        elif platform.system() == "Darwin":
-                            cmdline("sudo bash {}".format(START_POSTGRESQL_OSX_PATH))
-                        else:
-                            error("Currently not supporting windows")
-                            sys.exit(1)
+                    if "darwin" in platform_running.lower():
+                        cmdline("{} darwin".format(START_SERVICES_PATH))
+                    elif "linux" in platform_running.lower():
+                        cmdline("{} linux".format(START_SERVICES_PATH))
                     else:
-                        if platform.system() == "Linux":
-                            cmdline("sudo bash {}".format(START_APACHE_PATH))
-                        elif platform.system() == "Darwin":
-                            cmdline("sudo bash {}".format(START_APACHE_OSX_PATH))
-                        else:
-                            error("Currently not supporting windows")
-                            sys.exit(1)
+                        close("your platform is not supported by AutoSploit at this time", status=2)
 
                     # moving this back because it was funky to see it each run
                     info("services started successfully")
@@ -72,13 +59,12 @@ def main():
                 except psutil.NoSuchProcess:
                     pass
             else:
-                error(
+                close(
                     "service {} is required to be started for autosploit to run successfully (you can do it manually "
                     "by using the command `sudo service {} start`), exiting".format(
                         service.title(), service
                     )
                 )
-                sys.exit(1)
 
     if len(sys.argv) > 1:
         info("attempting to load API keys")
