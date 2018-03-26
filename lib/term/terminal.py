@@ -19,8 +19,9 @@ class AutoSploitTerminal(object):
         self.tokens = tokens
         self.usage_path = lib.settings.USAGE_AND_LEGAL_PATH
         self.sep = "-" * 30
+        self.host_path = lib.settings.HOST_FILE
         try:
-            self.host_path = open(lib.settings.HOST_FILE).readlines()
+            open(lib.settings.HOST_FILE).readlines()
         except IOError:
             lib.output.warning("no hosts file present, you need to gather some hosts")
             self.host_path = lib.settings.HOST_FILE
