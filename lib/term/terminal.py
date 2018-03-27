@@ -170,7 +170,7 @@ class AutoSploitTerminal(object):
         ruby_exec = False
         msf_path = None
         if hosts is None:
-            host_file = self.host_path
+            host_file = open(self.host_path).readlines()
         else:
             host_file = open(hosts).readlines()
         if not lib.settings.check_for_msf():
