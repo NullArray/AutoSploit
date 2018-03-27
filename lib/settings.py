@@ -178,10 +178,9 @@ def cmdline(command):
 
 def check_for_msf():
     """
-    check the ENV PATH for msfconsole.
-    Returns None if executable not found
+    check the ENV PATH for msfconsole
     """
-    return distutils.spawn.find_executable("msfconsole")
+    return os.getenv("msfconsole", False) or distutils.spawn.find_executable("msfconsole")
 
 def logo():
     """
