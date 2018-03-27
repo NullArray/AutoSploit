@@ -6,6 +6,7 @@ import random
 import platform
 import getpass
 import tempfile
+import distutils.spawn
 # import subprocess
 
 import psutil
@@ -179,7 +180,7 @@ def check_for_msf():
     """
     check the ENV PATH for msfconsole
     """
-    return os.getenv("msfconsole", False)
+    return os.getenv("msfconsole", False) or distutils.spawn.find_executable("msfconsole")
 
 def logo():
     """
