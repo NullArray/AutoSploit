@@ -160,10 +160,6 @@ And thanks to [Khast3x](https://github.com/khast3x) for setting up Docker suppor
 
 While this isn't exactly a Beta release, AutoSploit 2.0 is an early release nonetheless as such the tool might be subject to changes in the future.
 
-### Active Development
-
-While this isn't exactly a Beta release, AutoSploit 2.0 is an early release nonetheless as such the tool might be subject to changes in the future.
-
 I've been working on the new version of the tool in an open source capacity with the help of a number of developers
 that have expressed an interest in doing so. If you would like to keep up to date on all the most recent developments be sure to check out the [Development Branch](https://github.com/NullArray/AutoSploit/tree/dev-beta).
 
