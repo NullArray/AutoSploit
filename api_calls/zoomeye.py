@@ -67,7 +67,7 @@ class ZoomEyeAPIHook(object):
             else:
                 headers = {
                     "Authorization": "JWT {}".format(str(token["access_token"])),
-                    "agent": self.user_agent["User-Agent"]
+                    "User-Agent": self.user_agent["User-Agent"]  # oops
                 }
             params = {"query": self.query, "page": "1", "facet": "ipv4"}
             req = requests.get(

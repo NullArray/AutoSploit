@@ -19,8 +19,9 @@ class AutoSploitTerminal(object):
         self.tokens = tokens
         self.usage_path = lib.settings.USAGE_AND_LEGAL_PATH
         self.sep = "-" * 30
+        self.host_path = lib.settings.HOST_FILE
         try:
-            self.host_path = open(lib.settings.HOST_FILE).readlines()
+            open(lib.settings.HOST_FILE).readlines()
         except IOError:
             lib.output.warning("no hosts file present, you need to gather some hosts")
             self.host_path = lib.settings.HOST_FILE
@@ -168,10 +169,19 @@ class AutoSploitTerminal(object):
         """
         ruby_exec = False
         msf_path = None
+        whitelist_file = lib.output.prompt("specify full path to a whitelist file, otherwise hit enter", lowercase=False)
         if hosts is None:
-            host_file = self.host_path
+            if whitelist_file is not "" and not whitelist_file.isspace():
+                # If whitelist is specified, return a washed hosts list
+                host_file = lib.exploitation.exploiter.whitelist_wash(open(self.host_path).readlines(), whitelist_file)
+            else:
+                host_file = open(self.host_path).readlines()
         else:
-            host_file = open(hosts).readlines()
+            if whitelist_file is not "" and not whitelist_file.isspace():
+                # If whitelist is specified, return a washed hosts list
+                host_file = lib.exploitation.exploiter.whitelist_wash(open(hosts).readlines(), whitelist_file)
+            else:
+                host_file = open(hosts).readlines()
         if not lib.settings.check_for_msf():
             msf_path = lib.output.prompt(
                 "it appears that MSF is not in your PATH, provide the full path to msfconsole"
