@@ -33,7 +33,8 @@ Installing AutoSploit is very simple, you can find the latest stable release [he
 sudo -s << EOF
 git clone https://github.com/NullArray/Autosploit.git
 cd AutoSploit
-pip2 install -r requirements.txt
+chmod +x install.sh
+./install.sh
 python2 autosploit.py
 EOF
 ```
@@ -43,6 +44,9 @@ EOF
 ```bash
 sudo -s << EOF
 git clone https://github.com/NullArray/AutoSploit.git
+cd AutoSploit
+chmod +x install.sh
+./installsh
 cd AutoSploit/Docker
 docker network create -d bridge haknet
 docker run --network haknet --name msfdb -e POSTGRES_PASSWORD=s3cr3t -d postgres
