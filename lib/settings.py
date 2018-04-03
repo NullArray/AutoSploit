@@ -172,7 +172,7 @@ def cmdline(command):
     """
 
     #os.system(command)
-    lib.output.info("Executing command {}".format(command))
+    lib.output.info("Executing command '{}'".format(command.strip()))
     split_cmd = [x.strip() for x in command.split(" ") if x]
 
     sys.stdout.flush()
