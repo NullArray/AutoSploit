@@ -181,7 +181,7 @@ def cmdline(command):
     stdout_buff = []
     for stdout_line in iter(proc.stdout.readline, b''):
         stdout_buff += [stdout_line.rstrip()]
-        print(">>>> {}".format(stdout_line).rstrip())
+        print("(msf)>> {}".format(stdout_line).rstrip())
 
     return stdout_buff
 
