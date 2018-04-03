@@ -19,9 +19,11 @@ class AutoSploitParser(argparse.ArgumentParser):
 
     @staticmethod
     def optparser():
+
         """
-        the options object for our parser
+        the options function for our parser, it will put everything into play
         """
+
         parser = argparse.ArgumentParser(
             usage="python autosploit.py -[c|z|s|a] -[q] QUERY\n"
                   "{spacer}[-C] WORKSPACE LHOST LPORT [-e]\n"
@@ -65,6 +67,8 @@ class AutoSploitParser(argparse.ArgumentParser):
                           help="pass the path to your framework if it is not in your ENV PATH")
         misc.add_argument("--ethics", action="store_true", dest="displayEthics",
                           help=argparse.SUPPRESS)  # easter egg!
+        misc.add_argument("--whitelist", metavar="PATH", dest="whitelist",
+                             help="only exploit hosts listed in the whitelist file")
         opts = parser.parse_args()
         return opts
 
@@ -158,10 +162,13 @@ class AutoSploitParser(argparse.ArgumentParser):
                 keys["censys"][1], keys["censys"][0], opt.searchQuery, proxy=headers[0], agent=headers[1]
             ).censys()
         if opt.startExploit:
+            hosts = open(lib.settings.HOST_FILE).readlines()
+            if opt.whitelist:
+                hosts = lib.exploitation.exploiter.whitelist_wash(hosts, whitelist_file=opt.whitelist)
             lib.exploitation.exploiter.AutoSploitExploiter(
                 opt.msfConfig,
                 loaded_modules,
-                open(lib.settings.HOST_FILE).readlines(),
+                hosts,
                 ruby_exec=opt.rubyExecutableNeeded,
                 msf_path=opt.pathToFramework
             ).start_exploit()
