@@ -7,7 +7,10 @@ import platform
 import getpass
 import tempfile
 import distutils.spawn
-# import subprocess
+from subprocess import (
+    PIPE,
+    Popen
+)
 
 import psutil
 
@@ -27,6 +30,8 @@ USAGE_AND_LEGAL_PATH = "{}/etc/text_files/general".format(CUR_DIR)
 
 # one bash script to rule them all takes an argument via the operating system
 START_SERVICES_PATH = "{}/etc/scripts/start_services.sh".format(CUR_DIR)
+
+RC_SCRIPTS_PATH = "{}/autosploit_out/".format(CUR_DIR)
 
 # path to the file that will contain our query
 QUERY_FILE_PATH = tempfile.NamedTemporaryFile(delete=False).name
@@ -166,14 +171,19 @@ def cmdline(command):
     I intend to have the issue resolved by Version 1.5.0.
     """
 
-    os.system(command)
-    '''process = subprocess.call(
-        args=" ".join(command),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        shell=True
-    )
-    return process'''
+    #os.system(command)
+    lib.output.info("Executing command '{}'".format(command.strip()))
+    split_cmd = [x.strip() for x in command.split(" ") if x]
+
+    sys.stdout.flush()
+
+    proc = Popen(split_cmd, stdout=PIPE, bufsize=1)
+    stdout_buff = []
+    for stdout_line in iter(proc.stdout.readline, b''):
+        stdout_buff += [stdout_line.rstrip()]
+        print("(msf)>> {}".format(stdout_line).rstrip())
+
+    return stdout_buff
 
 
 def check_for_msf():
