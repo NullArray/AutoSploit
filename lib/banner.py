@@ -1,6 +1,6 @@
 import random
 
-VERSION = "2.0"
+VERSION = "2.1"
 
 
 def banner_1(line_sep="#--", space=" " * 30):
