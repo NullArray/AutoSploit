@@ -162,13 +162,16 @@ class AutoSploitParser(argparse.ArgumentParser):
                 keys["censys"][1], keys["censys"][0], opt.searchQuery, proxy=headers[0], agent=headers[1]
             ).censys()
         if opt.startExploit:
-            hosts = open(lib.settings.HOST_FILE).readlines()
-            if opt.whitelist:
-                hosts = lib.exploitation.exploiter.whitelist_wash(hosts, whitelist_file=opt.whitelist)
-            lib.exploitation.exploiter.AutoSploitExploiter(
-                opt.msfConfig,
-                loaded_modules,
-                hosts,
-                ruby_exec=opt.rubyExecutableNeeded,
-                msf_path=opt.pathToFramework
-            ).start_exploit()
+            try:
+                hosts = open(lib.settings.HOST_FILE).readlines()
+                if opt.whitelist:
+                    hosts = lib.exploitation.exploiter.whitelist_wash(hosts, whitelist_file=opt.whitelist)
+                lib.exploitation.exploiter.AutoSploitExploiter(
+                    opt.msfConfig,
+                    loaded_modules,
+                    hosts,
+                    ruby_exec=opt.rubyExecutableNeeded,
+                    msf_path=opt.pathToFramework
+                ).start_exploit()
+            except KeyboardInterrupt:
+                lib.output.warning("user aborted scan")
