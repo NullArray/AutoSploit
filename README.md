@@ -72,7 +72,7 @@ As of version 2.0 AutoSploit can be started with a number of command line argume
 
 ```
 usage: python autosploit.py -[c|z|s|a] -[q] QUERY
-                            [-C] WORKSPACE LHOST LPORT [-e]
+                            [-C] WORKSPACE LHOST LPORT [-e] [--whitewash] PATH
                             [--ruby-exec] [--msf-path] PATH [-E] EXPLOIT-FILE-PATH
                             [--rand-agent] [--proxy] PROTO://IP:PORT [-P] AGENT
 
@@ -116,6 +116,7 @@ misc arguments:
                         this
   --msf-path MSF-PATH   pass the path to your framework if it is not in your
                         ENV PATH
+  --whitelist PATH      only exploit hosts listed in the whitelist file
 ```
 
 ## Installation
@@ -128,6 +129,7 @@ chmod +x install.sh
 ```
 
 ## Dependencies
+_Note_: All dependencies should be installed using the above installation method, however, if you find they are not:
 
 AutoSploit depends on the following Python2.7 modules.
 
