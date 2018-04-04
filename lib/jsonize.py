@@ -44,7 +44,7 @@ def load_exploits(path, nodes):
         # the road
         _json = json.loads(exploit_file.read())
         for node in nodes:
-            for item in _json[node]:
+            for item in _json.get(node, []):
                 # so we'll reload it into a ascii string before we save it into the file
                 retval.append(str(item))
     return retval
