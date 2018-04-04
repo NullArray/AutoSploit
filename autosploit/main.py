@@ -69,17 +69,38 @@ def main():
                     )
                 )
 
+
     if len(sys.argv) > 1:
         info("attempting to load API keys")
         loaded_tokens = load_api_keys()
         AutoSploitParser().parse_provided(opts)
+
         misc_info("checking if there are multiple exploit files")
-        loaded_exploits = load_exploits(EXPLOIT_FILES_PATH)
+
+        modules_to_load = []
+        if opts.runExploits:
+            modules_to_load += ["exploits"]
+        if opts.runFuzzers:
+            modules_to_load += ["fuzzers"]
+
+        loaded_exploits = load_exploits(EXPLOIT_FILES_PATH, modules_to_load)
         AutoSploitParser().single_run_args(opts, loaded_tokens, loaded_exploits)
     else:
         warning("no arguments have been parsed, defaulting to terminal session. press 99 to quit and help to get help")
+
         misc_info("checking if there are multiple exploit files")
-        loaded_exploits = load_exploits(EXPLOIT_FILES_PATH)
+
+        load_exploit_modules = prompt("Use stored exploits MSF modules? [y/N]", lowercase=False)
+        load_fuzzers_modules = prompt("Use stored fuzzers MSF modules? [y/N]", lowercase=False)
+
+        modules_to_load = []
+        if load_exploit_modules.lower().startswith('y'):
+            modules_to_load += ["exploits"]
+        if load_fuzzers_modules.lower().startswith('y'):
+            modules_to_load += ["fuzzers"]
+
+        loaded_exploits = load_exploits(EXPLOIT_FILES_PATH, modules_to_load)
+
         info("attempting to load API keys")
         loaded_tokens = load_api_keys()
         terminal = AutoSploitTerminal(loaded_tokens)
