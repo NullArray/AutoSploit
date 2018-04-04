@@ -25,7 +25,7 @@ The new version of AutoSploit has a feature that allows you to set a proxy befor
 
 # Installation
 
-Installing AutoSploit is very simple, you can find the latest stable release [here](https://github.com/NullArray/AutoSploit/releases/tag/2.0). You can also download the master branch as a [zip](https://github.com/NullArray/AutSploit/zipball/master) or [tarball](https://github.com/NullArray/AutSploit/tarball/master) or follow one of the below methods;
+Installing AutoSploit is very simple, you can find the latest stable release [here](https://github.com/NullArray/AutoSploit/releases/tag/2.1). You can also download the master branch as a [zip](https://github.com/NullArray/AutSploit/zipball/master) or [tarball](https://github.com/NullArray/AutSploit/tarball/master) or follow one of the below methods;
 
 ###### Cloning
 
@@ -47,7 +47,7 @@ git clone https://github.com/NullArray/AutoSploit.git
 cd AutoSploit
 chmod +x install.sh
 ./installsh
-cd AutoSploit/Docker
+cd Docker
 docker network create -d bridge haknet
 docker run --network haknet --name msfdb -e POSTGRES_PASSWORD=s3cr3t -d postgres
 docker build -t autosploit .
