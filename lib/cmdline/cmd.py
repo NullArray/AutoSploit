@@ -59,13 +59,9 @@ class AutoSploitParser(argparse.ArgumentParser):
                              help="set the configuration for MSF (IE -C default 127.0.0.1 8080)")
         exploit.add_argument("-e", "--exploit", action="store_true", dest="startExploit",
                              help="start exploiting the already gathered hosts")
-        exploit.add_argument("--load-exploits",
-                             action="store_true",
-                             dest="runExploits",
+        exploit.add_argument("--load-exploits", action="store_true", dest="runExploits",
                              help="Use this flag to run the stored JSON exploits MSF modules.")
-        exploit.add_argument("--load-fuzzers",
-                             action="store_true",
-                             dest="runFuzzers",
+        exploit.add_argument("--load-fuzzers", action="store_true", dest="runFuzzers",
                              help="Use this flag to run the stored JSON fuzzers MSF modules.")
 
         misc = parser.add_argument_group("misc arguments", "arguments that don't fit anywhere else")
