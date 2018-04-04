@@ -19,12 +19,14 @@ class AutoSploitParser(argparse.ArgumentParser):
 
     @staticmethod
     def optparser():
+
         """
-        the options object for our parser
+        the options function for our parser, it will put everything into play
         """
+
         parser = argparse.ArgumentParser(
             usage="python autosploit.py -[c|z|s|a] -[q] QUERY\n"
-                  "{spacer}[-C] WORKSPACE LHOST LPORT [-e]\n"
+                  "{spacer}[-C] WORKSPACE LHOST LPORT [-e] [--whitewash] PATH\n"
                   "{spacer}[--ruby-exec] [--msf-path] PATH [-E] EXPLOIT-FILE-PATH\n"
                   "{spacer}[--rand-agent] [--proxy] PROTO://IP:PORT [-P] AGENT".format(
                     spacer=" " * 28
@@ -65,6 +67,8 @@ class AutoSploitParser(argparse.ArgumentParser):
                           help="pass the path to your framework if it is not in your ENV PATH")
         misc.add_argument("--ethics", action="store_true", dest="displayEthics",
                           help=argparse.SUPPRESS)  # easter egg!
+        misc.add_argument("--whitelist", metavar="PATH", dest="whitelist",
+                             help="only exploit hosts listed in the whitelist file")
         opts = parser.parse_args()
         return opts
 
@@ -158,10 +162,16 @@ class AutoSploitParser(argparse.ArgumentParser):
                 keys["censys"][1], keys["censys"][0], opt.searchQuery, proxy=headers[0], agent=headers[1]
             ).censys()
         if opt.startExploit:
-            lib.exploitation.exploiter.AutoSploitExploiter(
-                opt.msfConfig,
-                loaded_modules,
-                open(lib.settings.HOST_FILE).readlines(),
-                ruby_exec=opt.rubyExecutableNeeded,
-                msf_path=opt.pathToFramework
-            ).start_exploit()
+            try:
+                hosts = open(lib.settings.HOST_FILE).readlines()
+                if opt.whitelist:
+                    hosts = lib.exploitation.exploiter.whitelist_wash(hosts, whitelist_file=opt.whitelist)
+                lib.exploitation.exploiter.AutoSploitExploiter(
+                    opt.msfConfig,
+                    loaded_modules,
+                    hosts,
+                    ruby_exec=opt.rubyExecutableNeeded,
+                    msf_path=opt.pathToFramework
+                ).start_exploit()
+            except KeyboardInterrupt:
+                lib.output.warning("user aborted scan")

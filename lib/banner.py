@@ -1,6 +1,7 @@
+import os
 import random
 
-VERSION = "2.0"
+VERSION = "2.1"
 
 
 def banner_1(line_sep="#--", space=" " * 30):
@@ -8,9 +9,9 @@ def banner_1(line_sep="#--", space=" " * 30):
 {sep1}Author : Vector/NullArray |  _  |_ _| |_ ___|   __|___| |___|_| |_
 {sep1}Twitter: @Real__Vector    |     | | |  _| . |__   | . | | . | |  _|
 {sep1}Type   : Mass Exploiter   |__|__|___|_| |___|_____|  _|_|___|_|_|
-{sep1}Version: {v_num}                                    |_|
+{sep1}Version: {v_num}{spacer}                              |_|
 ##############################################\033[0m
-    """.format(sep1=line_sep, v_num=VERSION, space_sep=space)
+    """.format(sep1=line_sep, v_num=VERSION, space_sep=space, spacer=" " * 8)
     return banner
 
 
@@ -66,7 +67,7 @@ def banner_4():
 {red}    .__.    ,     __.   .     , 	{end}
 {red}    [__]. .-+- _ (__ ._ | _ *-+-	{end}
 {red}    |  |(_| | (_).__)[_)|(_)| | 	{end}
-{red}                 |          	{end}
+{red}                     |          	{end}
 {red}          _ ._  _ , _ ._		{end}
 {red}         (_ ' ( `  )_  .__)	{end}
 {red}       ( (  (    )   `)  ) _)	{end}
@@ -114,4 +115,15 @@ def banner_main():
         banner_5, banner_4,
         banner_3, banner_2, banner_1
     ]
-    return random.choice(banners)()
+    if os.getenv("Graffiti", False):
+        return banner_5()
+    elif os.getenv("AutosploitOG", False):
+        return banner_1()
+    elif os.getenv("Nuclear", False):
+        return banner_4()
+    elif os.getenv("SploitaSaurusRex", False):
+        return banner_3()
+    elif os.getenv("Autosploit2", False):
+        return banner_2()
+    else:
+        return random.choice(banners)()

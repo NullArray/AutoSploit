@@ -6,7 +6,11 @@ import random
 import platform
 import getpass
 import tempfile
-# import subprocess
+import distutils.spawn
+from subprocess import (
+    PIPE,
+    Popen
+)
 
 import psutil
 
@@ -24,11 +28,10 @@ EXPLOIT_FILES_PATH = "{}/etc/json".format(CUR_DIR)
 # path to the usage and legal file
 USAGE_AND_LEGAL_PATH = "{}/etc/text_files/general".format(CUR_DIR)
 
-# path to the bash script to stack the PostgreSQL service
-START_POSTGRESQL_PATH = "{}/etc/scripts/start_postgre.sh".format(CUR_DIR)
+# one bash script to rule them all takes an argument via the operating system
+START_SERVICES_PATH = "{}/etc/scripts/start_services.sh".format(CUR_DIR)
 
-# path to the bash script to start the Apache service
-START_APACHE_PATH = "{}/etc/scripts/start_apache.sh".format(CUR_DIR)
+RC_SCRIPTS_PATH = "{}/autosploit_out/".format(CUR_DIR)
 
 # path to the file that will contain our query
 QUERY_FILE_PATH = tempfile.NamedTemporaryFile(delete=False).name
@@ -88,14 +91,22 @@ def check_services(service_name):
     """
     check to see if certain services ar started
     """
-    all_processes = set()
-    for pid in psutil.pids():
-        running_proc = psutil.Process(pid)
-        all_processes.add(" ".join(running_proc.cmdline()).strip())
-    for proc in list(all_processes):
-        if service_name in proc:
-            return True
-    return False
+    try:
+        all_processes = set()
+        for pid in psutil.pids():
+            running_proc = psutil.Process(pid)
+            all_processes.add(" ".join(running_proc.cmdline()).strip())
+        for proc in list(all_processes):
+            if service_name in proc:
+                return True
+        return False
+    except psutil.ZombieProcess as e:
+        # zombie processes appear to happen on macOS for some reason
+        # so we'll just kill them off
+        pid = str(e).split("=")[-1].split(")")[0]
+        os.kill(int(pid), 0)
+        return True
+
 
 
 def write_to_file(data_to_write, filename, mode="a+"):
@@ -160,21 +171,26 @@ def cmdline(command):
     I intend to have the issue resolved by Version 1.5.0.
     """
 
-    os.system(command)
-    '''process = subprocess.call(
-        args=" ".join(command),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        shell=True
-    )
-    return process'''
+    #os.system(command)
+    lib.output.info("Executing command '{}'".format(command.strip()))
+    split_cmd = [x.strip() for x in command.split(" ") if x]
+
+    sys.stdout.flush()
+
+    proc = Popen(split_cmd, stdout=PIPE, bufsize=1)
+    stdout_buff = []
+    for stdout_line in iter(proc.stdout.readline, b''):
+        stdout_buff += [stdout_line.rstrip()]
+        print("(msf)>> {}".format(stdout_line).rstrip())
+
+    return stdout_buff
 
 
 def check_for_msf():
     """
     check the ENV PATH for msfconsole
     """
-    return os.getenv("msfconsole", False)
+    return os.getenv("msfconsole", False) or distutils.spawn.find_executable("msfconsole")
 
 def logo():
     """
