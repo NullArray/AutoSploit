@@ -263,7 +263,9 @@
      "exploit/windows/smb/ipass_pipe_exec",
      "exploit/windows/smb/smb_relay",
      "auxiliary/sqli/oracle/jvm_os_code_10g",
-     "auxiliary/sqli/oracle/jvm_os_code_11g",
+     "auxiliary/sqli/oracle/jvm_os_code_11g"
+     ],
+  "fuzzers": [
      "auxiliary/fuzzers/dns/dns_fuzzer",
      "auxiliary/fuzzers/ftp/client_ftp",
      "auxiliary/fuzzers/ftp/ftp_pre_post",
