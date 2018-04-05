@@ -125,11 +125,29 @@ misc arguments:
 
 ## Installation
 
+On any Linux system the following should work;
+
 ```bash
 git clone https://github.com/NullArray/AutoSploit
 cd AutoSploit
 chmod +x install.sh
 ./install.sh
+```
+
+If you want to run AutoSploit on a macOS system, AutoSploit is compatible with macOS, however, you have to be inside a virtual environment for it to run successfully. To do this, do the following;
+
+```bash
+sudo -s << '_EOF' 
+pip2 install virtualenv --user
+git clone https://github.com/NullArray/AutoSploit.git
+virtualenv <PATH-TO-YOUR-ENV>
+source <PATH-TO-YOUR-ENV>/bin/activate
+cd <PATH-TO-AUTOSPLOIT>
+pip2 install -r requirements.txt
+chmod +x install.sh
+./install.sh
+python autosploit.py
+_EOF
 ```
 
 ## Dependencies
