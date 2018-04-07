@@ -156,8 +156,8 @@ def load_api_keys(path="{}/etc/tokens".format(CUR_DIR)):
         else:
             lib.output.info("{} API token loaded from {}".format(key.title(), API_KEYS[key][0]))
     api_tokens = {
-        "censys": (open(API_KEYS["censys"][0]).read(), open(API_KEYS["censys"][1]).read()),
-        "shodan": (open(API_KEYS["shodan"][0]).read(), )
+        "censys": (open(API_KEYS["censys"][0]).read().rstrip(), open(API_KEYS["censys"][1]).read().rstrip()),
+        "shodan": (open(API_KEYS["shodan"][0]).read().rstrip(), )
     }
     return api_tokens
 
