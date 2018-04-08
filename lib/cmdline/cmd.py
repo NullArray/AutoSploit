@@ -59,6 +59,8 @@ class AutoSploitParser(argparse.ArgumentParser):
                              help="set the configuration for MSF (IE -C default 127.0.0.1 8080)")
         exploit.add_argument("-e", "--exploit", action="store_true", dest="startExploit",
                              help="start exploiting the already gathered hosts")
+        exploit.add_argument("-d", "--dry-run", action="store_true", dest="dryRun",
+                             help="Do not launch metasploit's exploits. Do everything else. msfconsole is never called.")
 
         misc = parser.add_argument_group("misc arguments", "arguments that don't fit anywhere else")
         misc.add_argument("--ruby-exec", action="store_true", dest="rubyExecutableNeeded",
@@ -170,5 +172,6 @@ class AutoSploitParser(argparse.ArgumentParser):
                 loaded_modules,
                 hosts,
                 ruby_exec=opt.rubyExecutableNeeded,
-                msf_path=opt.pathToFramework
+                msf_path=opt.pathToFramework,
+                dryRun=opt.dryRun
             ).start_exploit()
