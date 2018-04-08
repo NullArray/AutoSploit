@@ -61,6 +61,8 @@ class AutoSploitParser(argparse.ArgumentParser):
                              help="start exploiting the already gathered hosts")
         exploit.add_argument("-d", "--dry-run", action="store_true", dest="dryRun",
                              help="Do not launch metasploit's exploits. Do everything else. msfconsole is never called.")
+        exploit.add_argument("-f", "--exploit-file-to-use", metavar="PATH", dest="exploitFile",
+                             help="Run AutoSploit with provided exploit JSON file.")
 
         misc = parser.add_argument_group("misc arguments", "arguments that don't fit anywhere else")
         misc.add_argument("--ruby-exec", action="store_true", dest="rubyExecutableNeeded",

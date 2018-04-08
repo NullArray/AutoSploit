@@ -20,6 +20,24 @@ def random_file_name(acceptable=string.ascii_letters, length=7):
     return ''.join(list(retval))
 
 
+def load_exploit_file(path, node="exploits"):
+    """
+    load exploits from a given file
+    """
+
+    selected_file_path = path
+
+    retval = []
+    with open(selected_file_path) as exploit_file:
+        # loading it like this has been known to cause Unicode issues later on down
+        # the road
+        _json = json.loads(exploit_file.read())
+        for item in _json[node]:
+            # so we'll reload it into a ascii string before we save it into the file
+            retval.append(str(item))
+    return retval
+
+
 def load_exploits(path, node="exploits"):
     """
     load exploits from a given path, depending on how many files are loaded into
