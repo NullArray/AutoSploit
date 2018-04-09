@@ -4,6 +4,7 @@
 if [[ $# -lt 2 ]]; then
     echo "Syntax:"
     echo -e "\t./run_autosploit.sh <whitelist.txt> <exposed_lport>"
+	exit 1
 fi
 
 WHITELIST=$1

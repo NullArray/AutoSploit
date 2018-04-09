@@ -4,6 +4,7 @@
 if [[ $# -lt 2 ]]; then
     echo "Syntax:"
     echo -e "\t./dryrun_autosploit.sh <whitelist.txt> <search_query>"
+	exit 1
 fi
 
 WHITELIST=$1
