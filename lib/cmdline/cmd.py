@@ -42,9 +42,9 @@ class AutoSploitParser(argparse.ArgumentParser):
         se.add_argument("-a", "--all", action="store_true", dest="searchAll",
                         help="search all available search engines to gather hosts")
         save_results_args = se.add_mutually_exclusive_group(required=False)
-        save_results_args.add_argument("--overwrite", action="store_true", dest="overwriteHosts",
+        save_results_args.add_argument("-O", "--overwrite", action="store_true", dest="overwriteHosts",
                         help="When specified, start from scratch by overwriting the host file with new search results.")
-        save_results_args.add_argument("--append", action="store_true", dest="appendHosts",
+        save_results_args.add_argument("-A", "--append", action="store_true", dest="appendHosts",
                                        help="When specified, append discovered hosts to the host file.")
 
         req = parser.add_argument_group("requests", "arguments to edit your requests")
