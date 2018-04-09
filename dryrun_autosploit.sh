@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 
-if [[ $# -lt 3 ]]; then
+if [[ $# -lt 2 ]]; then
     echo "Syntax:"
     echo -e "\t./dryrun_autosploit.sh <whitelist.txt> <search_query>"
 fi

@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
 
-if [[ $# -lt 3 ]]; then
+if [[ $# -lt 2 ]]; then
     echo "Syntax:"
     echo -e "\t./run_autosploit.sh <whitelist.txt> <exposed_lport>"
 fi
 
 WHITELIST=$1
-LPORT=$3
+LPORT=$2
 
 LHOST=`dig +short @resolver1.opendns.com myip.opendns.com`
 TIMESTAMP=`date +%s`
