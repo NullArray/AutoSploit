@@ -41,6 +41,11 @@ class AutoSploitParser(argparse.ArgumentParser):
                         help="use shodan.io as the search engine to gather hosts")
         se.add_argument("-a", "--all", action="store_true", dest="searchAll",
                         help="search all available search engines to gather hosts")
+        save_results_args = se.add_mutually_exclusive_group(required=False)
+        save_results_args.add_argument("--overwrite", action="store_true", dest="overwriteHosts",
+                        help="When specified, start from scratch by overwriting the host file with new search results.")
+        save_results_args.add_argument("--append", action="store_true", dest="appendHosts",
+                                       help="When specified, append discovered hosts to the host file.")
 
         req = parser.add_argument_group("requests", "arguments to edit your requests")
         req.add_argument("--proxy", metavar="PROTO://IP:PORT", dest="proxyConfig",
@@ -138,21 +143,35 @@ class AutoSploitParser(argparse.ArgumentParser):
                 lib.output.error("caught IOError '{}' check the file path and try again".format(str(e)))
             sys.exit(0)
 
+        search_save_mode = None
+        if opt.overwriteHosts:
+            # Create a new empty file, overwriting the previous one.
+            # Set the mode to append afterwards
+            # This way, successive searches will start clean without
+            # overriding each others.
+            open(lib.settings.HOST_FILE, mode="w").close()
+            search_save_mode = "a"
+        elif opt.appendHosts:
+            search_save_mode = "a"
+
         if opt.searchCensys:
             lib.output.info(single_search_msg.format("Censys"))
             api_searches[2](
                 keys["censys"][1], keys["censys"][0],
-                opt.searchQuery, proxy=headers[0], agent=headers[1]
+                opt.searchQuery, proxy=headers[0], agent=headers[1],
+                save_mode=search_save_mode
             ).censys()
         if opt.searchZoomeye:
             lib.output.info(single_search_msg.format("Zoomeye"))
             api_searches[0](
-                opt.searchQuery, proxy=headers[0], agent=headers[1]
+                opt.searchQuery, proxy=headers[0], agent=headers[1],
+                save_mode=search_save_mode
             ).zoomeye()
         if opt.searchShodan:
             lib.output.info(single_search_msg.format("Shodan"))
             api_searches[1](
-                keys["shodan"][0], opt.searchQuery, proxy=headers[0], agent=headers[1]
+                keys["shodan"][0], opt.searchQuery, proxy=headers[0], agent=headers[1],
+                save_mode=search_save_mode
             ).shodan()
         if opt.searchAll:
             lib.output.info("searching all search engines in order")

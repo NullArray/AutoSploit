@@ -108,20 +108,33 @@ def check_services(service_name):
         return True
 
 
-
-def write_to_file(data_to_write, filename, mode="a+"):
+def write_to_file(data_to_write, filename, mode=None):
     """
     write data to a specified file, if it exists, ask to overwrite
     """
     global stop_animation
 
     if os.path.exists(filename):
-        stop_animation = True
-        is_append = lib.output.prompt("would you like to (a)ppend or (o)verwrite the file")
-        if is_append == "o":
-            mode = "w"
-        elif is_append != "a":
-            lib.output.warning("invalid input provided ('{}'), appending to file".format(is_append))
+        if not mode:
+            stop_animation = True
+            is_append = lib.output.prompt("would you like to (a)ppend or (o)verwrite the file")
+            if is_append.lower() == "o":
+                mode = "w"
+            elif is_append.lower() == "a":
+                mode = "a+"
+            else:
+                lib.output.error("invalid input provided ('{}'), appending to file".format(is_append))
+                lib.output.error("Search results NOT SAVED!")
+
+        if mode == "w":
+            lib.output.warning("Overwriting to {}".format(filename))
+        if mode == "a":
+            lib.output.info("Appending to {}".format(filename))
+
+    else:
+        # File does not exists, mode does not matter
+        mode = "w"
+
     with open(filename, mode) as log:
         if isinstance(data_to_write, (tuple, set, list)):
             for item in list(data_to_write):
@@ -132,7 +145,7 @@ def write_to_file(data_to_write, filename, mode="a+"):
     return filename
 
 
-def load_api_keys(path="{}/etc/tokens".format(CUR_DIR)):
+def load_api_keys(unattended=False, path="{}/etc/tokens".format(CUR_DIR)):
 
     """
     load the API keys from their .key files
