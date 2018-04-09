@@ -19,7 +19,10 @@ from lib.settings import (
     EXPLOIT_FILES_PATH,
     START_SERVICES_PATH
 )
-from lib.jsonize import load_exploits
+from lib.jsonize import (
+    load_exploits,
+    load_exploit_file
+)
 
 
 def main():
@@ -73,8 +76,17 @@ def main():
         info("attempting to load API keys")
         loaded_tokens = load_api_keys()
         AutoSploitParser().parse_provided(opts)
-        misc_info("checking if there are multiple exploit files")
-        loaded_exploits = load_exploits(EXPLOIT_FILES_PATH)
+
+        loaded_exploits = []
+        if not opts.exploitFile:
+            misc_info("checking if there are multiple exploit files")
+            loaded_exploits = load_exploits(EXPLOIT_FILES_PATH)
+        else:
+            loaded_exploits = load_exploit_file(opts.exploitFile)
+            misc_info("Loaded {} exploits from {}.".format(
+                len(loaded_exploits),
+                opts.exploitFile))
+
         AutoSploitParser().single_run_args(opts, loaded_tokens, loaded_exploits)
     else:
         warning("no arguments have been parsed, defaulting to terminal session. press 99 to quit and help to get help")

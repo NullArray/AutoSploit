@@ -17,12 +17,13 @@ class ShodanAPIHook(object):
     Shodan API hook, saves us from having to install another dependency
     """
 
-    def __init__(self, token=None, query=None, proxy=None, agent=None, **kwargs):
+    def __init__(self, token=None, query=None, proxy=None, agent=None, save_mode=None, **kwargs):
         self.token = token
         self.query = query
         self.proxy = proxy
         self.user_agent = agent
         self.host_file = HOST_FILE
+        self.save_mode = save_mode
 
     def shodan(self):
         """
@@ -38,7 +39,7 @@ class ShodanAPIHook(object):
             json_data = json.loads(req.content)
             for match in json_data["matches"]:
                 discovered_shodan_hosts.add(match["ip_str"])
-            write_to_file(discovered_shodan_hosts, self.host_file)
+            write_to_file(discovered_shodan_hosts, self.host_file, mode=self.save_mode)
             return True
         except Exception as e:
             raise AutoSploitAPIConnectionError(str(e))
