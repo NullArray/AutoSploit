@@ -176,13 +176,16 @@ class AutoSploitParser(argparse.ArgumentParser):
         if opt.searchAll:
             lib.output.info("searching all search engines in order")
             api_searches[0](
-                opt.searchQuery, proxy=headers[0], agent=headers[1]
+                opt.searchQuery, proxy=headers[0], agent=headers[1],
+                save_mode=search_save_mode
             ).zoomeye()
             api_searches[1](
-                keys["shodan"][0], opt.searchQuery, proxy=headers[0], agent=headers[1]
+                keys["shodan"][0], opt.searchQuery, proxy=headers[0], agent=headers[1],
+                save_mode=search_save_mode
             ).shodan()
             api_searches[2](
-                keys["censys"][1], keys["censys"][0], opt.searchQuery, proxy=headers[0], agent=headers[1]
+                keys["censys"][1], keys["censys"][0], opt.searchQuery, proxy=headers[0], agent=headers[1],
+                save_mode=search_save_mode
             ).censys()
         if opt.startExploit:
             hosts = open(lib.settings.HOST_FILE).readlines()
