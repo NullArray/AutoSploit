@@ -17,11 +17,11 @@ TIMESTAMP=`date +%s`
 echo "python autosploit.py -s -c -q \"${SEARCH_QUERY}\" --overwrite \
     --whitelist $WHITELIST -e \
     -C \"msf_autorun_${TIMESTAMP}\" $LHOST $LPORT \
-    --exploit-file-to-use etc/json/other_modules.json \
+    --exploit-file-to-use etc/json/default_modules.json \
     --dry-run"
 
 python autosploit.py -s -c -q "${SEARCH_QUERY}" --overwrite \
     --whitelist $WHITELIST -e \
     -C "msf_autorun_${TIMESTAMP}" $LHOST $LPORT \
-    --exploit-file-to-use etc/json/other_modules.json \
+    --exploit-file-to-use etc/json/default_modules.json \
     --dry-run
