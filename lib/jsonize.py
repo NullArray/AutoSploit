@@ -37,7 +37,7 @@ def load_exploit_file(path, node="exploits"):
                 # so we'll reload it into a ascii string before we save it into the file
                 retval.append(str(item))
     except IOError as e:
-        lib.output.error(e)
+        lib.settings.close(e)
     return retval
 
 
