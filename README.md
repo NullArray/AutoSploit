@@ -22,7 +22,7 @@ The new version of AutoSploit has a feature that allows you to set a proxy befor
  - [Development](https://github.com/NullArray/AutoSploit#active-development)
  - [Discord server](https://discord.gg/9BeeZQk)
  - [README translations](https://github.com/NullArray/AutoSploit#translations)
- 
+
 # Installation
 
 Installing AutoSploit is very simple, you can find the latest stable release [here](https://github.com/NullArray/AutoSploit/releases/tag/2.0). You can also download the master branch as a [zip](https://github.com/NullArray/AutSploit/zipball/master) or [tarball](https://github.com/NullArray/AutSploit/tarball/master) or follow one of the below methods;
@@ -33,7 +33,8 @@ Installing AutoSploit is very simple, you can find the latest stable release [he
 sudo -s << EOF
 git clone https://github.com/NullArray/Autosploit.git
 cd AutoSploit
-pip2 install -r requirements.txt
+chmod +x install.sh
+./install.sh
 python2 autosploit.py
 EOF
 ```
@@ -43,6 +44,9 @@ EOF
 ```bash
 sudo -s << EOF
 git clone https://github.com/NullArray/AutoSploit.git
+cd AutoSploit
+chmod +x install.sh
+./installsh
 cd AutoSploit/Docker
 docker network create -d bridge haknet
 docker run --network haknet --name msfdb -e POSTGRES_PASSWORD=s3cr3t -d postgres
@@ -72,7 +76,7 @@ As of version 2.0 AutoSploit can be started with a number of command line argume
 
 ```
 usage: python autosploit.py -[c|z|s|a] -[q] QUERY
-                            [-C] WORKSPACE LHOST LPORT [-e]
+                            [-C] WORKSPACE LHOST LPORT [-e] [--whitewash] PATH
                             [--ruby-exec] [--msf-path] PATH [-E] EXPLOIT-FILE-PATH
                             [--rand-agent] [--proxy] PROTO://IP:PORT [-P] AGENT
 
@@ -116,9 +120,12 @@ misc arguments:
                         this
   --msf-path MSF-PATH   pass the path to your framework if it is not in your
                         ENV PATH
+  --whitelist PATH      only exploit hosts listed in the whitelist file
 ```
 
 ## Installation
+
+On any Linux system the following should work;
 
 ```bash
 git clone https://github.com/NullArray/AutoSploit
@@ -127,7 +134,24 @@ chmod +x install.sh
 ./install.sh
 ```
 
+If you want to run AutoSploit on a macOS system, AutoSploit is compatible with macOS, however, you have to be inside a virtual environment for it to run successfully. To do this, do the following;
+
+```bash
+sudo -s << '_EOF'
+pip2 install virtualenv --user
+git clone https://github.com/NullArray/AutoSploit.git
+virtualenv <PATH-TO-YOUR-ENV>
+source <PATH-TO-YOUR-ENV>/bin/activate
+cd <PATH-TO-AUTOSPLOIT>
+pip2 install -r requirements.txt
+chmod +x install.sh
+./install.sh
+python autosploit.py
+_EOF
+```
+
 ## Dependencies
+_Note_: All dependencies should be installed using the above installation method, however, if you find they are not:
 
 AutoSploit depends on the following Python2.7 modules.
 
