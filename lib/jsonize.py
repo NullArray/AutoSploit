@@ -50,9 +50,9 @@ def load_exploits(path, node="exploits"):
     retval = []
     file_list = os.listdir(path)
     if len(file_list) != 1:
-        lib.output.info("total of {} exploit files discovered for use, select one".format(len(file_list)))
+        lib.output.info("total of {} exploit files discovered for use, select one:".format(len(file_list)))
         for i, f in enumerate(file_list, start=1):
-            print("{}. {}".format(i, f[:-5]))
+            print("{}. '{}'".format(i, f[:-5]))
         action = raw_input(lib.settings.AUTOSPLOIT_PROMPT)
         selected_file = file_list[int(action) - 1]
     else:
@@ -88,4 +88,3 @@ def text_file_to_dict(path):
         _data = json.dumps(start_dict, indent=4, sort_keys=True)
         exploits.write(_data)
     return filename_path
-
