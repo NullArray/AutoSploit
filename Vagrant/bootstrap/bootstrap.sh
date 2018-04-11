@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-
 echo "Yolosploit configurator 2.42"
 sudo apt-get --yes update
 sudo apt-get --yes upgrade
@@ -10,7 +9,7 @@ wget --quiet https://downloads.metasploit.com/data/releases/metasploit-latest-li
 chmod +x metasploit-latest-linux-x64-installer.run
 sudo ./metasploit-latest-linux-x64-installer.run --unattendedmodeui none --prefix /opt/msf --mode unattended
 
-echo "Installing pyhton2"
+echo "Installing python2"
 sudo apt-get --yes install python python-pip python-virtualenv git
 
 sudo apt-get --yes install fish
