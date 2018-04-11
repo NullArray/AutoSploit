@@ -24,7 +24,6 @@ def load_exploit_file(path, node="exploits"):
     """
     load exploits from a given file
     """
-
     selected_file_path = path
 
     retval = []
