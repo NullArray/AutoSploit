@@ -14,6 +14,7 @@ All contributions to AutoSploit are not only welcomed, but highly appreciated, p
 
 To get started making a contribution please do the following:
 
+- Read our [contribution standards](https://github.com/NullArray/AutoSploit/wiki/Development-information#contribution-standards)
 - Fork the repository using the fork button
 - `git clone https://github.com/<YOUR-NAME>/AutoSploit.git -b dev-beta`
 - Edit the code to your liking
