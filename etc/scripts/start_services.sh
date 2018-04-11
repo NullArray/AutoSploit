@@ -24,7 +24,7 @@ function main () {
     startApacheOSX;
     startPostgreSQLOSX;
   else
-    echo "[*} invalid operating system";
+    echo "[*] invalid operating system";
   fi
 }
 
