@@ -12,7 +12,7 @@ def random_file_name(acceptable=string.ascii_letters, length=7):
     create a random filename.
 
      `note: this could potentially cause issues if there
-           a lot of file in the directory`
+           a lot of files in the directory`
     """
     retval = set()
     for _ in range(length):
