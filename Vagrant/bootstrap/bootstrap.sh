@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 echo "Yolosploit configurator 2.42"
 sudo apt-get --yes update
