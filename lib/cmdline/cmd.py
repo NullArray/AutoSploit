@@ -154,6 +154,8 @@ class AutoSploitParser(argparse.ArgumentParser):
         elif opt.appendHosts:
             search_save_mode = "a"
 
+        # TODO[4]:// move the searches into their own class and call it from the static method if a search is needed
+        # this is ugly and i wanna change it
         if opt.searchCensys:
             lib.output.info(single_search_msg.format("Censys"))
             api_searches[2](

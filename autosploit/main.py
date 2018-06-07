@@ -77,6 +77,8 @@ def main():
         loaded_tokens = load_api_keys()
         AutoSploitParser().parse_provided(opts)
 
+        # TODO[5] figure out why this isn't used anywhere
+        # maybe we can just remove it, idk
         loaded_exploits = []
         if not opts.exploitFile:
             misc_info("checking if there are multiple exploit files")

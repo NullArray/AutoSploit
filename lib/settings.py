@@ -34,7 +34,7 @@ START_SERVICES_PATH = "{}/etc/scripts/start_services.sh".format(CUR_DIR)
 RC_SCRIPTS_PATH = "{}/autosploit_out/".format(CUR_DIR)
 
 # path to the file that will contain our query
-QUERY_FILE_PATH = tempfile.NamedTemporaryFile(delete=False).name
+# QUERY_FILE_PATH = tempfile.NamedTemporaryFile(delete=False).name
 
 # default HTTP User-Agent
 DEFAULT_USER_AGENT = "AutoSploit/{} (Language=Python/{}; Platform={})".format(
@@ -151,9 +151,7 @@ def load_api_keys(unattended=False, path="{}/etc/tokens".format(CUR_DIR)):
     load the API keys from their .key files
     """
 
-    """
-    make the directory if it does not exist
-    """
+    # make the directory if it does not exist
     if not os.path.exists(path):
         os.mkdir(path)
 
@@ -177,14 +175,9 @@ def load_api_keys(unattended=False, path="{}/etc/tokens".format(CUR_DIR)):
 
 def cmdline(command):
     """
-    Function that allows us to store system command output in a variable.
-    We'll change this later in order to solve the potential security
-    risk that arises when passing untrusted input to the shell.
-
-    I intend to have the issue resolved by Version 1.5.0.
+    send the commands through subprocess
     """
 
-    #os.system(command)
     lib.output.info("Executing command '{}'".format(command.strip()))
     split_cmd = [x.strip() for x in command.split(" ") if x]
 
@@ -204,6 +197,7 @@ def check_for_msf():
     check the ENV PATH for msfconsole
     """
     return os.getenv("msfconsole", False) or distutils.spawn.find_executable("msfconsole")
+
 
 def logo():
     """
