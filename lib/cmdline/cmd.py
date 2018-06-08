@@ -26,7 +26,8 @@ class AutoSploitParser(argparse.ArgumentParser):
 
         parser = argparse.ArgumentParser(
             usage="python autosploit.py -[c|z|s|a] -[q] QUERY\n"
-                  "{spacer}[-C] WORKSPACE LHOST LPORT [-e] [--whitelist]\n"
+
+                  "{spacer}[-C] WORKSPACE LHOST LPORT [-e] [--whitewash] PATH\n"
                   "{spacer}[--ruby-exec] [--msf-path] PATH [-E] EXPLOIT-FILE-PATH\n"
                   "{spacer}[--rand-agent] [--proxy] PROTO://IP:PORT [-P] AGENT".format(
                     spacer=" " * 28
