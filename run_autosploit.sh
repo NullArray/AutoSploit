@@ -1,13 +1,14 @@
 #!/bin/bash
 
 
-# TODO[6] this causes an AttributeError somewhere
-
 if [[ $# -lt 1 ]]; then
     echo "Syntax:"
     echo -e "\t./run_autosploit.sh PORT [WHITELIST]"
 	exit 1
 fi
+
+echo -e "[!] Make sure you are not on your localhost while running this script, press enter to continue";
+read
 
 WHITELIST=$2
 LPORT=$1

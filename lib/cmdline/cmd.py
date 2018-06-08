@@ -26,7 +26,7 @@ class AutoSploitParser(argparse.ArgumentParser):
 
         parser = argparse.ArgumentParser(
             usage="python autosploit.py -[c|z|s|a] -[q] QUERY\n"
-                  "{spacer}[-C] WORKSPACE LHOST LPORT [-e]\n"
+                  "{spacer}[-C] WORKSPACE LHOST LPORT [-e] [--whitelist]\n"
                   "{spacer}[--ruby-exec] [--msf-path] PATH [-E] EXPLOIT-FILE-PATH\n"
                   "{spacer}[--rand-agent] [--proxy] PROTO://IP:PORT [-P] AGENT".format(
                     spacer=" " * 28
@@ -89,10 +89,10 @@ class AutoSploitParser(argparse.ArgumentParser):
         parser = any([opt.searchAll, opt.searchZoomeye, opt.searchCensys, opt.searchShodan])
 
         if opt.rubyExecutableNeeded and opt.pathToFramework is None:
-            lib.settings.close("if the Ruby exec is needed, so is that path to metasploit, pass the `--msf-path` switch")
+            lib.settings.close("if the Ruby exec is needed, so is the path to metasploit, pass the `--msf-path` switch")
         if opt.pathToFramework is not None and not opt.rubyExecutableNeeded:
             lib.settings.close(
-                "if you need the metasploit path, you also need the executable. pass the `--ruby-exec` switch"
+                "if you need the metasploit path, you also need the ruby executable. pass the `--ruby-exec` switch"
             )
         if opt.personalAgent is not None and opt.randomAgent:
             lib.settings.close("you cannot use both a personal agent and a random agent, choose only one")
@@ -106,7 +106,9 @@ class AutoSploitParser(argparse.ArgumentParser):
         if opt.startExploit and opt.msfConfig is None:
             lib.settings.close(
                 "you must provide the configuration for metasploit in order to start the exploits "
-                "do so by passing the `-C\--config` switch IE -C default 127.0.0.1 8080"
+                "do so by passing the `-C\--config` switch (IE -C default 127.0.0.1 8080). don't be "
+                "an idiot and keep in mind that sending connections back to your localhost is "
+                "probably not a good idea"
             )
         if not opt.startExploit and opt.msfConfig is not None:
             lib.settings.close(
@@ -133,7 +135,9 @@ class AutoSploitParser(argparse.ArgumentParser):
             ethics_file = "{}/etc/text_files/ethics.lst".format(os.getcwd())
             with open(ethics_file) as ethics:
                 ethic = random.choice(ethics.readlines()).strip()
-                lib.settings.close("Here we have an ethical lesson for you:\n\n{}".format(ethic))
+                lib.settings.close(
+                    "You should take this ethical lesson into consideration "
+                    "before you continue with the use of this tool:\n\n{}\n".format(ethic))
         if opt.exploitList:
             try:
                 lib.output.info("converting {} to JSON format".format(opt.exploitList))
@@ -154,8 +158,7 @@ class AutoSploitParser(argparse.ArgumentParser):
         elif opt.appendHosts:
             search_save_mode = "a"
 
-        # TODO[4]:// move the searches into their own class and call it from the static method if a search is needed
-        # this is ugly and i wanna change it
+        # changed my mind it's not to bad
         if opt.searchCensys:
             lib.output.info(single_search_msg.format("Censys"))
             api_searches[2](
