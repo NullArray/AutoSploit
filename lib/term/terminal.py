@@ -307,8 +307,15 @@ class AutoSploitTerminal(object):
                     elif choice == 2:
                         print(self.sep)
                         query = lib.output.prompt("enter your search query", lowercase=False)
-                        with open(lib.settings.QUERY_FILE_PATH, "a+") as _query:
-                            _query.write(query)
+                        try:
+                            with open(lib.settings.QUERY_FILE_PATH, "w") as _query:
+                                _query.write(query)
+                        except AttributeError:
+                            filename = tempfile.NamedTemporaryFile(delete=False).name
+                            with open(filename, "w") as _query:
+                                _query.write(query)
+                                lib.settings.QUERY_FILE_PATH = filename
+                        print lib.settings.QUERY_FILE_PATH
                         proxy, agent = __config_headers()
                         # possibly needs to change here (see TODO[2])
                         self.gather_hosts(query, proxy=proxy, agent=agent)

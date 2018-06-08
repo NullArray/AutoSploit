@@ -34,7 +34,7 @@ START_SERVICES_PATH = "{}/etc/scripts/start_services.sh".format(CUR_DIR)
 RC_SCRIPTS_PATH = "{}/autosploit_out/".format(CUR_DIR)
 
 # path to the file that will contain our query
-# QUERY_FILE_PATH = tempfile.NamedTemporaryFile(delete=False).name
+QUERY_FILE_PATH = tempfile.NamedTemporaryFile(delete=False).name
 
 # default HTTP User-Agent
 DEFAULT_USER_AGENT = "AutoSploit/{} (Language=Python/{}; Platform={})".format(

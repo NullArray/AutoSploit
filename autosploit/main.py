@@ -32,6 +32,7 @@ def main():
     try:
         is_admin = os.getuid() == 0
     except AttributeError:
+        # we'll make it cross platform because it seems like a cool idea
         is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
 
     if not is_admin:
@@ -87,9 +88,6 @@ def main():
         loaded_tokens = load_api_keys()
         AutoSploitParser().parse_provided(opts)
 
-        # TODO[5] figure out why this isn't used anywhere
-        # maybe we can just remove it, idk
-        loaded_exploits = []
         if not opts.exploitFile:
             misc_info("checking if there are multiple exploit files")
             loaded_exploits = load_exploits(EXPLOIT_FILES_PATH)
