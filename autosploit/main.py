@@ -1,4 +1,6 @@
+import os
 import sys
+import ctypes
 import psutil
 import platform
 
@@ -26,6 +28,14 @@ from lib.jsonize import (
 
 
 def main():
+
+    try:
+        is_admin = os.getuid() == 0
+    except AttributeError:
+        is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
+
+    if not is_admin:
+        close("must have admin privileges to run")
 
     opts = AutoSploitParser().optparser()
 
