@@ -5,3 +5,5 @@ hosts.txt
 secret.p
 uid.p
 etc/tokens/*
+autosploit_out/*
+venv/*

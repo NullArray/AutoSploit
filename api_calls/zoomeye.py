@@ -20,13 +20,14 @@ class ZoomEyeAPIHook(object):
     so we're going to use some 'lifted' credentials to login for us
     """
 
-    def __init__(self, query=None, proxy=None, agent=None, **kwargs):
+    def __init__(self, query=None, proxy=None, agent=None, save_mode=None, **kwargs):
         self.query = query
         self.host_file = HOST_FILE
         self.proxy = proxy
         self.user_agent = agent
         self.user_file = "{}/etc/text_files/users.lst".format(os.getcwd())
         self.pass_file = "{}/etc/text_files/passes.lst".format(os.getcwd())
+        self.save_mode = save_mode
 
     @staticmethod
     def __decode(filepath):
@@ -81,7 +82,7 @@ class ZoomEyeAPIHook(object):
                         discovered_zoomeye_hosts.add(ip)
                 else:
                     discovered_zoomeye_hosts.add(str(item["ip"][0]))
-            write_to_file(discovered_zoomeye_hosts, self.host_file)
+            write_to_file(discovered_zoomeye_hosts, self.host_file, mode=self.save_mode)
             return True
         except Exception as e:
             raise AutoSploitAPIConnectionError(str(e))

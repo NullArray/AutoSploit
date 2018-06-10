@@ -1,4 +1,6 @@
+import os
 import sys
+import ctypes
 import psutil
 import platform
 
@@ -19,10 +21,22 @@ from lib.settings import (
     EXPLOIT_FILES_PATH,
     START_SERVICES_PATH
 )
-from lib.jsonize import load_exploits
+from lib.jsonize import (
+    load_exploits,
+    load_exploit_file
+)
 
 
 def main():
+
+    try:
+        is_admin = os.getuid() == 0
+    except AttributeError:
+        # we'll make it cross platform because it seems like a cool idea
+        is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
+
+    if not is_admin:
+        close("must have admin privileges to run")
 
     opts = AutoSploitParser().optparser()
 
@@ -73,8 +87,16 @@ def main():
         info("attempting to load API keys")
         loaded_tokens = load_api_keys()
         AutoSploitParser().parse_provided(opts)
-        misc_info("checking if there are multiple exploit files")
-        loaded_exploits = load_exploits(EXPLOIT_FILES_PATH)
+
+        if not opts.exploitFile:
+            misc_info("checking if there are multiple exploit files")
+            loaded_exploits = load_exploits(EXPLOIT_FILES_PATH)
+        else:
+            loaded_exploits = load_exploit_file(opts.exploitFile)
+            misc_info("Loaded {} exploits from {}.".format(
+                len(loaded_exploits),
+                opts.exploitFile))
+
         AutoSploitParser().single_run_args(opts, loaded_tokens, loaded_exploits)
     else:
         warning("no arguments have been parsed, defaulting to terminal session. press 99 to quit and help to get help")

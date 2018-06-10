@@ -41,6 +41,11 @@ class AutoSploitParser(argparse.ArgumentParser):
                         help="use shodan.io as the search engine to gather hosts")
         se.add_argument("-a", "--all", action="store_true", dest="searchAll",
                         help="search all available search engines to gather hosts")
+        save_results_args = se.add_mutually_exclusive_group(required=False)
+        save_results_args.add_argument("-O", "--overwrite", action="store_true", dest="overwriteHosts",
+                        help="When specified, start from scratch by overwriting the host file with new search results.")
+        save_results_args.add_argument("-A", "--append", action="store_true", dest="appendHosts",
+                                       help="When specified, append discovered hosts to the host file.")
 
         req = parser.add_argument_group("requests", "arguments to edit your requests")
         req.add_argument("--proxy", metavar="PROTO://IP:PORT", dest="proxyConfig",
@@ -59,6 +64,10 @@ class AutoSploitParser(argparse.ArgumentParser):
                              help="set the configuration for MSF (IE -C default 127.0.0.1 8080)")
         exploit.add_argument("-e", "--exploit", action="store_true", dest="startExploit",
                              help="start exploiting the already gathered hosts")
+        exploit.add_argument("-d", "--dry-run", action="store_true", dest="dryRun",
+                             help="Do not launch metasploit's exploits. Do everything else. msfconsole is never called.")
+        exploit.add_argument("-f", "--exploit-file-to-use", metavar="PATH", dest="exploitFile",
+                             help="Run AutoSploit with provided exploit JSON file.")
 
         misc = parser.add_argument_group("misc arguments", "arguments that don't fit anywhere else")
         misc.add_argument("--ruby-exec", action="store_true", dest="rubyExecutableNeeded",
@@ -80,10 +89,10 @@ class AutoSploitParser(argparse.ArgumentParser):
         parser = any([opt.searchAll, opt.searchZoomeye, opt.searchCensys, opt.searchShodan])
 
         if opt.rubyExecutableNeeded and opt.pathToFramework is None:
-            lib.settings.close("if the Ruby exec is needed, so is that path to metasploit, pass the `--msf-path` switch")
+            lib.settings.close("if the Ruby exec is needed, so is the path to metasploit, pass the `--msf-path` switch")
         if opt.pathToFramework is not None and not opt.rubyExecutableNeeded:
             lib.settings.close(
-                "if you need the metasploit path, you also need the executable. pass the `--ruby-exec` switch"
+                "if you need the metasploit path, you also need the ruby executable. pass the `--ruby-exec` switch"
             )
         if opt.personalAgent is not None and opt.randomAgent:
             lib.settings.close("you cannot use both a personal agent and a random agent, choose only one")
@@ -97,7 +106,9 @@ class AutoSploitParser(argparse.ArgumentParser):
         if opt.startExploit and opt.msfConfig is None:
             lib.settings.close(
                 "you must provide the configuration for metasploit in order to start the exploits "
-                "do so by passing the `-C\--config` switch IE -C default 127.0.0.1 8080"
+                "do so by passing the `-C\--config` switch (IE -C default 127.0.0.1 8080). don't be "
+                "an idiot and keep in mind that sending connections back to your localhost is "
+                "probably not a good idea"
             )
         if not opt.startExploit and opt.msfConfig is not None:
             lib.settings.close(
@@ -124,7 +135,9 @@ class AutoSploitParser(argparse.ArgumentParser):
             ethics_file = "{}/etc/text_files/ethics.lst".format(os.getcwd())
             with open(ethics_file) as ethics:
                 ethic = random.choice(ethics.readlines()).strip()
-                lib.settings.close("Here we have an ethical lesson for you:\n\n{}".format(ethic))
+                lib.settings.close(
+                    "You should take this ethical lesson into consideration "
+                    "before you continue with the use of this tool:\n\n{}\n".format(ethic))
         if opt.exploitList:
             try:
                 lib.output.info("converting {} to JSON format".format(opt.exploitList))
@@ -134,44 +147,60 @@ class AutoSploitParser(argparse.ArgumentParser):
                 lib.output.error("caught IOError '{}' check the file path and try again".format(str(e)))
             sys.exit(0)
 
+        search_save_mode = None
+        if opt.overwriteHosts:
+            # Create a new empty file, overwriting the previous one.
+            # Set the mode to append afterwards
+            # This way, successive searches will start clean without
+            # overriding each others.
+            open(lib.settings.HOST_FILE, mode="w").close()
+            search_save_mode = "a"
+        elif opt.appendHosts:
+            search_save_mode = "a"
+
+        # changed my mind it's not to bad
         if opt.searchCensys:
             lib.output.info(single_search_msg.format("Censys"))
             api_searches[2](
                 keys["censys"][1], keys["censys"][0],
-                opt.searchQuery, proxy=headers[0], agent=headers[1]
+                opt.searchQuery, proxy=headers[0], agent=headers[1],
+                save_mode=search_save_mode
             ).censys()
         if opt.searchZoomeye:
             lib.output.info(single_search_msg.format("Zoomeye"))
             api_searches[0](
-                opt.searchQuery, proxy=headers[0], agent=headers[1]
+                opt.searchQuery, proxy=headers[0], agent=headers[1],
+                save_mode=search_save_mode
             ).zoomeye()
         if opt.searchShodan:
             lib.output.info(single_search_msg.format("Shodan"))
             api_searches[1](
-                keys["shodan"][0], opt.searchQuery, proxy=headers[0], agent=headers[1]
+                keys["shodan"][0], opt.searchQuery, proxy=headers[0], agent=headers[1],
+                save_mode=search_save_mode
             ).shodan()
         if opt.searchAll:
             lib.output.info("searching all search engines in order")
             api_searches[0](
-                opt.searchQuery, proxy=headers[0], agent=headers[1]
+                opt.searchQuery, proxy=headers[0], agent=headers[1],
+                save_mode=search_save_mode
             ).zoomeye()
             api_searches[1](
-                keys["shodan"][0], opt.searchQuery, proxy=headers[0], agent=headers[1]
+                keys["shodan"][0], opt.searchQuery, proxy=headers[0], agent=headers[1],
+                save_mode=search_save_mode
             ).shodan()
             api_searches[2](
-                keys["censys"][1], keys["censys"][0], opt.searchQuery, proxy=headers[0], agent=headers[1]
+                keys["censys"][1], keys["censys"][0], opt.searchQuery, proxy=headers[0], agent=headers[1],
+                save_mode=search_save_mode
             ).censys()
         if opt.startExploit:
-            try:
-                hosts = open(lib.settings.HOST_FILE).readlines()
-                if opt.whitelist:
-                    hosts = lib.exploitation.exploiter.whitelist_wash(hosts, whitelist_file=opt.whitelist)
-                lib.exploitation.exploiter.AutoSploitExploiter(
-                    opt.msfConfig,
-                    loaded_modules,
-                    hosts,
-                    ruby_exec=opt.rubyExecutableNeeded,
-                    msf_path=opt.pathToFramework
-                ).start_exploit()
-            except KeyboardInterrupt:
-                lib.output.warning("user aborted scan")
+            hosts = open(lib.settings.HOST_FILE).readlines()
+            if opt.whitelist:
+                hosts = lib.exploitation.exploiter.whitelist_wash(hosts, whitelist_file=opt.whitelist)
+            lib.exploitation.exploiter.AutoSploitExploiter(
+                opt.msfConfig,
+                loaded_modules,
+                hosts,
+                ruby_exec=opt.rubyExecutableNeeded,
+                msf_path=opt.pathToFramework,
+                dryRun=opt.dryRun
+            ).start_exploit()

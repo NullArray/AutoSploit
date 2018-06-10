@@ -23,12 +23,48 @@ function installFedora () {
 }
 
 function installOSX () {
-  sudo /usr/sbin/apachectl start;
-  brew doctor;
-  brew update;
-  brew install postgresql;
-  brew services start postgresql;
-  installMSF;
+  xcode-select --install;
+  /usr/bin/ruby -e "$(curl -fsSkL raw.github.com/mxcl/homebrew/go)";
+  echo PATH=/usr/local/bin:/usr/local/sbin:$PATH >> ~/.bash_profile;
+  source ~/.bash_profile;
+  brew tap homebrew/versions;
+  brew install nmap;
+  brew install homebrew/versions/ruby21;
+  gem install bundler;
+  brew install postgresql --without-ossp-uuid;
+  initdb /usr/local/var/postgres;
+  mkdir -p ~/Library/LaunchAgents;
+  cp /usr/local/Cellar/postgresql/9.4.4/homebrew.mxcl.postgresql.plist ~/Library/LaunchAgents/;
+  launchctl load -w ~/Library/LaunchAgents/homebrew.mxcl.postgresql.plist;
+  createuser msf -P -h localhost;
+  createdb -O msf msf -h localhost;
+  installOsxMSF;
+}
+
+function installOsxMSF () {
+  mkdir /usr/local/share;
+  cd /usr/local/share/;
+  git clone https://github.com/rapid7/metasploit-framework.git;
+  cd metasploit-framework;
+  for MSF in $(ls msf*); do ln -s /usr/local/share/metasploit-framework/$MSF /usr/local/bin/$MSF;done;
+  sudo chmod go+w /etc/profile;
+  sudo echo export MSF_DATABASE_CONFIG=/usr/local/share/metasploit-framework/config/database.yml >> /etc/profile;
+  bundle install;
+  echo "[!!] A DEFAULT CONFIG OF THE FILE 'database.yml' WILL BE USED";
+  rm /usr/local/share/metasploit-framework/config/database.yml;
+  cat > /usr/local/share/metasploit-framework/config/database.yml << '_EOF'
+production:
+  adapter: postgresql
+  database: msf
+  username: msf
+  password:
+  host: 127.0.0.1
+  port: 5432
+  pool: 75
+  timeout: 5
+_EOF
+  source /etc/profile;
+  source ~/.bash_profile;
 }
 
 function installMSF () {

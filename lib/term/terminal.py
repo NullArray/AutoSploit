@@ -80,7 +80,7 @@ class AutoSploitTerminal(object):
 
     def add_single_host(self):
         """
-        add a singluar host to the hosts.txt file and check if the host
+        add a singular host to the hosts.txt file and check if the host
         will resolve to a true IP address, if it is not a true IP address
         you will be re-prompted for an IP address
 
@@ -129,7 +129,13 @@ class AutoSploitTerminal(object):
         else:
             choice = given_choice
         while not searching:
+            # TODO[2]:// bug in the animation, if the user chooses one search engine to search
+            # the animation does not stop when the user chooses a single search engine, instead
+            # the user will see the animation continuously until they either:
+            #   A) exit the terminal
+            #   B) search another search engine
             try:
+                # something in here needs to change (see TODO[2])
                 choice = int(choice)
                 if choice == 1:
                     choice_dict[choice](
@@ -204,29 +210,36 @@ class AutoSploitTerminal(object):
             ruby_exec=ruby_exec,
             msf_path=msf_path
         )
-        sorted_mods = exploiter.sort_modules_by_query()
-        choice = lib.output.prompt(
-            "a total of {} modules have been sorted by relevance, would you like to display them[y/N]".format(
-                len(sorted_mods)
+        try:
+            sorted_mods = exploiter.sort_modules_by_query()
+            choice = lib.output.prompt(
+                "a total of {} modules have been sorted by relevance, would you like to display them[y/N]".format(
+                    len(sorted_mods)
+                )
             )
-        )
-        if not choice.lower().strip().startswith("y"):
-            mods = lib.output.prompt("use relevant modules[y/N]")
-            if mods.lower().startswith("n"):
-                lib.output.info("starting exploitation with all loaded modules (total of {})".format(len(loaded_mods)))
-                exploiter.start_exploit()
-            elif mods.lower().startswith("y"):
-                lib.output.info("starting exploitation with sorted modules (total of {})".format(len(sorted_mods)))
-                exploiter.start_exploit()
-        else:
-            exploiter.view_sorted()
-            mods = lib.output.prompt("use relevant modules[y/N]")
-            if mods.lower().startswith("n"):
-                lib.output.info("starting exploitation with all loaded modules (total of {})".format(len(loaded_mods)))
-                exploiter.start_exploit()
-            elif mods.lower().startswith("y"):
-                lib.output.info("starting exploitation with sorted modules (total of {})".format(len(sorted_mods)))
-                exploiter.start_exploit()
+
+            if not choice.lower().strip().startswith("y"):
+                mods = lib.output.prompt("use relevant modules[y/N]")
+                if mods.lower().startswith("n"):
+                    lib.output.info(
+                        "starting exploitation with all loaded modules (total of {})".format(len(loaded_mods)))
+                    exploiter.start_exploit()
+                elif mods.lower().startswith("y"):
+                    lib.output.info("starting exploitation with sorted modules (total of {})".format(len(sorted_mods)))
+                    exploiter.start_exploit()
+            else:
+                exploiter.view_sorted()
+                mods = lib.output.prompt("use relevant modules[y/N]")
+                if mods.lower().startswith("n"):
+                    lib.output.info(
+                        "starting exploitation with all loaded modules (total of {})".format(len(loaded_mods)))
+                    exploiter.start_exploit()
+                elif mods.lower().startswith("y"):
+                    lib.output.info("starting exploitation with sorted modules (total of {})".format(len(sorted_mods)))
+                    exploiter.start_exploit()
+        except AttributeError:
+            lib.output.warning("unable to sort modules by relevance")
+
 
     def custom_host_list(self, mods):
         """
@@ -268,6 +281,7 @@ class AutoSploitTerminal(object):
                 for i in lib.settings.AUTOSPLOIT_TERM_OPTS.keys():
                     print("{}. {}".format(i, lib.settings.AUTOSPLOIT_TERM_OPTS[i].title()))
                 choice = raw_input(lib.settings.AUTOSPLOIT_PROMPT)
+                # TODO[3] this is ugly so it needs to change
                 try:
                     choice = int(choice)
                     if choice == 99:
@@ -293,9 +307,17 @@ class AutoSploitTerminal(object):
                     elif choice == 2:
                         print(self.sep)
                         query = lib.output.prompt("enter your search query", lowercase=False)
-                        with open(lib.settings.QUERY_FILE_PATH, "a+") as _query:
-                            _query.write(query)
+                        try:
+                            with open(lib.settings.QUERY_FILE_PATH, "w") as _query:
+                                _query.write(query)
+                        except AttributeError:
+                            filename = tempfile.NamedTemporaryFile(delete=False).name
+                            with open(filename, "w") as _query:
+                                _query.write(query)
+                                lib.settings.QUERY_FILE_PATH = filename
+                        print lib.settings.QUERY_FILE_PATH
                         proxy, agent = __config_headers()
+                        # possibly needs to change here (see TODO[2])
                         self.gather_hosts(query, proxy=proxy, agent=agent)
                         print(self.sep)
                     elif choice == 1:
