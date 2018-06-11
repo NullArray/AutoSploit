@@ -253,6 +253,7 @@ def close(warning, status=1):
     lib.output.error(warning)
     sys.exit(status)
 
+
 def grab_random_agent():
     """
     get a random HTTP User-Agent

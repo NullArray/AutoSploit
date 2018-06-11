@@ -73,7 +73,7 @@ def main():
                 except psutil.NoSuchProcess:
                     pass
             else:
-                process_start_command = "`sudo service {} start`"
+                process_start_command = "`sudo systemctl {} start`"
                 if "darwin" in platform_running.lower():
                     process_start_command = "`brew services start {}`"
                 close(

@@ -1,8 +1,10 @@
 import os
 import sys
+import tempfile
 
 import lib.settings
 import lib.output
+import lib.errors
 import lib.exploitation.exploiter
 import api_calls.shodan
 import api_calls.zoomeye
@@ -239,7 +241,6 @@ class AutoSploitTerminal(object):
                     exploiter.start_exploit()
         except AttributeError:
             lib.output.warning("unable to sort modules by relevance")
-
 
     def custom_host_list(self, mods):
         """

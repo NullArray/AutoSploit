@@ -10,3 +10,5 @@
 "Both Metasploit and Shodan have been available for years, as integral to the pen testers toolkit as Nessus and Burpsuite. But with Autosploit pulling them together, the concern should be focused on curious kids thinking it would be fun to see what they can find"
 "My fear is that this has magnified the attack surface, and made it so that every exposed service on the internet will be scanned and probed on a near-constant basis by an entirely new set of attackers."
 "The release of tools like these exponentially expands the threat landscape by allowing a wider group of hackers to launch global attacks at will"
+"Good to know we’ve weaponized for the masses. Everyone can now be a script kiddie simply by plugging, playing and attacking."
+"The fact that something is really easy, does not make unauthorized computer access any less a crime. And tools like this leave a forensic footprint that is miles wide. Yes, you can compromise poorly protected systems very easily with this tool, but you can also end up in a lot of trouble."
