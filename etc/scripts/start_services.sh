@@ -1,6 +1,9 @@
 #!/bin/bash
 
 function startApacheLinux () {
+  # NOTE: if you are running on Arch uncomment this
+  #sudo systemctl start apache > /dev/null 2>&1
+  # and comment this one out
   sudo systemctl start apache2 > /dev/null 2>&1
 }
 
