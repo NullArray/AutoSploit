@@ -1,14 +1,7 @@
 import os
 import random
 
-VERSION = "2.2"
-COLOR_CODEX = {
-    "red": "\033[31m", "bright red": "\033[1m\033[31m",
-    "blue": "\033[36m", "bright blue": "\033[1m\033[36m",
-    "green": "\033[32m", "bright green": "\033[1m\033[32m",
-    "grey": "\033[37m", "white": "\033[1m\033[38m",
-    "end": "\033[0m"
-}
+VERSION = "2.2.1"
 
 
 def banner_1(line_sep="#--", space=" " * 30):
@@ -32,11 +25,9 @@ def banner_2():
 {blue}--+{end}            {red}AutoSploit{end}            {blue}+--{end}
 {blue}--+{end}           NullArray/Eku          {blue}+--{end}
 {blue}--+{end}{minor_space2}             v({red}{vnum}{end}){minor_space}             {blue}+--{end}
-    """.format(
-        vnum=VERSION, blue=COLOR_CODEX["blue"], red=COLOR_CODEX["red"], end=COLOR_CODEX["end"],
-        minor_space=" " * 1 if len(VERSION) == 3 else "",
-        minor_space2=" " * 1 if len(VERSION) == 3 else ""
-    )
+    """.format(vnum=VERSION, blue="\033[36m", red="\033[31m", end="\033[0m",
+               minor_space=" " * 1 if len(VERSION) == 3 else "",
+               minor_space2=" " * 1 if len(VERSION) == 3 else "")
     return banner
 
 
@@ -66,11 +57,11 @@ def banner_3():
                      |  /            |  |
                      \  \__          |   \__
                      /\____=\       /\_____=\{end} v({vnum})'''''.format(
-        green=COLOR_CODEX["bright green"], end=COLOR_CODEX["end"], vnum=VERSION
+        green="\033[1m\033[32m", end="\033[0m", vnum=VERSION
     )
     return banner
 
-    
+
 def banner_4():
     banner = r"""
 {red}    .__.    ,     __.   .     , 	{end}
@@ -90,10 +81,8 @@ def banner_4():
 {blue}-----+       v({red}{vnum}{end}{blue}){spacer}+-----{end}
 {blue}-----------NullArray/Eku----------{end}	  
 {blue}__________________________________{end}
-    """.format(
-        vnum=VERSION, blue=COLOR_CODEX["blue"], red=COLOR_CODEX["red"], end=COLOR_CODEX["end"],
-       spacer=" " * 9 if len(VERSION) == 3 else " " * 7
-    )
+    """.format(vnum=VERSION, blue="\033[36m", red="\033[31m", end="\033[0m",
+               spacer=" " * 9 if len(VERSION) == 3 else " " * 7)
     return banner
 
 
@@ -114,50 +103,7 @@ def banner_5():
    {grey}|       |{end}
    {grey}`-.___.-'{end}
    v({red}{version}{end})
-    """.format(
-        end=COLOR_CODEX["end"], grey=COLOR_CODEX["grey"], white=COLOR_CODEX["white"],
-        version=VERSION, red=COLOR_CODEX["red"]
-    )
-    return banner
-
-
-def banner_6():
-    banner = r"""{red}
-  ________              _____  _____.__  __  .__      
- /  _____/___________ _/ ____\/ ____\__|/  |_|__|     
-/   \  __\_  __ \__  \\   __\\   __\|  \   __\  |     
-\    \_\  \  | \// __ \|  |   |  |  |  ||  | |  |     
- \______  /__|  (____  /__|   |__|  |__||__| |__|     
-        \/           \/{end}{green}                               
-___________.__                                        
-\__    ___/|  |__   ____                              
-  |    |   |  |  \_/ __ \                             
-  |    |   |   Y  \  ___/                             
-  |____|   |___|  /\___  >                            
-                \/     \/{blue}
- __      __            .__       .___                 
-/  \    /  \___________|  |    __| _/                 
-\   \/\/   /  _ \_  __ \  |   / __ |                  
- \        (  <_> )  | \/  |__/ /_/ |                  
-  \__/\  / \____/|__|  |____/\____ |                  
-       \/                         \/{end}{grey}     
- __      __.__  __  .__                               
-/  \    /  \__|/  |_|  |__                            
-\   \/\/   /  \   __\  |  \                           
- \        /|  ||  | |   Y  \                          
-  \__/\  / |__||__| |___|  /                          
-       \/                \/{end}{white}                           
-___________              .__         .__  __          
-\_   _____/__  _________ |  |   ____ |__|/  |_  ______
- |    __)_\  \/  /\____ \|  |  /  _ \|  \   __\/  ___/
- |        \>    < |  |_> >  |_(  <_> )  ||  |  \___ \ 
-/_______  /__/\_ \|   __/|____/\____/|__||__| /____  >
-        \/      \/|__|                             \/ {end}
-{white}v{version}->NullArray/Eku{end}""".format(
-        end=COLOR_CODEX["end"], grey=COLOR_CODEX["grey"], white=COLOR_CODEX["white"],
-        version=VERSION, red=COLOR_CODEX["bright red"], green=COLOR_CODEX["bright green"],
-        blue=COLOR_CODEX["bright blue"]
-    )
+    """.format(end="\033[0m", grey="\033[36m", white="\033[37m", version=VERSION, red="\033[31m")
     return banner
 
 
@@ -166,7 +112,7 @@ def banner_main():
     grab a random banner each run
     """
     banners = [
-        banner_6, banner_5, banner_4,
+        banner_5, banner_4,
         banner_3, banner_2, banner_1
     ]
     if os.getenv("Graffiti", False):

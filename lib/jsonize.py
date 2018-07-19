@@ -48,17 +48,9 @@ def load_exploits(path, node="exploits"):
     """
     retval = []
     file_list = os.listdir(path)
-    exploit_files = []
     if len(file_list) != 1:
+        lib.output.info("total of {} exploit files discovered for use, select one:".format(len(file_list)))
         for i, f in enumerate(file_list, start=1):
-            # we're going to go ahead and make sure that the file is not a directory
-            # this will allow us to create directories and fill them with JSON data
-            # in the future
-            if os.path.isfile(os.path.join(path, f)):
-                exploit_files.append(f)
-        # after we've done that, we'll go ahead and continue with what we where doing
-        lib.output.info("total of {} exploit files discovered for use, select one:".format(len(exploit_files)))
-        for i, f in enumerate(exploit_files, start=1):
             print("{}. '{}'".format(i, f[:-5]))
         action = raw_input(lib.settings.AUTOSPLOIT_PROMPT)
         selected_file = file_list[int(action) - 1]
@@ -77,7 +69,7 @@ def load_exploits(path, node="exploits"):
     return retval
 
 
-def text_file_to_dict(path):
+def text_file_to_dict(path, filename=None):
     """
     take a text file path, and load all of the information into a `dict`
     send that `dict` into a JSON format and save it into a file. it will
@@ -89,7 +81,10 @@ def text_file_to_dict(path):
         for exploit in exploits.readlines():
             # load everything into the dict
             start_dict["exploits"].append(exploit.strip())
-    filename_path = "{}/etc/json/{}.json".format(os.getcwd(), random_file_name())
+    if filename is None:
+        filename_path = "{}/etc/json/{}.json".format(os.getcwd(), random_file_name())
+    else:
+        filename_path = filename
     with open(filename_path, "a+") as exploits:
         # sort and indent to make it look pretty
         _data = json.dumps(start_dict, indent=4, sort_keys=True)

@@ -43,8 +43,7 @@ class AutoSploitParser(argparse.ArgumentParser):
                         help="search all available search engines to gather hosts")
         save_results_args = se.add_mutually_exclusive_group(required=False)
         save_results_args.add_argument("-O", "--overwrite", action="store_true", dest="overwriteHosts",
-                                       help="When specified, start from scratch by overwriting the host "
-                                            "file with new search results.")
+                        help="When specified, start from scratch by overwriting the host file with new search results.")
         save_results_args.add_argument("-A", "--append", action="store_true", dest="appendHosts",
                                        help="When specified, append discovered hosts to the host file.")
 
@@ -78,7 +77,9 @@ class AutoSploitParser(argparse.ArgumentParser):
         misc.add_argument("--ethics", action="store_true", dest="displayEthics",
                           help=argparse.SUPPRESS)  # easter egg!
         misc.add_argument("--whitelist", metavar="PATH", dest="whitelist",
-                          help="only exploit hosts listed in the whitelist file")
+                             help="only exploit hosts listed in the whitelist file")
+        misc.add_argument("-D", "--download", nargs="+", metavar="SEARCH1 SEARCH2 ...", dest="downloadModules",
+                          help="download new exploit modules with a provided search flag")
         opts = parser.parse_args()
         return opts
 
@@ -139,6 +140,8 @@ class AutoSploitParser(argparse.ArgumentParser):
                 lib.settings.close(
                     "You should take this ethical lesson into consideration "
                     "before you continue with the use of this tool:\n\n{}\n".format(ethic))
+        if opt.downloadModules is not None:
+            print "downloading MODULES!"
         if opt.exploitList:
             try:
                 lib.output.info("converting {} to JSON format".format(opt.exploitList))

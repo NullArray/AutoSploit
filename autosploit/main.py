@@ -18,6 +18,7 @@ from lib.settings import (
     check_services,
     cmdline,
     close,
+    download_modules_list,
     EXPLOIT_FILES_PATH,
     START_SERVICES_PATH
 )
@@ -39,6 +40,16 @@ def main():
         close("must have admin privileges to run")
 
     opts = AutoSploitParser().optparser()
+
+    if opts.downloadModules is not None:
+        info("downloading modules")
+        for search in opts.downloadModules:
+            downloaded = download_modules_list(search)
+            info("downloaded {} file(s)".format(len(downloaded)))
+            for f in downloaded:
+                print("=> {}".format(f))
+        info("new exploit paths have been added to JSON files, re-run autosploit to access them")
+        exit(1)
 
     logo()
     info("welcome to autosploit, give us a little bit while we configure")
@@ -73,7 +84,7 @@ def main():
                 except psutil.NoSuchProcess:
                     pass
             else:
-                process_start_command = "`sudo systemctl {} start`"
+                process_start_command = "`sudo service {} start`"
                 if "darwin" in platform_running.lower():
                     process_start_command = "`brew services start {}`"
                 close(
