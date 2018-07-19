@@ -335,7 +335,10 @@ def download_modules_list(search_string):
                 length = len(raw_exploits)
                 lib.output.info("downloading a total of {} module paths".format(length))
                 for i, line in enumerate(raw_exploits):
-                    tmp.write(line.split(" ")[3] + os.linesep)
+                    try:
+                        tmp.write(line.split(" ")[3] + os.linesep)
+                    except IndexError:
+                        pass
                 tmp.seek(0)
             lib.jsonize.text_file_to_dict(random_temp_file_for_download, filename=filepath)
             lib.output.misc_info("removing created tmp file: '{}'".format(random_temp_file_for_download))
