@@ -69,7 +69,7 @@ def load_exploits(path, node="exploits"):
     return retval
 
 
-def text_file_to_dict(path):
+def text_file_to_dict(path, filename=None):
     """
     take a text file path, and load all of the information into a `dict`
     send that `dict` into a JSON format and save it into a file. it will
@@ -81,7 +81,10 @@ def text_file_to_dict(path):
         for exploit in exploits.readlines():
             # load everything into the dict
             start_dict["exploits"].append(exploit.strip())
-    filename_path = "{}/etc/json/{}.json".format(os.getcwd(), random_file_name())
+    if filename is None:
+        filename_path = "{}/etc/json/{}.json".format(os.getcwd(), random_file_name())
+    else:
+        filename_path = filename
     with open(filename_path, "a+") as exploits:
         # sort and indent to make it look pretty
         _data = json.dumps(start_dict, indent=4, sort_keys=True)

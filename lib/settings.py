@@ -63,6 +63,15 @@ API_URLS = {
     )
 }
 
+# has msf been launched?
+MSF_LAUNCHED = False
+
+# token path for issue requests
+TOKEN_PATH = "{}/etc/text_files/auth.key".format(CUR_DIR)
+
+# location of error files
+ERROR_FILES_LOCATION = "{}/.autosploit_errors".format(os.path.expanduser("~"))
+
 # terminal options
 AUTOSPLOIT_TERM_OPTS = {
     1: "usage and legal", 2: "gather hosts", 3: "custom hosts",
@@ -253,6 +262,7 @@ def close(warning, status=1):
     lib.output.error(warning)
     sys.exit(status)
 
+
 def grab_random_agent():
     """
     get a random HTTP User-Agent
@@ -292,3 +302,23 @@ def configure_requests(proxy=None, agent=None, rand_agent=False):
         }
 
     return proxy_dict, header_dict
+
+
+def save_error_to_file(error_info):
+    """
+    save an error traceback to log file for further use
+    """
+
+    import string
+
+    if not os.path.exists(ERROR_FILES_LOCATION):
+        os.makedirs(ERROR_FILES_LOCATION)
+    acceptable = string.ascii_letters
+    filename = []
+    for _ in range(12):
+        filename.append(random.choice(acceptable))
+    filename = ''.join(filename) + "_AS_error.txt"
+    file_path = "{}/{}".format(ERROR_FILES_LOCATION, filename)
+    with open(file_path, "a+") as log:
+        log.write(error_info)
+    return file_path
