@@ -31,11 +31,7 @@ USAGE_AND_LEGAL_PATH = "{}/etc/text_files/general".format(CUR_DIR)
 # one bash script to rule them all takes an argument via the operating system
 START_SERVICES_PATH = "{}/etc/scripts/start_services.sh".format(CUR_DIR)
 
-# rc script path
 RC_SCRIPTS_PATH = "{}/autosploit_out/".format(CUR_DIR)
-
-# links to all the downloadable modules
-MODULE_DOWNLOAD_LINKS = "{}/etc/text_files/links.txt".format(CUR_DIR)
 
 # path to the file that will contain our query
 QUERY_FILE_PATH = tempfile.NamedTemporaryFile(delete=False).name
@@ -66,6 +62,15 @@ API_URLS = {
         "https://api.zoomeye.org/web/search"
     )
 }
+
+# has msf been launched?
+MSF_LAUNCHED = False
+
+# token path for issue requests
+TOKEN_PATH = "{}/etc/text_files/auth.key".format(CUR_DIR)
+
+# location of error files
+ERROR_FILES_LOCATION = "{}/.autosploit_errors".format(os.path.expanduser("~"))
 
 # terminal options
 AUTOSPLOIT_TERM_OPTS = {
@@ -299,51 +304,21 @@ def configure_requests(proxy=None, agent=None, rand_agent=False):
     return proxy_dict, header_dict
 
 
-def download_modules_list(search_string):
+def save_error_to_file(error_info):
     """
-    download msf exploit module paths
+    save an error traceback to log file for further use
     """
-    import re
-    import requests
-    import lib.jsonize
-    try:
-        from bs4 import BeautifulSoup
-    except ImportError:
-        close("in order to install modules you will need to install BeautifulSoup: `pip install beautifulsoup4`")
 
-    related = []
-    downloaded_files = []
+    import string
 
-    with open(MODULE_DOWNLOAD_LINKS) as downloads:
-        for link in downloads.readlines():
-            if search_string == "all":
-                related.append(link.strip())
-            else:
-                searcher = re.compile(search_string, re.I)
-                discovered = searcher.findall(link)
-                if len(discovered) != 0:
-                    related.append(link.strip())
-    lib.output.info("discovered a total of {} relevant file(s)".format(len(related)))
-    for link in related:
-        filepath = "{}/{}".format(EXPLOIT_FILES_PATH, link.split("/")[-1].replace(".txt", ".json"))
-        if not os.path.exists(filepath):
-            req = requests.get(link)
-            random_temp_file_for_download = "/tmp/{}.AS".format(lib.jsonize.random_file_name())
-            raw_content = req.content
-            with open(random_temp_file_for_download, "a+") as tmp:
-                raw_exploits = raw_content.split("\n")
-                length = len(raw_exploits)
-                lib.output.info("downloading a total of {} module paths".format(length))
-                for i, line in enumerate(raw_exploits):
-                    try:
-                        tmp.write(line.split(" ")[3] + os.linesep)
-                    except IndexError:
-                        pass
-                tmp.seek(0)
-            lib.jsonize.text_file_to_dict(random_temp_file_for_download, filename=filepath)
-            lib.output.misc_info("removing created tmp file: '{}'".format(random_temp_file_for_download))
-            os.remove(random_temp_file_for_download)
-            downloaded_files.append(filepath)
-        else:
-            lib.output.warning("file: '{}' already exists, skipping".format(filepath))
-    return downloaded_files
+    if not os.path.exists(ERROR_FILES_LOCATION):
+        os.makedirs(ERROR_FILES_LOCATION)
+    acceptable = string.ascii_letters
+    filename = []
+    for _ in range(12):
+        filename.append(random.choice(acceptable))
+    filename = ''.join(filename) + "_AS_error.txt"
+    file_path = "{}/{}".format(ERROR_FILES_LOCATION, filename)
+    with open(file_path, "a+") as log:
+        log.write(error_info)
+    return file_path
