@@ -181,7 +181,11 @@ class AutoSploitTerminal(object):
                 # If whitelist is specified, return a washed hosts list
                 host_file = lib.exploitation.exploiter.whitelist_wash(open(self.host_path).readlines(), whitelist_file)
             else:
-                host_file = open(self.host_path).readlines()
+                try:
+                    host_file = open(self.host_path).readlines()
+                except Exception:
+                    lib.output.error("no host file is present, did you gather hosts?")
+                    return
         else:
             if whitelist_file is not "" and not whitelist_file.isspace():
                 # If whitelist is specified, return a washed hosts list
@@ -239,7 +243,6 @@ class AutoSploitTerminal(object):
                     exploiter.start_exploit()
         except AttributeError:
             lib.output.warning("unable to sort modules by relevance")
-
 
     def custom_host_list(self, mods):
         """
