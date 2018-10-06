@@ -213,3 +213,4 @@ Thanks in advance.
 
  - [FR](https://github.com/NullArray/AutoSploit/blob/master/.github/.translations/README-fr.md)
  - [ZH](https://github.com/NullArray/AutoSploit/blob/master/.github/.translations/README-zh.md)
+ - [DE](https://github.com/NullArray/AutoSploit/blob/master/.github/.translations/README-de.md)
