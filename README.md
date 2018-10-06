@@ -197,11 +197,6 @@ And thanks to [Khast3x](https://github.com/khast3x) for setting up Docker suppor
 
 ### Active Development
 
-While this isn't exactly a Beta release, AutoSploit 2.0 is an early release nonetheless as such the tool might be subject to changes in the future.
-
-I've been working on the new version of the tool in an open source capacity with the help of a number of developers
-that have expressed an interest in doing so. If you would like to keep up to date on all the most recent developments be sure to check out the [Development Branch](https://github.com/NullArray/AutoSploit/tree/dev-beta).
-
 If you would like to contribute to the development of this project please be sure to read [CONTRIBUTING.md](https://github.com/NullArray/AutoSploit/blob/master/CONTRIBUTING.md) as it contains our contribution guidelines.
 
 Please, also, be sure to read our [contribution standards](https://github.com/NullArray/AutoSploit/wiki/Development-information#contribution-standards) before sending pull requests
@@ -218,3 +213,4 @@ Thanks in advance.
 
  - [FR](https://github.com/NullArray/AutoSploit/blob/master/.github/.translations/README-fr.md)
  - [ZH](https://github.com/NullArray/AutoSploit/blob/master/.github/.translations/README-zh.md)
+ - [DE](https://github.com/NullArray/AutoSploit/blob/master/.github/.translations/README-de.md)
