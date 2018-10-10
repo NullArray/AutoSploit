@@ -165,3 +165,5 @@ def request_issue_creation(path, arguments, error_message):
             lib.output.error(
                 "someone has already created this issue here: {}".format(find_url(identifier))
             )
+    else:
+        lib.output.info("the issue has been logged to a file in path: '{}'".format(path))

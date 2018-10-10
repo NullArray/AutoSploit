@@ -3,6 +3,7 @@ import sys
 
 import lib.settings
 import lib.output
+import lib.errors
 import lib.exploitation.exploiter
 import api_calls.shodan
 import api_calls.zoomeye
@@ -25,6 +26,23 @@ class AutoSploitTerminal(object):
         except IOError:
             lib.output.warning("no hosts file present, you need to gather some hosts")
             self.host_path = lib.settings.HOST_FILE
+
+    @staticmethod
+    def help_menu_full():
+        seperator = "-" * 30
+        help_choices = [
+            (0, "usage"),
+            (1, "view"),
+            (2, "single"),
+            (3, "exit"),
+            (4, "gather"),
+            (5, "exploit"),
+            (6, "custom"),
+        ]
+        print("\n{}\nPossible help choices:".format(seperator))
+        for i, _ in enumerate(help_choices):
+            print("{}- `help {}`".format(" " * 3, help_choices[i][1]))
+        print("{}\n".format(seperator))
 
     def usage_and_legal(self):
         """
@@ -166,6 +184,10 @@ class AutoSploitTerminal(object):
                 else:
                     lib.output.warning("must be integer between 1-{} not string".format(len(lib.settings.API_URLS.keys())))
                     self.gather_hosts(query, proxy=proxy, agent=agent)
+            except Exception as e:
+                lib.settings.stop_animation = True
+                lib.output.error("unable to search API got error: {}".format(str(e)))
+                break
 
     def exploit_gathered_hosts(self, loaded_mods, hosts=None):
         """
@@ -184,6 +206,7 @@ class AutoSploitTerminal(object):
                 try:
                     host_file = open(self.host_path).readlines()
                 except Exception:
+                    sys.stdout.flush()
                     lib.output.error("no host file is present, did you gather hosts?")
                     return
         else:
@@ -339,7 +362,7 @@ class AutoSploitTerminal(object):
                         else:
                             lib.output.warning("option must be integer not string")
                     elif choice == "help":
-                        lib.output.error("must provide an argument for help IE 'help exploit'")
+                        AutoSploitTerminal.help_menu_full()
 
         except KeyboardInterrupt:
             print("\n")
