@@ -21,6 +21,10 @@ CUR_DIR = "{}".format(os.getcwd())
 
 # path to the file containing all the discovered hosts
 HOST_FILE = "{}/hosts.txt".format(CUR_DIR)
+try:
+    open(HOST_FILE).close()
+except:
+    open(HOST_FILE, "a+").close()
 
 # path to the folder containing all the JSON exploit modules
 EXPLOIT_FILES_PATH = "{}/etc/json".format(CUR_DIR)
@@ -304,7 +308,7 @@ def configure_requests(proxy=None, agent=None, rand_agent=False):
     return proxy_dict, header_dict
 
 
-def save_error_to_file(error_info):
+def save_error_to_file(error_info, error_message, error_class):
     """
     save an error traceback to log file for further use
     """
@@ -320,5 +324,7 @@ def save_error_to_file(error_info):
     filename = ''.join(filename) + "_AS_error.txt"
     file_path = "{}/{}".format(ERROR_FILES_LOCATION, filename)
     with open(file_path, "a+") as log:
-        log.write(error_info)
+        log.write(
+            "Traceback (most recent call):\n " + error_info.strip() + "\n{}: {}".format(error_class, error_message)
+        )
     return file_path

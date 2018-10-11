@@ -48,12 +48,19 @@ def load_exploits(path, node="exploits"):
     """
     retval = []
     file_list = os.listdir(path)
+    selected = False
     if len(file_list) != 1:
         lib.output.info("total of {} exploit files discovered for use, select one:".format(len(file_list)))
-        for i, f in enumerate(file_list, start=1):
-            print("{}. '{}'".format(i, f[:-5]))
-        action = raw_input(lib.settings.AUTOSPLOIT_PROMPT)
-        selected_file = file_list[int(action) - 1]
+        while not selected:
+            for i, f in enumerate(file_list, start=1):
+                print("{}. '{}'".format(i, f[:-5]))
+            action = raw_input(lib.settings.AUTOSPLOIT_PROMPT)
+            try:
+                selected_file = file_list[int(action) - 1]
+                selected = True
+            except Exception:
+                lib.output.warning("invalid selection ('{}'), select from below".format(action))
+                selected = False
     else:
         selected_file = file_list[0]
 
