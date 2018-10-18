@@ -64,7 +64,7 @@ chmod +x install.sh
 ./install.sh
 ```
 
-If you want to run AutoSploit on a macOS system, AutoSploit is compatible with macOS, however, you have to be inside a virtual environment for it to run successfully. To do this, do the following;
+AutoSploit is compatible with macOS, however, you have to be inside a virtual environment for it to run successfully. In order to accomplish this employ/perform the below operations via the terminal or in the form of a shell script.
 
 ```bash
 sudo -s << '_EOF'
@@ -149,21 +149,6 @@ misc arguments:
   --whitelist PATH      only exploit hosts listed in the whitelist file
 ```
 
-If you want to run AutoSploit on a macOS system, AutoSploit is compatible with macOS, however, you have to be inside a virtual environment for it to run successfully. To do this, do the following;
-
-```bash
-sudo -s << '_EOF' 
-pip2 install virtualenv --user
-git clone https://github.com/NullArray/AutoSploit.git
-virtualenv <PATH-TO-YOUR-ENV>
-source <PATH-TO-YOUR-ENV>/bin/activate
-cd <PATH-TO-AUTOSPLOIT>
-pip2 install -r requirements.txt
-chmod +x install.sh
-./install.sh
-python autosploit.py
-_EOF
-```
 
 ## Dependencies
 _Note_: All dependencies should be installed using the above installation method, however, if you find they are not:
@@ -191,9 +176,11 @@ Since the program invokes functionality from the Metasploit Framework you need t
 
 ## Acknowledgements
 
-Special thanks to [Ekultek](https://github.com/Ekultek) without whoms contributions to the project version 2.0 would have been a lot less spectacular.
+Special thanks to [Ekultek](https://github.com/Ekultek) without whoms contributions to the project, version 2.0 would have been a lot less spectacular.
 
-And thanks to [Khast3x](https://github.com/khast3x) for setting up Docker support.
+Thanks to [Khast3x](https://github.com/khast3x) for setting up Docker support.
+
+Last but certainly not least. Thanks to all who have submitted Pull Requests, bug reports, useful and productive contributions in general.  
 
 ### Active Development
 
