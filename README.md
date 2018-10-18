@@ -46,7 +46,7 @@ sudo -s << EOF
 git clone https://github.com/NullArray/AutoSploit.git
 cd AutoSploit
 chmod +x install.sh
-./installsh
+./install.sh
 cd AutoSploit/Docker
 docker network create -d bridge haknet
 docker run --network haknet --name msfdb -e POSTGRES_PASSWORD=s3cr3t -d postgres
