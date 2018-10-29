@@ -274,7 +274,12 @@ class AutoSploitTerminal(object):
         option 3 must be provided
         """
         provided_host_file = lib.output.prompt("enter the full path to your host file", lowercase=False)
-        self.exploit_gathered_hosts(mods, hosts=provided_host_file)
+        if provided_host_file == "":
+            lib.output.error("you provided a blank hosts file, did you mean to?")
+            lib.output.info("defaulting to default hosts file (press CNTRL-C to go back and try again)")
+            self.exploit_gathered_hosts(mods, hosts=self.host_path)
+        else:
+            self.exploit_gathered_hosts(mods, hosts=provided_host_file)
 
     def terminal_main_display(self, loaded_mods):
         """

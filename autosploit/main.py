@@ -69,9 +69,7 @@ def main():
                     )
                     if choice.lower().startswith("y"):
                         try:
-                            if "darwin" in platform_running.lower():
-                                cmdline("{} darwin".format(START_SERVICES_PATH))
-                            elif "linux" in platform_running.lower():
+                            if "linux" in platform_running.lower():
                                 cmdline("{} linux".format(START_SERVICES_PATH))
                             else:
                                 close("your platform is not supported by AutoSploit at this time", status=2)
