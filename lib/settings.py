@@ -328,3 +328,23 @@ def save_error_to_file(error_info, error_message, error_class):
             "Traceback (most recent call):\n " + error_info.strip() + "\n{}: {}".format(error_class, error_message)
         )
     return file_path
+
+
+def download_modules(link):
+    import re
+    import requests
+    import tempfile
+
+    lib.output.info('downloading: {}'.format(link))
+    retval = ""
+    req = requests.get(link)
+    content = req.content
+    split_data = content.split(" ")
+    searcher = re.compile("exploit/\w+/\w+")
+    storage_file = tempfile.NamedTemporaryFile(delete=False)
+    for item in split_data:
+        if searcher.search(item) is not None:
+            retval += item + "\n"
+    with open(storage_file.name, 'a+') as tmp:
+        tmp.write(retval)
+    return storage_file.name

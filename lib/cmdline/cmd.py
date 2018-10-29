@@ -141,7 +141,25 @@ class AutoSploitParser(argparse.ArgumentParser):
                     "You should take this ethical lesson into consideration "
                     "before you continue with the use of this tool:\n\n{}\n".format(ethic))
         if opt.downloadModules is not None:
-            print "downloading MODULES!"
+            import re
+
+            modules_to_download = opt.downloadModules
+            links_list = "{}/etc/text_files/links.txt".format(lib.settings.CUR_DIR)
+            possibles = open(links_list).readlines()
+            for module in modules_to_download:
+                searcher = re.compile("{}".format(module))
+                for link in possibles:
+                    if searcher.search(link) is not None:
+                        filename = lib.settings.download_modules(link.strip())
+                        download_filename = "{}.json".format(link.split("/")[-1].split(".")[0])
+                        download_path = "{}/etc/json".format(os.getcwd())
+                        current_files = os.listdir(download_path)
+                        if download_filename not in current_files:
+                            full_path = "{}/{}".format(download_path, download_filename)
+                            lib.jsonize.text_file_to_dict(filename, filename=full_path)
+                            lib.output.info("downloaded into: {}".format(download_path))
+                        else:
+                            lib.output.warning("file already downloaded, skipping")
         if opt.exploitList:
             try:
                 lib.output.info("converting {} to JSON format".format(opt.exploitList))
