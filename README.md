@@ -152,7 +152,7 @@ misc arguments:
 If you want to run AutoSploit on a macOS system, AutoSploit is compatible with macOS, however, you have to be inside a virtual environment for it to run successfully. To do this, do the following;
 
 ```bash
-sudo -s << '_EOF' 
+sudo -s << '_EOF'
 pip2 install virtualenv --user
 git clone https://github.com/NullArray/AutoSploit.git
 virtualenv <PATH-TO-YOUR-ENV>
@@ -173,12 +173,13 @@ AutoSploit depends on the following Python2.7 modules.
 ```
 requests
 psutil
+beautifulsoup4
 ```
 
 Should you find you do not have these installed get them with pip like so.
 
 ```bash
-pip install requests psutil
+pip install requests psutil beautifulsoup4
 ```
 
 or

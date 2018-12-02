@@ -3,7 +3,7 @@
 Comme vous pouvez l'imaginer au vu du nom de ce projet, AutoSploit automatise l'exploitation d'hôtes distantes connectées à internet. Les adresses des hôtes à attaquer sont collectées automatiquement grâce à l'aide de Shodan, Censys et Zoomeye. Vous pouvez également utiliser vos propres listes de cibles.
 Les modules Metasploit disponibles ont été sélectionnés afin de faciliter l'obtention d'exécution de code à distance ( Remote Code Execution, ou RCE ), qui permettent ensuite de créer des sessions terminal inversées ( reverse shell ) ou meterpreter ( via metasploit ).
 
-**Ne soyez pas stupides** 
+**Ne soyez pas stupides**
 
 Recevoir les connexions de vos victimes directement sur votre ordinateur n'est pas vraiment une bonne idée. Vous devriez considérer l'option de dépenser quelques euros dans un VPS ( ou VPN ).
 
@@ -127,12 +127,13 @@ AutoSploit exige la présence des modules Python2.7 suivants.
 ```
 requests
 psutil
+beautifulsoup4
 ```
 
 Si vous ne les avez pas, vous pouvez les installer avec les commandes ci-dessous ( dans le dossier d'AutoSploit ):
 
 ```bash
-pip install requests psutil
+pip install requests psutil beautifulsoup4
 ```
 
 ou
