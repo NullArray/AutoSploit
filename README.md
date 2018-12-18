@@ -31,7 +31,7 @@ Installing AutoSploit is very simple, you can find the latest stable release [he
 
 ```bash
 sudo -s << EOF
-git clone https://github.com/NullArray/Autosploit.git
+git clone https://github.com/NullArray/Autosploit.git AutoSploit
 cd AutoSploit
 chmod +x install.sh
 ./install.sh
@@ -43,7 +43,7 @@ EOF
 
 ```bash
 sudo -s << EOF
-git clone https://github.com/NullArray/AutoSploit.git
+git clone https://github.com/NullArray/AutoSploit.git AutoSploit
 cd AutoSploit
 chmod +x install.sh
 ./install.sh
@@ -58,7 +58,7 @@ EOF
 On any Linux system the following should work;
 
 ```bash
-git clone https://github.com/NullArray/AutoSploit
+git clone https://github.com/NullArray/AutoSploit AutoSploit
 cd AutoSploit
 chmod +x install.sh
 ./install.sh
