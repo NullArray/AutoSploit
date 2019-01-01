@@ -240,7 +240,7 @@ class AutoSploitTerminal(object):
         """
         if len(self.loaded_hosts) != 0:
             for host in self.loaded_hosts:
-                lib.output.info(host)
+                lib.output.info(host.strip())
         else:
             lib.output.warning("currently no gathered hosts")
 
