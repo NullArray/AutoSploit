@@ -385,7 +385,7 @@ class AutoSploitTerminal(object):
 
         try:
             open("{}".format(file_path)).close()
-        except Exception:
+        except IOError:
             lib.output.error("file does not exist, check the path and try again")
             return
         lib.output.warning("overwriting hosts file with provided, and backing up current")
