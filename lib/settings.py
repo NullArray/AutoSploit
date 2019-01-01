@@ -51,6 +51,7 @@ exploit/run/attack      Run the exploits on the already gathered hosts
 search/api/gather       Search the API's for hosts
 exit/quit               Exit the terminal session
 single                  Load a single host into the file
+personal/custom         Load a custom host file
 tokens/reset            Reset API tokens if needed
 external                View loaded external commands
 help/?                  Display this help
