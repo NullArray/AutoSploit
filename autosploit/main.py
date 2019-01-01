@@ -109,10 +109,6 @@ def main():
 
             AutoSploitParser().single_run_args(opts, loaded_tokens, loaded_exploits)
         else:
-            warning(
-                "no arguments have been parsed, defaulting to terminal session. "
-                "press 99 to quit and type `help` to view the help menus"
-            )
             misc_info("checking if there are multiple exploit files")
             loaded_exploits = load_exploits(EXPLOIT_FILES_PATH)
             info("attempting to load API keys")

@@ -138,7 +138,21 @@ class AutoSploitTerminal(object):
 
     def do_token_reset(self, api, token, username):
         """
-        reset the API tokens
+        Explanation:
+        ------------
+        Reset the API tokens when needed, this will overwrite the existing
+        API token with a provided one
+
+        Parameters:
+        -----------
+        :param api: name of the API to reset
+        :param token: the token that will overwrite the current token
+        :param username: if resetting Censys this will be the user ID token
+
+        Examples:
+        ---------
+        Censys ->  reset/tokens censys <token> <userID>
+        Shodan ->  reset.tokens shodan <token>
         """
         if api.lower() == "censys":
             lib.output.info("resetting censys API credentials")
@@ -151,9 +165,21 @@ class AutoSploitTerminal(object):
                 token_.write(token)
         lib.output.warning("program must be restarted for the new tokens to initialize")
 
-    def do_api_search(self, requested_api_data, query, tokens, proxy=None, agent=None):
+    def do_api_search(self, requested_api_data, query, tokens):
         """
-        search the API's for hosts
+        Explanation:
+        ------------
+        Search the API with a provided query for potentially exploitable hosts.
+
+        Parameters:
+        -----------
+        :param requested_api_data: data to be used with the API tuple of info
+        :param query: the query to be searched
+        :param tokens: an argument dict that will contain the token information
+
+        Examples:
+        ---------
+        search/api/gather shodan[,censys[,zoomeye]] windows 10
         """
         acceptable_api_names = ("shodan", "censys", "zoomeye")
         api_checker = lambda l: all(i.lower() in acceptable_api_names for i in l)
@@ -246,7 +272,17 @@ class AutoSploitTerminal(object):
 
     def do_add_single_host(self, ip):
         """
-        add a single host to the host file
+        Explanation:
+        ------------
+        Add a single host by IP address
+
+        Parameters:
+        -----------
+        :param ip: IP address to be added
+
+        Examples:
+        ---------
+        single 89.76.12.124
         """
         validated_ip = lib.settings.validate_ip_addr(ip)
         if not validated_ip:
@@ -272,7 +308,17 @@ class AutoSploitTerminal(object):
 
     def do_exploit_targets(self, workspace_info):
         """
-        exploit the already gathered targets
+        Explanation:
+        ------------
+        Exploit the already gathered hosts inside of the hosts.txt file
+
+        Parameters:
+        -----------
+        :param workspace_info: a tuple of workspace information
+
+        Examples:
+        ---------
+        exploit/run/attack 127.0.0.1 9065 default [whitewash list]
         """
         if workspace_info[-1] is not None:
             lib.output.misc_info("doing whitewash on hosts file")
@@ -321,7 +367,19 @@ class AutoSploitTerminal(object):
 
     def do_load_custom_hosts(self, file_path):
         """
-        load a custom hosts file
+        Explanation:
+        -----------
+        Load a custom exploit file, this is useful to attack already gathered hosts
+        instead of trying to gather them again from the backup host files inside
+        of the `.autosploit_home` directory
+
+        Parameters:
+        -----------
+        :param file_path: the full path to the loadable hosts file
+
+        Examples:
+        ---------
+        custom/personal /some/path/to/myfile.txt
         """
         import shutil
 
@@ -340,6 +398,12 @@ class AutoSploitTerminal(object):
         """
         terminal main display
         """
+        lib.output.warning(
+            "no arguments have been passed, dropping into terminal session. "
+            "to get help type `help` to quit type `exit/quit` to get help on "
+            "a specific command type `command help`"
+        )
+
         if extra_commands is not None:
             for command in extra_commands:
                 self.external_terminal_commands.append(command)
@@ -385,7 +449,7 @@ class AutoSploitTerminal(object):
                                 choice_data_list = None
                         except:
                             choice_data_list = None
-                        if any(c in choice for c in ("help", "?")):
+                        if choice == "?" or choice == "help":
                             self.do_display_usage()
                         elif any(c in choice for c in ("external",)):
                             self.do_display_external()
@@ -396,11 +460,16 @@ class AutoSploitTerminal(object):
                         elif any(c in choice for c in ("view", "gathered")):
                             self.do_view_gathered()
                         elif "single" in choice:
+                            if "help" in choice_data_list:
+                                print(self.do_add_single_host.__doc__)
+
                             if choice_data_list is None or len(choice_data_list) == 1:
                                 lib.output.error("must provide host IP after `single` keyword (IE single 89.65.78.123)")
                             else:
                                 self.do_add_single_host(choice_data_list[-1])
                         elif any(c in choice for c in ("exploit", "run", "attack")):
+                            if "help" in choice_data_list:
+                                print(self.do_exploit_targets.__doc__)
                             if len(choice_data_list) < 4:
                                 lib.output.error(
                                     "must provide at least LHOST, LPORT, workspace name with `{}` keyword "
@@ -427,11 +496,16 @@ class AutoSploitTerminal(object):
                                         "did you type it right?"
                                     )
                         elif any(c in choice for c in ("personal", "custom")):
+                            if "help" in choice_data_list:
+                                print(self.do_load_custom_hosts.__doc__)
                             if len(choice_data_list) == 1:
                                 lib.output.error("must provide full path to file after `{}` keyword".format(choice))
                             else:
                                 self.do_load_custom_hosts(choice_data_list[-1])
                         elif any(c in choice for c in ("search", "api", "gather")):
+                            if "help" in choice_data_list:
+                                print(self.do_api_search.__doc__)
+
                             if len(choice_data_list) < 3:
                                 lib.output.error(
                                     "must provide a list of API names after `{}` keyword and query "
@@ -456,6 +530,9 @@ class AutoSploitTerminal(object):
                                 lib.output.warning("hack to learn, don't learn to hack")
                         elif any(c in choice for c in ("tokens", "reset")):
                             acceptable_api_names = ("shodan", "censys")
+
+                            if "help" in choice_data_list:
+                                print(self.do_token_reset.__doc__)
 
                             if len(choice_data_list) < 3:
                                 lib.output.error(
