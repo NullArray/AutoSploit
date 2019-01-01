@@ -161,7 +161,7 @@ def backup_host_file(current, path):
         os.makedirs(path)
     new_filename = "{}/hosts_{}_{}.txt".format(
         path,
-        lib.jsonize.random_file_name(length=17),
+        lib.jsonize.random_file_name(length=22),
         str(datetime.datetime.today()).split(" ")[0]
     )
     shutil.copyfile(current, new_filename)

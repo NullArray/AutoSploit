@@ -61,9 +61,12 @@ class AutoSploitTerminal(object):
         self.modules = modules
         try:
             self.loaded_hosts = open(lib.settings.HOST_FILE).readlines()
-        except:
+        except IOError:
             lib.output.warning("no hosts file present")
-            self.loaded_hosts = []
+            self.loaded_hosts = open(lib.settings.HOST_FILE, "a+").readlines()
+
+    def __reload(self):
+        self.loaded_hosts = open(lib.settings.HOST_FILE).readlines()
 
     def reflect_memory(self, max_memory=100):
         """
@@ -551,6 +554,7 @@ class AutoSploitTerminal(object):
                                 else:
                                     lib.output.error("cannot reset {} API credentials".format(choice))
                         self.history.append(choice)
+                        self.__reload()
                 except KeyboardInterrupt:
                     lib.output.warning("use the `exit/quit` command to end terminal session")
             except IndexError:
