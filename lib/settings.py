@@ -52,6 +52,7 @@ search/api/gather       Search the API's for hosts
 exit/quit               Exit the terminal session
 single                  Load a single host into the file
 tokens/reset            Reset API tokens if needed
+external                View loaded external commands
 help/?                  Display this help
 """
 
