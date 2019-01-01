@@ -117,8 +117,8 @@ def main():
             loaded_exploits = load_exploits(EXPLOIT_FILES_PATH)
             info("attempting to load API keys")
             loaded_tokens = load_api_keys()
-            terminal = AutoSploitTerminal(loaded_tokens)
-            terminal.terminal_main_display(loaded_exploits)
+            terminal = AutoSploitTerminal(loaded_tokens, loaded_exploits)
+            terminal.terminal_main_display(loaded_tokens)
     except Exception as e:
         import traceback
 

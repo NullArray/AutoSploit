@@ -54,7 +54,7 @@ class ZoomEyeAPIHook(object):
         token = json.loads(req.content)
         return token
 
-    def zoomeye(self):
+    def search(self):
         """
         connect to the API and pull all the IP addresses that are associated with the
         given query

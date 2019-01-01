@@ -25,7 +25,7 @@ class ShodanAPIHook(object):
         self.host_file = HOST_FILE
         self.save_mode = save_mode
 
-    def shodan(self):
+    def search(self):
         """
         connect to the API and grab all IP addresses associated with the provided query
         """

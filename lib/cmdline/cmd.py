@@ -187,33 +187,33 @@ class AutoSploitParser(argparse.ArgumentParser):
                 keys["censys"][1], keys["censys"][0],
                 opt.searchQuery, proxy=headers[0], agent=headers[1],
                 save_mode=search_save_mode
-            ).censys()
+            ).search()
         if opt.searchZoomeye:
             lib.output.info(single_search_msg.format("Zoomeye"))
             api_searches[0](
                 opt.searchQuery, proxy=headers[0], agent=headers[1],
                 save_mode=search_save_mode
-            ).zoomeye()
+            ).search()
         if opt.searchShodan:
             lib.output.info(single_search_msg.format("Shodan"))
             api_searches[1](
                 keys["shodan"][0], opt.searchQuery, proxy=headers[0], agent=headers[1],
                 save_mode=search_save_mode
-            ).shodan()
+            ).search()
         if opt.searchAll:
             lib.output.info("searching all search engines in order")
             api_searches[0](
                 opt.searchQuery, proxy=headers[0], agent=headers[1],
                 save_mode=search_save_mode
-            ).zoomeye()
+            ).search()
             api_searches[1](
                 keys["shodan"][0], opt.searchQuery, proxy=headers[0], agent=headers[1],
                 save_mode=search_save_mode
-            ).shodan()
+            ).search()
             api_searches[2](
                 keys["censys"][1], keys["censys"][0], opt.searchQuery, proxy=headers[0], agent=headers[1],
                 save_mode=search_save_mode
-            ).censys()
+            ).search()
         if opt.startExploit:
             hosts = open(lib.settings.HOST_FILE).readlines()
             if opt.whitelist:

@@ -1,0 +1,8 @@
+usage of AutoSploit for attacking targets without prior mutual consent is illegal in pretty much every sense of the word. it is the end user's responsibility to obey all applicable local, state, and federal laws. developers assume no liability and are not responsible for any misuse or damage caused by this program. please take these considerations into mind:
+
+ - use AutoSploit on a VPS through a proxy or Tor
+ - keep calm and wipe the logs or use tools to do so
+ - never connect from your local IP address
+ - keep a low profile, the point of hacking is not to get caught
+
+we do not condone hacking of any sort, the above are tips to keep in mind for ethical purposes. having said that, knowledge is not illegal, and anybody that tells you learning is wrong is a fool. get as much out of this program as we got from writing it.

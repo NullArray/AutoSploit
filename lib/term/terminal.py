@@ -1,13 +1,18 @@
 import os
-import sys
+import datetime
 
 import lib.settings
 import lib.output
 import lib.errors
-import lib.exploitation.exploiter
+import lib.jsonize
 import api_calls.shodan
 import api_calls.zoomeye
 import api_calls.censys
+import lib.exploitation.exploiter
+try:
+    raw_input
+except:
+    input = raw_input
 
 
 class AutoSploitTerminal(object):
@@ -16,359 +21,460 @@ class AutoSploitTerminal(object):
     class object for the main terminal of the program
     """
 
-    def __init__(self, tokens):
+    internal_terminal_commands = [
+        # viewing gathered hosts
+        "view", "show",
+        # displaying memory
+        "mem", "memory", "history",
+        # attacking targets
+        "exploit", "run", "attack",
+        # search API's
+        "search", "api", "gather",
+        # quit the terminal
+        "exit", "quit",
+        # single hosts
+        "single",
+        # custom hosts list
+        "custom", "personal",
+        # display help
+        "?", "help",
+        # display external commands
+        "external",
+        # reset API tokens
+        "reset", "tokens",
+        # easter eggs!
+        "idkwhatimdoing", "ethics", "skid"
+    ]
+    external_terminal_commands = lib.settings.load_external_commands()
+    api_call_pointers = {
+        "shodan": api_calls.shodan.ShodanAPIHook,
+        "zoomeye": api_calls.zoomeye.ZoomEyeAPIHook,
+        "censys": api_calls.censys.CensysAPIHook
+    }
+
+    def __init__(self, tokens, modules):
+        self.history = []
+        self.quit_terminal = False
         self.tokens = tokens
-        self.usage_path = lib.settings.USAGE_AND_LEGAL_PATH
-        self.sep = "-" * 30
-        self.host_path = lib.settings.HOST_FILE
+        self.history_dir = "{}/{}".format(lib.settings.HISTORY_FILE_PATH, datetime.date.today())
+        self.full_history_path = "{}/autosploit.history".format(self.history_dir)
+        self.modules = modules
         try:
-            open(lib.settings.HOST_FILE).readlines()
-        except IOError:
-            lib.output.warning("no hosts file present, you need to gather some hosts")
-            self.host_path = lib.settings.HOST_FILE
+            self.loaded_hosts = open(lib.settings.HOST_FILE).readlines()
+        except:
+            lib.output.warning("no hosts file present")
+            self.loaded_hosts = []
 
-    @staticmethod
-    def help_menu_full():
-        seperator = "-" * 30
-        help_choices = [
-            (0, "usage"),
-            (1, "view"),
-            (2, "single"),
-            (3, "exit"),
-            (4, "gather"),
-            (5, "exploit"),
-            (6, "custom"),
-        ]
-        print("\n{}\nPossible help choices:".format(seperator))
-        for i, _ in enumerate(help_choices):
-            print("{}- `help {}`".format(" " * 3, help_choices[i][1]))
-        print("{}\n".format(seperator))
-
-    def usage_and_legal(self):
+    def reflect_memory(self, max_memory=100):
         """
-        shows a display of the output and legal information that resides
-        in the etc/text_files/general file.
-
-        option 1 must be provided to display
+        reflect the command memory out of the history file
         """
-        lib.output.info("preparing to display usage and legal")
-        with open(self.usage_path) as usage:
-            print(usage.read().strip())
-
-    def help(self, command):
-        """
-        print the help of the commands
-        """
-        help_dict = {
-            "usage": self.usage_and_legal,
-            "view": self.view_gathered_hosts,
-            "single": self.add_single_host,
-            "exit": self.quit,
-            "gather": self.gather_hosts,
-            "exploit": self.exploit_gathered_hosts,
-            "custom": self.custom_host_list
-        }
-        for key in help_dict.keys():
-            if command == key:
-                lib.output.info("help found for provided argument:")
-                print(self.sep)
-                print(help_dict[key].__doc__)
-                print(self.sep)
-                break
-        else:
-            lib.output.warning("unable to find help for provided command '{}'".format(command))
-            lib.output.info("available helps '{}'".format(
-                ", ".join([k for k in help_dict.keys()])
-            ))
-
-    def view_gathered_hosts(self):
-        """
-        print a list of all available hosts in the hosts.txt file
-
-        option 5 must be provided
-        """
-        lib.output.info("loading gathered hosts from '{}'".format(self.host_path))
-        try:
-            with open(self.host_path) as hosts:
-                for host in hosts.readlines():
-                    # should take care of some Unicode errors that occur
-                    lib.output.info(str(host.strip()))
-        except IOError:
-            lib.output.warning("hosts file doesn't exist, looks like you haven't gathered any")
-
-    def add_single_host(self):
-        """
-        add a singular host to the hosts.txt file and check if the host
-        will resolve to a true IP address, if it is not a true IP address
-        you will be re-prompted for an IP address
-
-        option 4 must be provided
-        """
-        provided = False
-        while not provided:
-            new_host = lib.output.prompt("enter the host IP you wish to add", lowercase=False)
-            if not lib.settings.validate_ip_addr(new_host):
-                lib.output.warning("provided host does not appear to be a true IP, try again")
-            else:
-                with open(self.host_path, "a+") as hosts:
-                    hosts.write(new_host + os.linesep)
-                lib.output.info("successfully wrote provided host to {}".format(self.host_path))
-                break
-
-    def quit(self, status):
-        """
-        quits the terminal and exits the program entirely
-
-        option 99 must be provided
-        """
-        lib.output.error("aborting terminal session")
-        assert isinstance(status, int)
-        sys.exit(status)
-
-    def gather_hosts(self, query, given_choice=None, proxy=None, agent=None):
-        """
-        gather hosts from either Shodan, Zoomeye, Censys, or multiple
-        by providing a comma between integers.
-
-        option 2 must be provided
-        """
-        choice_dict = {
-            1: api_calls.shodan.ShodanAPIHook,
-            2: api_calls.zoomeye.ZoomEyeAPIHook,
-            3: api_calls.censys.CensysAPIHook
-        }
-        searching = False
-        if given_choice is None:
-            lib.output.info("please choose an API to gather from (choosing two or more "
-                            "separate by comma IE; 1,2)")
-            for i, api in enumerate(lib.settings.API_URLS.keys(), start=1):
-                print("{}. {}".format(i, api.title()))
-            choice = raw_input(lib.settings.AUTOSPLOIT_PROMPT)
-        else:
-            choice = given_choice
-        while not searching:
-            # TODO[2]:// bug in the animation, if the user chooses one search engine to search
-            # the animation does not stop when the user chooses a single search engine, instead
-            # the user will see the animation continuously until they either:
-            #   A) exit the terminal
-            #   B) search another search engine
+        if os.path.exists(self.history_dir):
+            tmp = []
             try:
-                # something in here needs to change (see TODO[2])
-                choice = int(choice)
-                if choice == 1:
-                    choice_dict[choice](
-                        self.tokens["shodan"][0], query, proxy=proxy, agent=agent
-                    ).shodan()
-                    break
-                elif choice == 2:
-                    choice_dict[choice](query, proxy=proxy, agent=agent).zoomeye()
-                    break
-                elif choice == 3:
-                    choice_dict[choice](
-                        self.tokens["censys"][1], self.tokens["censys"][0], query,
-                        proxy=proxy, agent=agent
-                    ).censys()
-                    break
-                else:
-                    lib.output.warning("invalid option provided, going back to main menu")
-                    break
-            except (ValueError, KeyError):
-                if "," in choice:
-                    for i in choice.split(","):
-                        if int(i) in choice_dict.keys():
-                            self.gather_hosts(query, given_choice=int(i), proxy=proxy, agent=agent)
-                        else:
-                            lib.output.warning("invalid option, skipping")
-                            break
-                    break
-                else:
-                    lib.output.warning("must be integer between 1-{} not string".format(len(lib.settings.API_URLS.keys())))
-                    self.gather_hosts(query, proxy=proxy, agent=agent)
-            except Exception as e:
-                lib.settings.stop_animation = True
-                lib.output.error("unable to search API got error: {}".format(str(e)))
-                break
+                with open(self.full_history_path) as history:
+                    for item in history.readlines():
+                        tmp.append(item.strip())
+            except:
+                pass
+            if len(tmp) == 0:
+                lib.output.warning("currently no history")
+            elif len(tmp) > max_memory:
+                import shutil
 
-    def exploit_gathered_hosts(self, loaded_mods, hosts=None):
-        """
-        exploit already gathered hosts from the hosts.txt file
-
-        option 6 must be provided
-        """
-        ruby_exec = False
-        msf_path = None
-        whitelist_file = lib.output.prompt("specify full path to a whitelist file, otherwise hit enter", lowercase=False)
-        if hosts is None:
-            if whitelist_file is not "" and not whitelist_file.isspace():
-                # If whitelist is specified, return a washed hosts list
-                host_file = lib.exploitation.exploiter.whitelist_wash(open(self.host_path).readlines(), whitelist_file)
-            else:
-                try:
-                    host_file = open(self.host_path).readlines()
-                except Exception:
-                    sys.stdout.flush()
-                    lib.output.error("no host file is present, did you gather hosts?")
-                    return
-        else:
-            if whitelist_file is not "" and not whitelist_file.isspace():
-                # If whitelist is specified, return a washed hosts list
-                host_file = lib.exploitation.exploiter.whitelist_wash(open(hosts).readlines(), whitelist_file)
-            else:
-                host_file = open(hosts).readlines()
-        if not lib.settings.check_for_msf():
-            msf_path = lib.output.prompt(
-                "it appears that MSF is not in your PATH, provide the full path to msfconsole"
-            )
-            ruby_exec = True
-        lib.output.info(
-            "you will need to do some configuration to MSF.\n"
-            "please keep in mind that sending connections back to "
-            "your local host is probably not a smart idea."
-        )
-        configuration = (
-            lib.output.prompt("enter your workspace name", lowercase=False),
-            lib.output.prompt("enter your LHOST", lowercase=False),
-            lib.output.prompt("enter your LPORT", lowercase=False)
-        )
-        exploiter = lib.exploitation.exploiter.AutoSploitExploiter(
-            configuration,
-            loaded_mods,
-            hosts=host_file,
-            ruby_exec=ruby_exec,
-            msf_path=msf_path
-        )
-        try:
-            sorted_mods = exploiter.sort_modules_by_query()
-            choice = lib.output.prompt(
-                "a total of {} modules have been sorted by relevance, would you like to display them[y/N]".format(
-                    len(sorted_mods)
+                history_file_backup_path = "{}.{}.old".format(
+                    self.full_history_path,
+                    lib.jsonize.random_file_name(length=12)
                 )
-            )
-
-            if not choice.lower().strip().startswith("y"):
-                mods = lib.output.prompt("use relevant modules[y/N]")
-                if mods.lower().startswith("n"):
-                    lib.output.info(
-                        "starting exploitation with all loaded modules (total of {})".format(len(loaded_mods)))
-                    exploiter.start_exploit()
-                elif mods.lower().startswith("y"):
-                    lib.output.info("starting exploitation with sorted modules (total of {})".format(len(sorted_mods)))
-                    exploiter.start_exploit()
+                shutil.copy(self.full_history_path, history_file_backup_path)
+                os.remove(self.full_history_path)
+                open(self.full_history_path, 'a+').close()
+                lib.output.misc_info("history file to large, backed up under '{}'".format(history_file_backup_path))
             else:
-                exploiter.view_sorted()
-                mods = lib.output.prompt("use relevant modules[y/N]")
-                if mods.lower().startswith("n"):
-                    lib.output.info(
-                        "starting exploitation with all loaded modules (total of {})".format(len(loaded_mods)))
-                    exploiter.start_exploit()
-                elif mods.lower().startswith("y"):
-                    lib.output.info("starting exploitation with sorted modules (total of {})".format(len(sorted_mods)))
-                    exploiter.start_exploit()
-        except AttributeError:
-            lib.output.warning("unable to sort modules by relevance")
+                for cmd in tmp:
+                    self.history.append(cmd)
 
-    def custom_host_list(self, mods):
+    def do_display_history(self):
         """
-        provided a custom host list that will be used for exploitation
+        display the history from the history files
+        """
+        for i, item in enumerate(self.history, start=1):
+            if len(list(str(i))) == 2:
+                spacer1, spacer2 = "  ", "   "
+            elif len(list(str(i))) == 3:
+                spacer1, spacer2 = " ", "   "
+            else:
+                spacer1, spacer2 = "   ", "   "
+            print("{}{}{}{}".format(spacer1, i, spacer2, item))
 
-        option 3 must be provided
+    def get_choice(self):
         """
-        provided_host_file = lib.output.prompt("enter the full path to your host file", lowercase=False)
-        if provided_host_file == "":
-            lib.output.error("you provided a blank hosts file, did you mean to?")
-            lib.output.info("defaulting to default hosts file (press CNTRL-C to go back and try again)")
-            self.exploit_gathered_hosts(mods, hosts=self.host_path)
+        get the provided choice and return a tuple of options and the choice
+        """
+        original_choice = raw_input(lib.settings.AUTOSPLOIT_PROMPT)
+        try:
+            choice_checker = original_choice.split(" ")[0]
+        except:
+            choice_checker = original_choice
+        if choice_checker in self.internal_terminal_commands:
+            retval = ("internal", original_choice)
+        elif choice_checker in self.external_terminal_commands:
+            retval = ("external", original_choice)
         else:
-            self.exploit_gathered_hosts(mods, hosts=provided_host_file)
+            retval = ("unknown", original_choice)
+        return retval
 
-    def terminal_main_display(self, loaded_mods):
+    def do_display_external(self):
         """
-        main output of the terminal
+        display all external commands
         """
+        print(" ".join(self.external_terminal_commands))
 
-        def __config_headers():
-            proxy = lib.output.prompt("enter your proxy (blank for none)", lowercase=False)
-            agent = lib.output.prompt(
-                "do you want to use a (p)ersonal user agent, a (r)andom one, or (d)efault"
-            )
-            if proxy == "" or proxy.isspace():
-                proxy = None
-            if agent.lower().startswith("p"):
-                agent = lib.output.prompt("enter your User-Agent", lowercase=False)
-            elif agent.lower().startswith("r"):
-                agent = lib.settings.grab_random_agent()
-            elif agent.lower().startswith("d"):
-                agent = None
-            else:
-                lib.output.warning("invalid argument, default will be selected")
-                agent = None
-            proxy, agent = lib.settings.configure_requests(proxy=proxy, agent=agent)
-            return proxy, agent
+    def do_terminal_command(self, command):
+        """
+        run a terminal command
+        """
+        lib.settings.cmdline(command, is_msf=False)
 
-        selected = False
+    def do_token_reset(self, api, token, username):
+        """
+        reset the API tokens
+        """
+        if api.lower() == "censys":
+            lib.output.info("resetting censys API credentials")
+            with open(lib.settings.API_KEYS["censys"][0], 'w') as token_:
+                token_.write(token)
+            with open(lib.settings.API_KEYS["censys"][1], 'w') as username_:
+                username_.write(username)
+        else:
+            with open(lib.settings.API_KEYS["shodan"][0], 'w') as token_:
+                token_.write(token)
+        lib.output.warning("program must be restarted for the new tokens to initialize")
+
+    def do_api_search(self, requested_api_data, query, tokens, proxy=None, agent=None):
+        """
+        search the API's for hosts
+        """
+        acceptable_api_names = ("shodan", "censys", "zoomeye")
+        api_checker = lambda l: all(i.lower() in acceptable_api_names for i in l)
 
         try:
-            while not selected:
-                for i in lib.settings.AUTOSPLOIT_TERM_OPTS.keys():
-                    print("{}. {}".format(i, lib.settings.AUTOSPLOIT_TERM_OPTS[i].title()))
-                choice = raw_input(lib.settings.AUTOSPLOIT_PROMPT)
-                # TODO[3] this is ugly so it needs to change
-                try:
-                    choice = int(choice)
-                    if choice == 99:
-                        print(self.sep)
-                        self.quit(0)
-                        print(self.sep)
-                    elif choice == 6:
-                        print(self.sep)
-                        self.exploit_gathered_hosts(loaded_mods)
-                        print(self.sep)
-                    elif choice == 5:
-                        print(self.sep)
-                        self.view_gathered_hosts()
-                        print(self.sep)
-                    elif choice == 4:
-                        print(self.sep)
-                        self.add_single_host()
-                        print(self.sep)
-                    elif choice == 3:
-                        print(self.sep)
-                        self.custom_host_list(loaded_mods)
-                        print(self.sep)
-                    elif choice == 2:
-                        print(self.sep)
-                        query = lib.output.prompt("enter your search query", lowercase=False)
-                        try:
-                            with open(lib.settings.QUERY_FILE_PATH, "w") as _query:
-                                _query.write(query)
-                        except AttributeError:
-                            import tempfile  # oooops
-                            filename = tempfile.NamedTemporaryFile(delete=False).name
-                            with open(filename, "w") as _query:
-                                _query.write(query)
-                                lib.settings.QUERY_FILE_PATH = filename
-                        proxy, agent = __config_headers()
-                        # possibly needs to change here (see TODO[2])
-                        self.gather_hosts(query, proxy=proxy, agent=agent)
-                        print(self.sep)
-                    elif choice == 1:
-                        print(self.sep)
-                        self.usage_and_legal()
-                    else:
-                        lib.output.warning("invalid option provided")
-                except ValueError:
-                    if not choice == "help":
-                        if "help" in choice:
-                            try:
-                                help_arg = choice.split(" ")
-                                self.help(help_arg[-1])
-                            except:
-                                lib.output.error("choice must be integer not string")
-                        else:
-                            lib.output.warning("option must be integer not string")
-                    elif choice == "help":
-                        AutoSploitTerminal.help_menu_full()
+            if len(query) < 1:
+                query = "".join(query)
+            else:
+                query = " ".join(query)
+        except:
+            query = query
 
-        except KeyboardInterrupt:
-            print("\n")
-            self.terminal_main_display(loaded_mods)
+        if query == "" or query.isspace():
+            lib.output.warning("looks like you forgot the query")
+            return
+        try:
+            api_list = requested_api_data.split(",")
+        except:
+            api_list = [requested_api_data]
+        prompt_for_save = len(open(lib.settings.HOST_FILE).readlines()) != 0
+        if prompt_for_save:
+            save_mode = lib.output.prompt(
+                "would you like to [a]ppend or [o]verwrite the file[a/o]", lowercase=True
+            )
+            if save_mode.startswith("o"):
+                backup = lib.settings.backup_host_file(lib.settings.HOST_FILE, lib.settings.HOST_FILE_BACKUP)
+                lib.output.misc_info("current host file backed up under: '{}'".format(backup))
+                save_mode = "w"
+            else:
+                if not any(save_mode.startswith(s) for s in ("a", "o")):
+                    lib.output.misc_info("provided option is not valid, defaulting to 'a'")
+                    save_mode = "a+"
+        else:
+            save_mode = "a+"
+
+        proxy = lib.output.prompt("enter your proxy or press enter for none", lowercase=False)
+        if proxy.isspace() or proxy == "":
+            proxy = {"http": "", "https": ""}
+        else:
+            proxy = {"http": proxy, "https": proxy}
+        agent = lib.output.prompt("use a [r]andom User-Agent or the [d]efault one[r/d]", lowercase=True)
+        if agent.startswith("r"):
+            agent = {"User-Agent": lib.settings.grab_random_agent()}
+        elif agent.startswith("d"):
+            agent = {"User-Agent": lib.settings.DEFAULT_USER_AGENT}
+        else:
+            lib.output.warning("invalid option, using default")
+            agent = {"User-Agent": lib.settings.DEFAULT_USER_AGENT}
+        for api in api_list:
+            res = api_checker([api])
+            if not res:
+                lib.output.error(
+                    "API: '{}' is not a valid API, will be skipped".format(api)
+                )
+            else:
+                with open(lib.settings.QUERY_FILE_PATH, "a+") as tmp:
+                    tmp.write(query)
+                lib.output.info(
+                    "starting search on API {} using query: '{}'".format(api, query)
+                )
+                try:
+                    self.api_call_pointers[api.lower()](
+                        token=tokens["shodan"][0] if api == "shodan" else tokens["censys"][0],
+                        identity=tokens["censys"][1] if api == "censys" else "",
+                        query=query,
+                        save_mode=save_mode,
+                        proxy=proxy,
+                        agent=agent
+                    ).search()
+                except lib.errors.AutoSploitAPIConnectionError as e:
+                    lib.settings.stop_animation = True
+                    lib.output.error("error searching API: '{}', error message: '{}'".format(api, str(e)))
+        lib.settings.stop_animation = True
+
+    def do_display_usage(self):
+        """
+        display the full help menu
+        """
+        print(lib.settings.TERMINAL_HELP_MESSAGE)
+
+    def do_view_gathered(self):
+        """
+        view the gathered hosts
+        """
+        if len(self.loaded_hosts) != 0:
+            for host in self.loaded_hosts:
+                lib.output.info(host)
+        else:
+            lib.output.warning("currently no gathered hosts")
+
+    def do_add_single_host(self, ip):
+        """
+        add a single host to the host file
+        """
+        validated_ip = lib.settings.validate_ip_addr(ip)
+        if not validated_ip:
+            lib.output.error("provided IP '{}' is invalid, try again".format(ip))
+        else:
+            with open(lib.settings.HOST_FILE, "a+") as hosts:
+                hosts.write(ip + "\n")
+                lib.output.info("host '{}' saved to hosts file".format(ip))
+
+    def do_quit_terminal(self, save_history=True):
+        """
+        quit the terminal and save the command history
+        """
+        self.quit_terminal = True
+        if save_history:
+            if not os.path.exists(self.history_dir):
+                os.makedirs(self.history_dir)
+            lib.output.misc_info("saving history")
+            with open(self.full_history_path, "a+") as hist:
+                for item in self.history:
+                    hist.write(item + "\n")
+        lib.output.info("exiting terminal session")
+
+    def do_exploit_targets(self, workspace_info):
+        """
+        exploit the already gathered targets
+        """
+        if workspace_info[-1] is not None:
+            lib.output.misc_info("doing whitewash on hosts file")
+            lib.exploitation.exploiter.whitelist_wash(
+                open(lib.settings.HOST_FILE).readlines(),
+                workspace_info[-1]
+            )
+        else:
+            if not lib.settings.check_for_msf():
+                msf_path = lib.output.prompt(
+                    "metasploit is not in your PATH, provide the full path to it", lowercase=False
+                )
+                ruby_exec = True
+            else:
+                msf_path = None
+                ruby_exec = False
+
+            sort_mods = lib.output.prompt(
+                "sort modules by relevance to last query[y/N]", lowercase=True
+            )
+
+            try:
+                if sort_mods.lower().startswith("y"):
+                    mods_to_use = lib.exploitation.exploiter.AutoSploitExploiter(
+                        None, None
+                    ).sort_modules_by_query()
+                else:
+                    mods_to_use = self.modules
+            except Exception:
+                lib.output.error("error sorting modules defaulting to all")
+                mods_to_use = self.modules
+
+            view_modules = lib.output.prompt("view sorted modules[y/N]", lowercase=True)
+            if view_modules.startswith("y"):
+                for mod in mods_to_use:
+                    lib.output.misc_info(mod.strip())
+            lib.output.prompt("press enter to start exploitation phase")
+            lib.output.info("starting exploitation phase")
+            lib.exploitation.exploiter.AutoSploitExploiter(
+                configuration=workspace_info[0:3],
+                all_modules=mods_to_use,
+                hosts=open(lib.settings.HOST_FILE).readlines(),
+                msf_path=msf_path,
+                ruby_exec=ruby_exec
+            ).start_exploit()
+
+    def do_load_custom_hosts(self, file_path):
+        """
+        load a custom hosts file
+        """
+        import shutil
+
+        try:
+            open("{}".format(file_path)).close()
+        except Exception:
+            lib.output.error("file does not exist, check the path and try again")
+            return
+        lib.output.warning("overwriting hosts file with provided, and backing up current")
+        backup_path = lib.settings.backup_host_file(lib.settings.HOST_FILE, lib.settings.HOST_FILE_BACKUP)
+        shutil.copy(file_path, lib.settings.HOST_FILE)
+        lib.output.info("host file replaced, backup stored under '{}'".format(backup_path))
+        self.loaded_hosts = open(lib.settings.HOST_FILE).readlines()
+
+    def terminal_main_display(self, tokens, extra_commands=None, save_history=True):
+        """
+        terminal main display
+        """
+        if extra_commands is not None:
+            for command in extra_commands:
+                self.external_terminal_commands.append(command)
+        self.reflect_memory()
+        while not self.quit_terminal:
+            try:
+                lib.settings.auto_completer(self.internal_terminal_commands)
+                try:
+                    choice_type, choice = self.get_choice()
+                    if choice_type == "unknown":
+                        sims = lib.settings.find_similar(
+                            choice,
+                            self.internal_terminal_commands,
+                            self.external_terminal_commands
+                        )
+                        if len(sims) != 0:
+                            max_sims_display = 7
+                            print(
+                                "no command '{}' found, but there {} {} similar command{}".format(
+                                    choice,
+                                    "are" if len(sims) > 1 else "is",
+                                    len(sims),
+                                    "s" if len(sims) > 1 else ""
+                                )
+                            )
+                            if len(sims) > max_sims_display:
+                                print("will only display top {} results".format(max_sims_display))
+                            for i, cmd in enumerate(sims, start=1):
+                                if i == max_sims_display:
+                                    break
+                                print(cmd)
+                            print("{}: command not found".format(choice))
+                        else:
+                            print("{} command not found".format(choice))
+                        self.history.append(choice)
+                    elif choice_type == "external":
+                        self.do_terminal_command(choice)
+                        self.history.append(choice)
+                    else:
+                        try:
+                            choice_data_list = choice.split(" ")
+                            if choice_data_list[-1] == "":
+                                choice_data_list = None
+                        except:
+                            choice_data_list = None
+                        if any(c in choice for c in ("help", "?")):
+                            self.do_display_usage()
+                        elif any(c in choice for c in ("external",)):
+                            self.do_display_external()
+                        elif any(c in choice for c in ("history", "mem", "memory")):
+                            self.do_display_history()
+                        elif any(c in choice for c in ("exit", "quit")):
+                            self.do_quit_terminal(save_history=save_history)
+                        elif any(c in choice for c in ("view", "gathered")):
+                            self.do_view_gathered()
+                        elif "single" in choice:
+                            if choice_data_list is None or len(choice_data_list) == 1:
+                                lib.output.error("must provide host IP after `single` keyword (IE single 89.65.78.123)")
+                            else:
+                                self.do_add_single_host(choice_data_list[-1])
+                        elif any(c in choice for c in ("exploit", "run", "attack")):
+                            if len(choice_data_list) < 4:
+                                lib.output.error(
+                                    "must provide at least LHOST, LPORT, workspace name with `{}` keyword "
+                                    "(IE {} 127.0.0.1 9076 default [whitelist-path])".format(
+                                        choice, choice
+                                    )
+                                )
+                            else:
+                                if lib.settings.validate_ip_addr(choice_data_list[1], home_ok=True):
+                                    try:
+                                        workspace = (
+                                            choice_data_list[1], choice_data_list[2],
+                                            choice_data_list[3], choice_data_list[4]
+                                        )
+                                    except IndexError:
+                                        workspace = (
+                                            choice_data_list[1], choice_data_list[2],
+                                            choice_data_list[3], None
+                                        )
+                                    self.do_exploit_targets(workspace)
+                                else:
+                                    lib.output.warning(
+                                        "heuristics could not validate provided IP address, "
+                                        "did you type it right?"
+                                    )
+                        elif any(c in choice for c in ("personal", "custom")):
+                            if len(choice_data_list) == 1:
+                                lib.output.error("must provide full path to file after `{}` keyword".format(choice))
+                            else:
+                                self.do_load_custom_hosts(choice_data_list[-1])
+                        elif any(c in choice for c in ("search", "api", "gather")):
+                            if len(choice_data_list) < 3:
+                                lib.output.error(
+                                    "must provide a list of API names after `{}` keyword and query "
+                                    "(IE {} shodan,censys apache2)".format(
+                                        choice, choice
+                                    )
+                                )
+                            else:
+                                self.do_api_search(choice_data_list[1], choice_data_list[2:], tokens)
+                        elif any(c in choice for c in ("idkwhatimdoing", "ethics", "skid")):
+                            import random
+
+                            if choice == "ethics" or choice == "idkwhatimdoing":
+                                ethics_file = "{}/etc/text_files/ethics.lst".format(os.getcwd())
+                                other_file = "{}/etc/text_files/gen".format(os.getcwd())
+                                with open(ethics_file) as ethics:
+                                    ethic = random.choice(ethics.readlines()).strip()
+                                    lib.output.info("take this ethical lesson into consideration before proceeding:")
+                                    print("\n{}\n".format(ethic))
+                                lib.output.warning(open(other_file).read())
+                            else:
+                                lib.output.warning("hack to learn, don't learn to hack")
+                        elif any(c in choice for c in ("tokens", "reset")):
+                            acceptable_api_names = ("shodan", "censys")
+
+                            if len(choice_data_list) < 3:
+                                lib.output.error(
+                                    "must supply API name with `{}` keyword along with "
+                                    "new token (IE {} shodan mytoken123 [userID (censys)])".format(
+                                        choice, choice
+                                    )
+                                )
+                            else:
+                                if choice_data_list[1].lower() in acceptable_api_names:
+                                    try:
+                                        api, token, username = choice_data_list[1], choice_data_list[2], choice_data_list[3]
+                                    except IndexError:
+                                        api, token, username = choice_data_list[1], choice_data_list[2], None
+                                    self.do_token_reset(api, token, username)
+                                else:
+                                    lib.output.error("cannot reset {} API credentials".format(choice))
+                        self.history.append(choice)
+                except KeyboardInterrupt:
+                    lib.output.warning("use the `exit/quit` command to end terminal session")
+            except IndexError:
+                pass
