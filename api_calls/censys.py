@@ -24,7 +24,7 @@ class CensysAPIHook(object):
         self.host_file = HOST_FILE
         self.save_mode = save_mode
 
-    def censys(self):
+    def search(self):
         """
         connect to the Censys API and pull all IP addresses from the provided query
         """

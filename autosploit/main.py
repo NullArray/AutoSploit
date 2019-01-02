@@ -69,9 +69,7 @@ def main():
                     )
                     if choice.lower().startswith("y"):
                         try:
-                            if "darwin" in platform_running.lower():
-                                cmdline("{} darwin".format(START_SERVICES_PATH))
-                            elif "linux" in platform_running.lower():
+                            if "linux" in platform_running.lower():
                                 cmdline("{} linux".format(START_SERVICES_PATH))
                             else:
                                 close("your platform is not supported by AutoSploit at this time", status=2)
@@ -111,16 +109,12 @@ def main():
 
             AutoSploitParser().single_run_args(opts, loaded_tokens, loaded_exploits)
         else:
-            warning(
-                "no arguments have been parsed, defaulting to terminal session. "
-                "press 99 to quit and type `help` to view the help menus"
-            )
             misc_info("checking if there are multiple exploit files")
             loaded_exploits = load_exploits(EXPLOIT_FILES_PATH)
             info("attempting to load API keys")
             loaded_tokens = load_api_keys()
-            terminal = AutoSploitTerminal(loaded_tokens)
-            terminal.terminal_main_display(loaded_exploits)
+            terminal = AutoSploitTerminal(loaded_tokens, loaded_exploits)
+            terminal.terminal_main_display(loaded_tokens)
     except Exception as e:
         import traceback
 

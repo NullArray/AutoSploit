@@ -1,4 +1,5 @@
 import re
+import os
 import sys
 import json
 import platform
@@ -165,5 +166,9 @@ def request_issue_creation(path, arguments, error_message):
             lib.output.error(
                 "someone has already created this issue here: {}".format(find_url(identifier))
             )
+        try:
+            os.remove(path)
+        except:
+            pass
     else:
         lib.output.info("the issue has been logged to a file in path: '{}'".format(path))

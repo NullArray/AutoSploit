@@ -152,7 +152,7 @@ misc arguments:
 Falls du AutoSploit auf einem System mit macOS ausführen willst, musst du das Programm trotz der Kompatibilität mit macOS in einer virtuellen Maschine ausführen, sodass es erfolgreich ausgeführt werden kann. Um dies zu tun, sind folgende Schritte nötig;
 
 ```bash
-sudo -s << '_EOF' 
+sudo -s << '_EOF'
 pip2 install virtualenv --user
 git clone https://github.com/NullArray/AutoSploit.git
 virtualenv <PFAD-ZU-DEINER-ENV>
@@ -173,12 +173,13 @@ AutoSploit benötigt die folgenden Python 2.7 Module:
 ```
 requests
 psutil
+beautifulsoup4
 ```
 
 Wenn dir auffällt, dass du diese nicht installiert hast, kannst du sie über Pip installieren, wie nachfolgend gezeigt.
 
 ```bash
-pip install requests psutil
+pip install requests psutil beautifulsoup4
 ```
 
 oder

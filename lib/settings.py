@@ -6,6 +6,7 @@ import random
 import platform
 import getpass
 import tempfile
+import readline
 import distutils.spawn
 from subprocess import (
     PIPE,
@@ -16,8 +17,57 @@ import psutil
 
 import lib.output
 import lib.banner
+import lib.jsonize
 
+
+class AutoSploitCompleter(object):
+
+    """
+    object to create an auto completer for the terminal
+    """
+
+    def __init__(self, opts):
+        self.opts = sorted(opts)
+        self.possibles = []
+
+    def complete_text(self, text, state):
+        if state == 0:
+            if text:
+                self.possibles = [m for m in self.opts if m.startswith(text)]
+            else:
+                self.possibles = self.opts[:]
+        try:
+            return self.possibles[state]
+        except IndexError:
+            return None
+
+
+TERMINAL_HELP_MESSAGE = """
+COMMAND:                SUMMARY:
+---------               --------
+view/show               Show the already gathered hosts
+mem[ory]/history        Display the command history
+exploit/run/attack      Run the exploits on the already gathered hosts
+search/api/gather       Search the API's for hosts
+exit/quit               Exit the terminal session
+single                  Load a single host into the file
+personal/custom         Load a custom host file
+tokens/reset            Reset API tokens if needed
+external                View loaded external commands
+help/?                  Display this help
+"""
+
+# current directory
 CUR_DIR = "{}".format(os.getcwd())
+
+# home
+HOME = "{}/.autosploit_home".format(os.path.expanduser("~"))
+
+# backup the current hosts file
+HOST_FILE_BACKUP = "{}/backups".format(HOME)
+
+# autosploit command history file path
+HISTORY_FILE_PATH = "{}/.history".format(HOME)
 
 # path to the file containing all the discovered hosts
 HOST_FILE = "{}/hosts.txt".format(CUR_DIR)
@@ -49,7 +99,7 @@ DEFAULT_USER_AGENT = "AutoSploit/{} (Language=Python/{}; Platform={})".format(
 PLATFORM_PROMPT = "\n{}@\033[36mPLATFORM\033[0m$ ".format(getpass.getuser())
 
 # the prompt that will be used most of the time
-AUTOSPLOIT_PROMPT = "\n\033[31m{}\033[0m@\033[36mautosploit\033[0m# ".format(getpass.getuser())
+AUTOSPLOIT_PROMPT = "\033[31m{}\033[0m@\033[36mautosploit\033[0m# ".format(getpass.getuser())
 
 # all the paths to the API tokens
 API_KEYS = {
@@ -74,7 +124,7 @@ MSF_LAUNCHED = False
 TOKEN_PATH = "{}/etc/text_files/auth.key".format(CUR_DIR)
 
 # location of error files
-ERROR_FILES_LOCATION = "{}/.autosploit_errors".format(os.path.expanduser("~"))
+ERROR_FILES_LOCATION = "{}/.autosploit_errors".format(HOME)
 
 # terminal options
 AUTOSPLOIT_TERM_OPTS = {
@@ -83,14 +133,58 @@ AUTOSPLOIT_TERM_OPTS = {
     99: "quit"
 }
 
+# global variable for the search animation
 stop_animation = False
 
 
-def validate_ip_addr(provided):
+def load_external_commands():
+    """
+    create a list of external commands from provided directories
+    """
+    paths = ["/bin", "/usr/bin"]
+    loaded_externals = []
+    for f in paths:
+        for cmd in os.listdir(f):
+            if not os.path.isdir("{}/{}".format(f, cmd)):
+                loaded_externals.append(cmd)
+    return loaded_externals
+
+
+def backup_host_file(current, path):
+    """
+    backup the current hosts file
+    """
+    import datetime
+    import shutil
+
+    if not os.path.exists(path):
+        os.makedirs(path)
+    new_filename = "{}/hosts_{}_{}.txt".format(
+        path,
+        lib.jsonize.random_file_name(length=22),
+        str(datetime.datetime.today()).split(" ")[0]
+    )
+    shutil.copyfile(current, new_filename)
+    return new_filename
+
+
+def auto_completer(keywords):
+    """
+    function to initialize the auto complete utility
+    """
+    completer = AutoSploitCompleter(keywords)
+    readline.set_completer(completer.complete_text)
+    readline.parse_and_bind('tab: complete')
+
+
+def validate_ip_addr(provided, home_ok=False):
     """
     validate an IP address to see if it is real or not
     """
-    not_acceptable = ("0.0.0.0", "127.0.0.1", "255.255.255.255")
+    if not home_ok:
+        not_acceptable = ("0.0.0.0", "127.0.0.1", "255.255.255.255")
+    else:
+        not_acceptable = ("255.255.255.255",)
     if provided not in not_acceptable:
         try:
             socket.inet_aton(provided)
@@ -186,7 +280,7 @@ def load_api_keys(unattended=False, path="{}/etc/tokens".format(CUR_DIR)):
     return api_tokens
 
 
-def cmdline(command):
+def cmdline(command, is_msf=True):
     """
     send the commands through subprocess
     """
@@ -200,7 +294,10 @@ def cmdline(command):
     stdout_buff = []
     for stdout_line in iter(proc.stdout.readline, b''):
         stdout_buff += [stdout_line.rstrip()]
-        print("(msf)>> {}".format(stdout_line).rstrip())
+        if is_msf:
+            print("(msf)>> {}".format(stdout_line).rstrip())
+        else:
+            print("{}".format(stdout_line).rstrip())
 
     return stdout_buff
 
@@ -328,3 +425,41 @@ def save_error_to_file(error_info, error_message, error_class):
             "Traceback (most recent call):\n " + error_info.strip() + "\n{}: {}".format(error_class, error_message)
         )
     return file_path
+
+
+def download_modules(link):
+    """
+    download new module links
+    """
+    import re
+    import requests
+    import tempfile
+
+    lib.output.info('downloading: {}'.format(link))
+    retval = ""
+    req = requests.get(link)
+    content = req.content
+    split_data = content.split(" ")
+    searcher = re.compile("exploit/\w+/\w+")
+    storage_file = tempfile.NamedTemporaryFile(delete=False)
+    for item in split_data:
+        if searcher.search(item) is not None:
+            retval += item + "\n"
+    with open(storage_file.name, 'a+') as tmp:
+        tmp.write(retval)
+    return storage_file.name
+
+
+def find_similar(command, internal, external):
+    """
+    find commands similar to the one provided
+    """
+    retval = []
+    first_char = command[0]
+    for inter in internal:
+        if inter.startswith(first_char):
+            retval.append(inter)
+    for exter in external:
+        if exter.startswith(first_char):
+            retval.append(exter)
+    return retval
