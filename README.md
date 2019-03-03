@@ -176,7 +176,7 @@ Since the program invokes functionality from the Metasploit Framework you need t
 
 ## Acknowledgements
 
-Special thanks to [Ekultek](https://github.com/Ekultek) without whoms contributions to the project, version 2.0 would have been a lot less spectacular.
+Special thanks to [Ekultek](https://github.com/Ekultek) without whoms contributions to the project, the new version would have been a lot less spectacular.
 
 Thanks to [Khast3x](https://github.com/khast3x) for setting up Docker support.
 
