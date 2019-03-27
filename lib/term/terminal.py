@@ -402,7 +402,7 @@ class AutoSploitTerminal(object):
         terminal main display
         """
         lib.output.warning(
-            "no arguments have been passed, dropping into terminal session. "
+            "no arguments have been parsed at run time, dropping into terminal session. "
             "to get help type `help` to quit type `exit/quit` to get help on "
             "a specific command type `command help`"
         )

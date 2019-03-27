@@ -12,7 +12,6 @@ from lib.creation.issue_creator import (
 )
 from lib.output import (
     info,
-    warning,
     prompt,
     misc_info
 )
