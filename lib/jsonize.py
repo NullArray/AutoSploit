@@ -58,7 +58,7 @@ def load_exploits(path, node="exploits"):
             try:
                 selected_file = file_list[int(action) - 1]
                 selected = True
-            except Except:
+            except Exception:
                 lib.output.warning("invalid selection ('{}'), select from below".format(action))
                 selected = False
     else:

@@ -54,6 +54,7 @@ single                  Load a single host into the file
 personal/custom         Load a custom host file
 tokens/reset            Reset API tokens if needed
 external                View loaded external commands
+ver[sion]               View the current version of the program
 help/?                  Display this help
 """
 

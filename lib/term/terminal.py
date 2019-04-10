@@ -1,6 +1,7 @@
 import os
 import datetime
 
+import lib.banner
 import lib.settings
 import lib.output
 import lib.errors
@@ -42,6 +43,8 @@ class AutoSploitTerminal(object):
         "external",
         # reset API tokens
         "reset", "tokens",
+        # show the version number
+        "ver", "version",
         # easter eggs!
         "idkwhatimdoing", "ethics", "skid"
     ]
@@ -126,6 +129,12 @@ class AutoSploitTerminal(object):
         else:
             retval = ("unknown", original_choice)
         return retval
+
+    def do_show_version_number(self):
+        """
+        display the current version number
+        """
+        lib.output.info("your current version number: {}".format(lib.banner.VERSION))
 
     def do_display_external(self):
         """
@@ -402,7 +411,7 @@ class AutoSploitTerminal(object):
         terminal main display
         """
         lib.output.warning(
-            "no arguments have been passed, dropping into terminal session. "
+            "no arguments have been parsed at run time, dropping into terminal session. "
             "to get help type `help` to quit type `exit/quit` to get help on "
             "a specific command type `command help`"
         )
@@ -462,6 +471,8 @@ class AutoSploitTerminal(object):
                             self.do_quit_terminal(save_history=save_history)
                         elif any(c in choice for c in ("view", "gathered")):
                             self.do_view_gathered()
+                        elif any(c in choice for c in ("ver", "version")):
+                            self.do_show_version_number()
                         elif "single" in choice:
                             if "help" in choice_data_list:
                                 print(self.do_add_single_host.__doc__)
