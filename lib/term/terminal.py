@@ -318,7 +318,7 @@ class AutoSploitTerminal(object):
                     hist.write(item + "\n")
         lib.output.info("exiting terminal session")
 
-    def do_exploit_targets(self, workspace_info):
+    def do_exploit_targets(self, workspace_info, shodan_token=None):
         """
         Explanation:
         ------------
@@ -332,11 +332,11 @@ class AutoSploitTerminal(object):
         ---------
         exploit/run/attack 127.0.0.1 9065 default [whitewash list]
         """
-        if workspace_info[-1] is not None:
+        if workspace_info[3] is not None and workspace_info[3] != "honeycheck":
             lib.output.misc_info("doing whitewash on hosts file")
             lib.exploitation.exploiter.whitelist_wash(
                 open(lib.settings.HOST_FILE).readlines(),
-                workspace_info[-1]
+                workspace_info[3]
             )
         else:
             if not lib.settings.check_for_msf():
@@ -374,7 +374,9 @@ class AutoSploitTerminal(object):
                 all_modules=mods_to_use,
                 hosts=open(lib.settings.HOST_FILE).readlines(),
                 msf_path=msf_path,
-                ruby_exec=ruby_exec
+                ruby_exec=ruby_exec,
+                check_honey=workspace_info[-1],
+                shodan_token=shodan_token
             ).start_exploit()
 
     def do_load_custom_hosts(self, file_path):
@@ -469,25 +471,30 @@ class AutoSploitTerminal(object):
                             self.do_display_history()
                         elif any(c in choice for c in ("exit", "quit")):
                             self.do_quit_terminal(save_history=save_history)
-                        elif any(c in choice for c in ("view", "gathered")):
+                        elif any(c in choice for c in ("view", "show")):
                             self.do_view_gathered()
                         elif any(c in choice for c in ("ver", "version")):
                             self.do_show_version_number()
                         elif "single" in choice:
-                            if "help" in choice_data_list:
-                                print(self.do_add_single_host.__doc__)
-
+                            try:
+                                if "help" in choice_data_list:
+                                    print(self.do_load_custom_hosts.__doc__)
+                            except TypeError:
+                                pass
                             if choice_data_list is None or len(choice_data_list) == 1:
                                 lib.output.error("must provide host IP after `single` keyword (IE single 89.65.78.123)")
                             else:
                                 self.do_add_single_host(choice_data_list[-1])
                         elif any(c in choice for c in ("exploit", "run", "attack")):
-                            if "help" in choice_data_list:
-                                print(self.do_exploit_targets.__doc__)
+                            try:
+                                if "help" in choice_data_list:
+                                    print(self.do_exploit_targets.__doc__)
+                            except TypeError:
+                                pass
                             if len(choice_data_list) < 4:
                                 lib.output.error(
                                     "must provide at least LHOST, LPORT, workspace name with `{}` keyword "
-                                    "(IE {} 127.0.0.1 9076 default [whitelist-path])".format(
+                                    "(IE {} 127.0.0.1 9076 default [whitelist-path] [honeycheck])".format(
                                         choice, choice
                                     )
                                 )
@@ -496,30 +503,50 @@ class AutoSploitTerminal(object):
                                     try:
                                         workspace = (
                                             choice_data_list[1], choice_data_list[2],
-                                            choice_data_list[3], choice_data_list[4]
+                                            choice_data_list[3], choice_data_list[4],
+                                            True if "honeycheck" in choice_data_list else False
                                         )
                                     except IndexError:
                                         workspace = (
                                             choice_data_list[1], choice_data_list[2],
-                                            choice_data_list[3], None
+                                            choice_data_list[3], None,
+                                            True if "honeycheck" in choice_data_list else False
                                         )
-                                    self.do_exploit_targets(workspace)
+                                    if workspace[-1]:
+                                        honeyscore = None
+                                        while honeyscore is None:
+                                            honeyscore = lib.output.prompt(
+                                                "enter the honeyscore you want as the maximum allowed"
+                                            )
+                                            try:
+                                                honeyscore = float(honeyscore)
+                                            except:
+                                                honeyscore = None
+                                                lib.output.error("honey score must be a float (IE 0.3)")
+                                    self.do_exploit_targets(
+                                        workspace, shodan_token=self.tokens["shodan"][0]
+                                    )
                                 else:
                                     lib.output.warning(
                                         "heuristics could not validate provided IP address, "
                                         "did you type it right?"
                                     )
                         elif any(c in choice for c in ("personal", "custom")):
-                            if "help" in choice_data_list:
-                                print(self.do_load_custom_hosts.__doc__)
+                            try:
+                                if "help" in choice_data_list:
+                                    print(self.do_load_custom_hosts.__doc__)
+                            except TypeError:
+                                pass
                             if len(choice_data_list) == 1:
                                 lib.output.error("must provide full path to file after `{}` keyword".format(choice))
                             else:
                                 self.do_load_custom_hosts(choice_data_list[-1])
                         elif any(c in choice for c in ("search", "api", "gather")):
-                            if "help" in choice_data_list:
-                                print(self.do_api_search.__doc__)
-
+                            try:
+                                if "help" in choice_data_list:
+                                    print(self.do_load_custom_hosts.__doc__)
+                            except TypeError:
+                                pass
                             if len(choice_data_list) < 3:
                                 lib.output.error(
                                     "must provide a list of API names after `{}` keyword and query "
@@ -545,8 +572,11 @@ class AutoSploitTerminal(object):
                         elif any(c in choice for c in ("tokens", "reset")):
                             acceptable_api_names = ("shodan", "censys")
 
-                            if "help" in choice_data_list:
-                                print(self.do_token_reset.__doc__)
+                            try:
+                                if "help" in choice_data_list:
+                                    print(self.do_load_custom_hosts.__doc__)
+                            except TypeError:
+                                pass
 
                             if len(choice_data_list) < 3:
                                 lib.output.error(

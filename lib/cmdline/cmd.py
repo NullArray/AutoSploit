@@ -68,6 +68,8 @@ class AutoSploitParser(argparse.ArgumentParser):
                              help="Do not launch metasploit's exploits. Do everything else. msfconsole is never called.")
         exploit.add_argument("-f", "--exploit-file-to-use", metavar="PATH", dest="exploitFile",
                              help="Run AutoSploit with provided exploit JSON file.")
+        exploit.add_argument("-H", "--is-honeypot", type=float, default=1000, dest="checkIfHoneypot", metavar="HONEY-SCORE",
+                             help="Determine if the host is a honeypot or not")
 
         misc = parser.add_argument_group("misc arguments", "arguments that don't fit anywhere else")
         misc.add_argument("--ruby-exec", action="store_true", dest="rubyExecutableNeeded",
@@ -218,11 +220,18 @@ class AutoSploitParser(argparse.ArgumentParser):
             hosts = open(lib.settings.HOST_FILE).readlines()
             if opt.whitelist:
                 hosts = lib.exploitation.exploiter.whitelist_wash(hosts, whitelist_file=opt.whitelist)
+            if opt.checkIfHoneypot != 1000:
+                check_pot = True
+            else:
+                check_pot = False
             lib.exploitation.exploiter.AutoSploitExploiter(
                 opt.msfConfig,
                 loaded_modules,
                 hosts,
                 ruby_exec=opt.rubyExecutableNeeded,
                 msf_path=opt.pathToFramework,
-                dryRun=opt.dryRun
+                dryRun=opt.dryRun,
+                shodan_token=keys["shodan"][0],
+                check_honey=check_pot,
+                compare_honey=opt.checkIfHoneypot
             ).start_exploit()
