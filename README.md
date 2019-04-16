@@ -28,8 +28,8 @@ The new version of AutoSploit has a feature that allows you to set a proxy befor
 Installing AutoSploit is very simple, you can find the latest stable release [here](https://github.com/NullArray/AutoSploit/releases/latest). You can also download the master branch as a [zip](https://github.com/NullArray/AutSploit/zipball/master) or [tarball](https://github.com/NullArray/AutSploit/tarball/master) or follow one of the below methods;
 
 
-###### Docker Compose
-Using DOcker Compose is by far the easiest way to get AutoSploit up and running without too much of a hassle.
+##### Docker Compose
+Using Docker Compose is by far the easiest way to get AutoSploit up and running without too much of a hassle.
 
 ```
 git clone https://github.com/NullArray/AutoSploit.git
@@ -37,7 +37,7 @@ cd Autosploit/Docker
 docker-compose run --rm autosploit
 ```
 
-###### Docker
+##### Docker
 Just using Docker.
 
 ```
@@ -54,7 +54,7 @@ docker run -it --network haknet -p 80:80 -p 443:443 -p 4444:4444 autosploit```
 Dev team contributor [Khast3x](https://github.com/khast3x) recently improved Docker operations as well as add more details to the README.md in the `Docker` subdirectory. For more information on deploying AutoSploit with Docker please be sure to click [here](https://github.com/NullArray/AutoSploit/tree/master/Docker) 
 
 
-###### Cloning
+##### Cloning
 On any Linux system the following should work;
 
 ```bash
