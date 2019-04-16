@@ -30,7 +30,6 @@ Installing AutoSploit is very simple, you can find the latest stable release [he
 
 ##### Docker Compose
 Using Docker Compose is by far the easiest way to get AutoSploit up and running without too much of a hassle.
-
 ```
 git clone https://github.com/NullArray/AutoSploit.git
 cd Autosploit/Docker
@@ -39,7 +38,6 @@ docker-compose run --rm autosploit
 
 ##### Docker
 Just using Docker.
-
 ```
 git clone https://github.com/NullArray/AutoSploit.git
 cd Autosploit/Docker
@@ -48,7 +46,7 @@ cd Autosploit/Docker
 docker network create -d bridge haknet
 docker run --network haknet --name msfdb -e POSTGRES_PASSWORD=s3cr3t -d postgres
 docker build -t autosploit .
-docker run -it --network haknet -p 80:80 -p 443:443 -p 4444:4444 autosploit```
+docker run -it --network haknet -p 80:80 -p 443:443 -p 4444:4444 autosploit
 ```
 
 Dev team contributor [Khast3x](https://github.com/khast3x) recently improved Docker operations as well as add more details to the README.md in the `Docker` subdirectory. For more information on deploying AutoSploit with Docker please be sure to click [here](https://github.com/NullArray/AutoSploit/tree/master/Docker) 
