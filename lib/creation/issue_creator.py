@@ -35,7 +35,6 @@ def check_version_number(current_version):
             return False
         return True
     except Exception as e:
-        print e
         return True
 
 
