@@ -23,7 +23,25 @@ except NameError:
     raw_input = input
 
 
+def check_version_number(current_version):
+    """
+    check the version number before creating an issue
+    """
+    version_checker = re.compile(r"version.=.\S\d.\d.(\d)?", re.I)
+    try:
+        req = requests.get("https://raw.githubusercontent.com/NullArray/AutoSploit/master/lib/banner.py")
+        available_version = version_checker.search(req.content).group().split("=")[-1].split('"')[1]
+        if available_version != current_version:
+            return False
+        return True
+    except Exception as e:
+        return True
+
+
 def create_identifier(data):
+    """
+    create the exception identifier
+    """
     obj = hashlib.sha1()
     try:
         obj.update(data)
@@ -83,7 +101,7 @@ def find_url(params):
             split_information = str(html).split("\n")
             for i, line in enumerate(split_information):
                 if searcher.search(line) is not None:
-                    href = split_information[i - 1]
+                    href = split_information[i]
         if href is not None:
             soup = BeautifulSoup(href, "html.parser")
             for item in soup.findAll("a"):
@@ -93,6 +111,9 @@ def find_url(params):
 
 
 def hide_sensitive():
+    """
+    hide sensitive information from the terminal
+    """
     sensitive = (
         "--proxy", "-P", "--personal-agent", "-q", "--query", "-C", "--config",
         "--whitelist", "--msf-path"
@@ -100,6 +121,7 @@ def hide_sensitive():
     args = sys.argv
     for item in sys.argv:
         if item in sensitive:
+            # TODO:/ we need to block the IP addresses in the -C argument
             try:
                 item_index = args.index(item) + 1
                 hidden = ''.join([x.replace(x, "*") for x in str(args[item_index])])
@@ -119,56 +141,66 @@ def request_issue_creation(path, arguments, error_message):
         "do you want to create an anonymized issue?[y/N]: "
     )
     if question.lower().startswith("y"):
-        # gonna read a chunk of it instead of one line
-        chunk = 4096
-        with open(path) as data:
-            identifier = create_identifier(data.read(chunk))
-            # gotta seek to the beginning of the file since it's already been read `4096` into it
-            data.seek(0)
-            issue_title = "Unhandled Exception ({})".format(identifier)
+        if check_version_number(lib.banner.VERSION):
+            # gonna read a chunk of it instead of one line
+            chunk = 4096
+            with open(path) as data:
+                identifier = create_identifier(error_message)
+                # gotta seek to the beginning of the file since it's already been read `4096` into it
+                data.seek(0)
+                issue_title = "Unhandled Exception ({})".format(identifier)
 
-        issue_data = {
-            "title": issue_title,
-            "body": (
-                "Autosploit version: `{}`\n"
-                "OS information: `{}`\n"
-                "Running context: `{}`\n"
-                "Error meesage: `{}`\n"
-                "Error traceback:\n```\n{}\n```\n"
-                "Metasploit launched: `{}`\n".format(
-                    lib.banner.VERSION,
-                    platform.platform(),
-                    ' '.join(sys.argv),
-                    error_message,
-                    open(path).read(),
-                    lib.settings.MSF_LAUNCHED,
+            issue_data = {
+                "title": issue_title,
+                "body": (
+                    "Autosploit version: `{}`\n"
+                    "OS information: `{}`\n"
+                    "Running context: `{}`\n"
+                    "Error mesage: `{}`\n"
+                    "Error traceback:\n```\n{}\n```\n"
+                    "Metasploit launched: `{}`\n".format(
+                        lib.banner.VERSION,
+                        platform.platform(),
+                        ' '.join(sys.argv),
+                        error_message,
+                        open(path).read(),
+                        lib.settings.MSF_LAUNCHED,
+                    )
                 )
-            )
-        }
+            }
 
-        _json_data = json.dumps(issue_data)
-        if sys.version_info > (3,):  # python 3
-            _json_data = _json_data.encode("utf-8")
+            _json_data = json.dumps(issue_data)
+            if sys.version_info > (3,):  # python 3
+                _json_data = _json_data.encode("utf-8")
 
-        if not ensure_no_issue(identifier):
-            req = Request(
-                url="https://api.github.com/repos/nullarray/autosploit/issues", data=_json_data,
-                headers={"Authorization": "token {}".format(get_token(lib.settings.TOKEN_PATH))}
-            )
-            urlopen(req, timeout=10).read()
-            lib.output.info(
-                "issue has been generated with the title '{}', at the following "
-                "URL '{}'".format(
-                    issue_title, find_url(identifier)
+            if not ensure_no_issue(identifier):
+                req = Request(
+                    url="https://api.github.com/repos/nullarray/autosploit/issues", data=_json_data,
+                    headers={"Authorization": "token {}".format(get_token(lib.settings.TOKEN_PATH))}
                 )
-            )
+                urlopen(req, timeout=10).read()
+                lib.output.info(
+                    "issue has been generated with the title '{}', at the following "
+                    "URL '{}'".format(
+                        issue_title, find_url(identifier)
+                    )
+                )
+            else:
+                lib.output.error(
+                    "someone has already created this issue here: {}".format(find_url(identifier))
+                )
+            try:
+                os.remove(path)
+            except:
+                pass
         else:
+            sep = "-" * 35
             lib.output.error(
-                "someone has already created this issue here: {}".format(find_url(identifier))
+                "it appears you are not using the current version of AutoSploit please update to the newest version "
+                "and try again, this can also happen when a new update has been pushed and the cached raw page has "
+                "not been updated yet. If you feel this is the later please create and issue on AutoSploits Github "
+                "page with the following info:"
             )
-        try:
-            os.remove(path)
-        except:
-            pass
+            print("{}\n{}\n{}".format(sep, open(path).read(), sep))
     else:
         lib.output.info("the issue has been logged to a file in path: '{}'".format(path))
