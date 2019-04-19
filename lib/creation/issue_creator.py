@@ -67,7 +67,7 @@ def checksum(issue_template_path):
         print("{}\n{}\n{}".format(
             sep, open(issue_template_path).read(), sep
         ))
-        return False
+        exit(1)
 
 
 def check_version_number(current_version):
