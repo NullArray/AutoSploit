@@ -48,7 +48,6 @@ def checksum(issue_template_path):
                 check.update(open(path).read())
                 check = check.hexdigest()
                 current_checksums.append("{}:{}".format(path.split("/")[-1], check))
-    print "\n".join(current_checksums);exit(1)
     try:
         req = requests.get(lib.settings.CHECKSUM_LINK)
         real_checksums = str(req.text).split("\n")
