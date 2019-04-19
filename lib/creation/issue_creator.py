@@ -23,6 +23,54 @@ except NameError:
     raw_input = input
 
 
+def checksum(issue_template_path):
+    """
+    verifies the checksums of the program before you can create an issue
+    """
+
+    file_skips = [
+        "__init__", ".pyc", ".xml",
+        ".sample", "HEAD", "pack",
+        "dev-beta", "description", "config",
+        "exclude", "index", ".json",
+        ".gitignore", "LICENSE", "ISSUE_TEMPLATE",
+        "README", "CONTRIBUTING", "hosts.txt",
+        "requirements.txt", "checksum_link.txt",
+        ".key", ".id", ".csv"
+    ]
+    current_checksums = []
+    failed_checks = 0
+    for root, sub, files in os.walk(lib.settings.CUR_DIR):
+        for name in files:
+            if not any(c in name for c in file_skips):
+                path = os.path.join(root, name)
+                check = hashlib.md5()
+                check.update(open(path).read())
+                check = check.hexdigest()
+                current_checksums.append("{}:{}".format(path.split("/")[-1], check))
+    print "\n".join(current_checksums);exit(1)
+    try:
+        req = requests.get(lib.settings.CHECKSUM_LINK)
+        real_checksums = str(req.text).split("\n")
+        for real, current in zip(sorted(real_checksums), sorted(current_checksums)):
+            if real != current:
+                failed_checks += 1
+        if failed_checks > 0:
+            return False
+        return True
+    except Exception:
+        sep = "-" * 35
+        lib.output.error(
+            "something went wrong while verifying the checksums of the current application, "
+            "this could be due to your internet connectivity. Please either try again, or use "
+            "the following template to create an issue:"
+        )
+        print("{}\n{}\n{}".format(
+            sep, open(issue_template_path).read(), sep
+        ))
+        return False
+
+
 def check_version_number(current_version):
     """
     check the version number before creating an issue
@@ -34,7 +82,7 @@ def check_version_number(current_version):
         if available_version != current_version:
             return False
         return True
-    except Exception as e:
+    except Exception:
         return True
 
 
@@ -136,6 +184,14 @@ def request_issue_creation(path, arguments, error_message):
     """
     request the creation and create the issue
     """
+
+    if not checksum(path):
+        lib.output.error(
+            "it seems you have changed some of the code in the program. We do not accept issues from edited "
+            "code as we have no way of reliability testing your issue. We recommend that you only use the version "
+            "that is available on github, no issue will be created for this problem, DO NOT REPORT IT"
+        )
+        exit(1)
 
     question = raw_input(
         "do you want to create an anonymized issue?[y/N]: "

@@ -70,6 +70,9 @@ HOST_FILE_BACKUP = "{}/backups".format(HOME)
 # autosploit command history file path
 HISTORY_FILE_PATH = "{}/.history".format(HOME)
 
+# link to the checksums
+CHECKSUM_LINK = open("{}/etc/text_files/checksum_link.txt".format(CUR_DIR)).read()
+
 # path to the file containing all the discovered hosts
 HOST_FILE = "{}/hosts.txt".format(CUR_DIR)
 try:
