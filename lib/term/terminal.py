@@ -491,11 +491,11 @@ class AutoSploitTerminal(object):
                                     print(self.do_exploit_targets.__doc__)
                             except TypeError:
                                 pass
-                            if len(choice_data_list) < 4:
+                            if choice_data_list is None or len(choice_data_list) < 4:
                                 lib.output.error(
                                     "must provide at least LHOST, LPORT, workspace name with `{}` keyword "
                                     "(IE {} 127.0.0.1 9076 default [whitelist-path] [honeycheck])".format(
-                                        choice, choice
+                                        choice.strip(), choice.strip()
                                     )
                                 )
                             else:
@@ -547,11 +547,11 @@ class AutoSploitTerminal(object):
                                     print(self.do_load_custom_hosts.__doc__)
                             except TypeError:
                                 pass
-                            if len(choice_data_list) < 3:
+                            if choice_data_list is None or len(choice_data_list) < 3:
                                 lib.output.error(
                                     "must provide a list of API names after `{}` keyword and query "
                                     "(IE {} shodan,censys apache2)".format(
-                                        choice, choice
+                                        choice.strip(), choice.strip()
                                     )
                                 )
                             else:
@@ -578,11 +578,11 @@ class AutoSploitTerminal(object):
                             except TypeError:
                                 pass
 
-                            if len(choice_data_list) < 3:
+                            if choice_data_list is None or len(choice_data_list) < 3:
                                 lib.output.error(
                                     "must supply API name with `{}` keyword along with "
                                     "new token (IE {} shodan mytoken123 [userID (censys)])".format(
-                                        choice, choice
+                                        choice.strip(), choice.strip()
                                     )
                                 )
                             else:
