@@ -184,13 +184,14 @@ def request_issue_creation(path, arguments, error_message):
     request the creation and create the issue
     """
 
-    if not checksum(path):
-        lib.output.error(
-            "It seems you have changed some of the code in the program. We do not accept issues from edited "
-            "code as we have no way of reliably testing your issue. We recommend that you only use the version "
-            "that is available on github, no issue will be created for this problem."
-        )
-        exit(1)
+    # TODO:/ we're gonna go ahead and give you guys another chance
+    #if not checksum(path):
+    #    lib.output.error(
+    #        "It seems you have changed some of the code in the program. We do not accept issues from edited "
+    #        "code as we have no way of reliably testing your issue. We recommend that you only use the version "
+    #        "that is available on github, no issue will be created for this problem."
+    #    )
+    #    exit(1)
 
     question = raw_input(
         "do you want to create an anonymized issue?[y/N]: "
