@@ -55,6 +55,7 @@ personal/custom         Load a custom host file
 tokens/reset            Reset API tokens if needed
 external                View loaded external commands
 ver[sion]               View the current version of the program
+clean/clear             Clean the hosts.txt file of duplicate IP addresses
 help/?                  Display this help
 """
 

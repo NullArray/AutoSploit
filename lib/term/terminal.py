@@ -45,6 +45,8 @@ class AutoSploitTerminal(object):
         "reset", "tokens",
         # show the version number
         "ver", "version",
+        # clean the hosts file of duplicate IP's
+        "clean", "clear",
         # easter eggs!
         "idkwhatimdoing", "ethics", "skid"
     ]
@@ -147,6 +149,25 @@ class AutoSploitTerminal(object):
         run a terminal command
         """
         lib.settings.cmdline(command, is_msf=False)
+
+    def do_clean_hosts(self):
+        """
+        Clean the hosts.txt file of any duplicate IP addresses
+        """
+        retval = set()
+        current_size = len(self.loaded_hosts)
+        for host in self.loaded_hosts:
+            retval.add(host)
+        cleaned_size = len(retval)
+        with open(lib.settings.HOST_FILE, 'w') as hosts:
+            for item in list(retval):
+                hosts.write(item)
+        if current_size != cleaned_size:
+            lib.output.info("cleaned {} duplicate IP address(es) (total of {})".format(
+                current_size - cleaned_size, cleaned_size
+            )
+            )
+        self.__reload()
 
     def do_token_reset(self, api, token, username):
         """
@@ -475,6 +496,8 @@ class AutoSploitTerminal(object):
                             self.do_view_gathered()
                         elif any(c in choice for c in ("ver", "version")):
                             self.do_show_version_number()
+                        elif any(c in choice for c in ("clean", "clear")):
+                            self.do_clean_hosts()
                         elif "single" in choice:
                             try:
                                 if "help" in choice_data_list:
