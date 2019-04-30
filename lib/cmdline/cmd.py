@@ -79,7 +79,7 @@ class AutoSploitParser(argparse.ArgumentParser):
         misc.add_argument("--ethics", action="store_true", dest="displayEthics",
                           help=argparse.SUPPRESS)  # easter egg!
         misc.add_argument("--whitelist", metavar="PATH", dest="whitelist",
-                             help="only exploit hosts listed in the whitelist file")
+                          help="only exploit hosts listed in the whitelist file")
         misc.add_argument("-D", "--download", nargs="+", metavar="SEARCH1 SEARCH2 ...", dest="downloadModules",
                           help="download new exploit modules with a provided search flag")
         opts = parser.parse_args()
