@@ -1,6 +1,5 @@
 {
   "exploits": [
-    "auxiliary/fuzzers/dns/dns_fuzzer",
     "auxiliary/fuzzers/ftp/client_ftp",
     "auxiliary/fuzzers/ftp/ftp_pre_post",
     "auxiliary/fuzzers/http/http_form_field",
