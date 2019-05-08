@@ -88,7 +88,7 @@ function install () {
             installOSX;
             ;;
         *)
-            echo "Unable to detect operating system that is compatible with AutoSploit...";
+            echo "Unable to detect an operating system that is compatible with AutoSploit...";
             ;;
     esac
     echo "";

@@ -11,9 +11,6 @@ if [[ $# -lt 1 ]]; then
 	exit 1
 fi
 
-echo -e "[!] Make sure you are not on your localhost while running this script, press enter to continue";
-read
-
 WHITELIST=$2
 SEARCH_QUERY=$1
 LPORT=4444
