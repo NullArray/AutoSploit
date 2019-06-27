@@ -38,7 +38,7 @@ def check_ip_alive(ip):
         return False
 
 
-def check_ip_wrapper(generated_ips, limit=350):
+def check_ip_wrapper(generated_ips, limit=250):
     """
     multiprocess the check_ip_alive function in order
     to proces a large amount of IP addresses quickly
