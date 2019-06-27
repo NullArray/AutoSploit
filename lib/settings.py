@@ -51,7 +51,7 @@ mem[ory]/history        Display the command history
 exploit/run/attack      Run the exploits on the already gathered hosts
 search/api/gather       Search the API's for hosts
 exit/quit               Exit the terminal session
-single                  Load a single host into the file
+single                  Load a single host into the file, or multiple hosts separated by a comma (1,2,3,..)
 personal/custom         Load a custom host file
 tokens/reset            Reset API tokens if needed
 external                View loaded external commands

@@ -308,6 +308,7 @@ class AutoSploitTerminal(object):
         Explanation:
         ------------
         Add a single host by IP address
+        Or a list of single hosts separatedd by a comma
 
         Parameters:
         -----------
@@ -315,15 +316,16 @@ class AutoSploitTerminal(object):
 
         Examples:
         ---------
-        single 89.76.12.124
+        single 89.76.12.124[89.76.12.43,89.90.65.78,...]
         """
-        validated_ip = lib.settings.validate_ip_addr(ip)
-        if not validated_ip:
-            lib.output.error("provided IP '{}' is invalid, try again".format(ip))
-        else:
-            with open(lib.settings.HOST_FILE, "a+") as hosts:
-                hosts.write(ip + "\n")
-                lib.output.info("host '{}' saved to hosts file".format(ip))
+        for item in ip.split(","):
+            validated_ip = lib.settings.validate_ip_addr(item)
+            if not validated_ip:
+                lib.output.error("provided IP '{}' is invalid, try again".format(ip))
+            else:
+                with open(lib.settings.HOST_FILE, "a+") as hosts:
+                    hosts.write(item + "\n")
+                    lib.output.info("host '{}' saved to hosts file".format(item))
 
     def do_quit_terminal(self, save_history=True):
         """
@@ -518,7 +520,7 @@ class AutoSploitTerminal(object):
                                 lib.output.error(
                                     "must provide at least LHOST, LPORT, workspace name with `{}` keyword "
                                     "(IE {} 127.0.0.1 9076 default [whitelist-path] [honeycheck])".format(
-                                        choice.strip(), choice.strip()
+                                        choice.split(" ")[0].strip(), choice.split(" ")[0].strip()
                                     )
                                 )
                             else:
@@ -574,7 +576,7 @@ class AutoSploitTerminal(object):
                                 lib.output.error(
                                     "must provide a list of API names after `{}` keyword and query "
                                     "(IE {} shodan,censys apache2)".format(
-                                        choice.strip(), choice.strip()
+                                        choice.split(" ")[0].strip(), choice.split(" ")[0].strip()
                                     )
                                 )
                             else:
@@ -605,7 +607,7 @@ class AutoSploitTerminal(object):
                                 lib.output.error(
                                     "must supply API name with `{}` keyword along with "
                                     "new token (IE {} shodan mytoken123 [userID (censys)])".format(
-                                        choice.strip(), choice.strip()
+                                        choice.split(" ")[0].strip(), choice.split(" ")[0].strip()
                                     )
                                 )
                             else:
