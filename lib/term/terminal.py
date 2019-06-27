@@ -316,7 +316,7 @@ class AutoSploitTerminal(object):
 
         Examples:
         ---------
-        single 89.76.12.124[89.76.12.43,89.90.65.78,...]
+        single 89.76.12.124[,89.76.12.43,89.90.65.78,...]
         """
         for item in ip.split(","):
             validated_ip = lib.settings.validate_ip_addr(item)
