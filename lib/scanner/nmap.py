@@ -1,13 +1,58 @@
-import io
+"""
+
+*********************************************************************************************
+*                          NOTICE FROM AUTOSPLOIT DEVELOPERS                                *
+*********************************************************************************************
+* this is basically an exact copy of                                                        *
+* `https://github.com/komand/python-nmap/blob/master/nmap/nmap.py` that has been modified   *
+* to better fit into autosploits development. There has been very minimal changes to it     *
+* and it still basically functions the exact same way                                       *
+*********************************************************************************************
+
+
+ORIGINAL INFO:
+--------------
+nmap.py - version and date, see below
+Source code : https://bitbucket.org/xael/python-nmap
+Author :
+* Alexandre Norman - norman at xael.org
+Contributors:
+* Steve 'Ashcrow' Milner - steve at gnulinux.net
+* Brian Bustin - brian at bustin.us
+* old.schepperhand
+* Johan Lundberg
+* Thomas D. maaaaz
+* Robert Bost
+* David Peltier
+Licence: GPL v3 or any later version for python-nmap
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+any later version.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**************
+IMPORTANT NOTE
+**************
+The Nmap Security Scanner used by python-nmap is distributed
+under it's own licence that you can find at https://svn.nmap.org/nmap/COPYING
+Any redistribution of python-nmap along with the Nmap Security Scanner
+must conform to the Nmap Security Scanner licence
+
+__author__ = 'Alexandre Norman (norman@xael.org)'
+__version__ = '0.6.2'
+__last_modification__ = '2017.01.07'
+"""
+
 import os
-import re
-import csv
-import sys
 import shlex
 import subprocess
 
 from xml.etree import ElementTree
-from multiprocessing import Process
 
 import lib.jsonize
 import lib.errors
@@ -45,7 +90,11 @@ def do_scan(host, nmap_path, ports=None, arguments=None):
         nmap_path, '-oX', '-', host,
         '-p ' + ports if ports is not None else "",
     ] + arguments_list
-    lib.output.info("launching nmap scan against {} ({})".format(host, " ".join(launch_arguments)))
+    to_launch = []
+    for item in launch_arguments:
+        if not item == "":
+            to_launch.append(item)
+    lib.output.info("launching nmap scan against {} ({})".format(host, " ".join(to_launch)))
     process = subprocess.Popen(
         launch_arguments, bufsize=10000, stdin=subprocess.PIPE,
         stdout=subprocess.PIPE, stderr=subprocess.PIPE
@@ -127,24 +176,24 @@ def parse_xml_output(output, warnings, error):
         results['nmap_scan'][host]['addresses'] = addresses
         results['nmap_scan'][host]['vendors'] = vendors
 
-        print results;exit(1)
-
         for status in attempted_host.findall('status'):
-            results['nmap_scan'][attempted_host]['status'] = {
+            results['nmap_scan'][host]['status'] = {
                     'state': status.get('state'),
                     'reason': status.get('reason')
             }
         for uptime in attempted_host.findall('uptime'):
-            results['nmap_scan'][attempted_host]['uptime'] = {
+            results['nmap_scan'][host]['uptime'] = {
                     'seconds': uptime.get('seconds'),
                     'lastboot': uptime.get('lastboot')
             }
         for discovered_port in attempted_host.findall('ports/port'):
             protocol = discovered_port.get('protocol')
             port_number = discovered_port.get('portid')
-            port_state = discovered_port.find('state').get('reason')
+            port_state = discovered_port.find('state').get('state')
+            port_reason = discovered_port.find('state').get('reason')
 
-            # damn I didn't even know you could do this!
+            # this is actually a thing!!
+            name = discovered_config = discovered_version = extra_information = discovered_product = stuff = ""
             for discovered_name in discovered_port.findall('service'):
                 name = discovered_name.get('name')
                 if discovered_name.get('product'):
@@ -153,4 +202,17 @@ def parse_xml_output(output, warnings, error):
                     discovered_version = discovered_name.get('version')
                 if discovered_name.get('extrainfo'):
                     extra_information = discovered_name.get('extrainfo')
-    print results
+                if discovered_name.get('conf'):
+                    discovered_config = discovered_name.get('conf')
+
+                for other_stuff in discovered_name.findall('cpe'):
+                    stuff = other_stuff.text
+            if protocol not in results['nmap_scan'][host].keys():
+                results['nmap_scan'][host][protocol] = list()
+            results['nmap_scan'][host][protocol].append({
+                    'port': port_number, 'state': port_state, 'reason': port_reason,
+                    'name': name, 'product': discovered_product, 'version': discovered_version,
+                    'extrainfo': extra_information, 'conf': discovered_config, 'cpe': stuff
+                })
+
+    return results
