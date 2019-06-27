@@ -24,6 +24,7 @@ from lib.settings import (
     EXPLOIT_FILES_PATH,
     START_SERVICES_PATH,
     save_error_to_file,
+    stop_animation
 )
 from lib.jsonize import (
     load_exploits,
@@ -115,6 +116,10 @@ def main():
             terminal = AutoSploitTerminal(loaded_tokens, loaded_exploits)
             terminal.terminal_main_display(loaded_tokens)
     except Exception as e:
+        global stop_animation
+
+        stop_animation = True
+
         import traceback
 
         print(
@@ -128,4 +133,3 @@ def main():
         error_class = str(e.__class__).split(" ")[1].split(".")[1].strip(">").strip("'")
         error_file = save_error_to_file(str(error_traceback), str(e), error_class)
         request_issue_creation(error_file, hide_sensitive(), str(e))
-

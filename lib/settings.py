@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import time
 import socket
@@ -71,6 +72,20 @@ HOST_FILE_BACKUP = "{}/backups".format(HOME)
 # autosploit command history file path
 HISTORY_FILE_PATH = "{}/.history".format(HOME)
 
+# we'll save the scans output for future use
+NMAP_XML_OUTPUT_BACKUP = "{}/nmap_scans".format(HOME)
+
+# regex to discover errors or warnings
+NMAP_ERROR_REGEX_WARNING = re.compile("^warning: .*", re.IGNORECASE)
+
+# possible options in nmap
+NMAP_OPTIONS_PATH = "{}/etc_text_files/nmap_opts.lst".format(CUR_DIR)
+
+# possible paths for nmap
+NMAP_POSSIBLE_PATHS = (
+    'nmap', '/usr/bin/nmap', '/usr/local/bin/nmap', '/sw/bin/nmap', '/opt/local/bin/nmap'
+)
+
 # link to the checksums
 CHECKSUM_LINK = open("{}/etc/text_files/checksum_link.txt".format(CUR_DIR)).read()
 
@@ -90,7 +105,8 @@ USAGE_AND_LEGAL_PATH = "{}/etc/text_files/general".format(CUR_DIR)
 # one bash script to rule them all takes an argument via the operating system
 START_SERVICES_PATH = "{}/etc/scripts/start_services.sh".format(CUR_DIR)
 
-RC_SCRIPTS_PATH = "{}/autosploit_out/".format(CUR_DIR)
+# path where we will keep the rc scripts
+RC_SCRIPTS_PATH = "{}/autosploit_out/".format(HOME)
 
 # path to the file that will contain our query
 QUERY_FILE_PATH = tempfile.NamedTemporaryFile(delete=False).name
