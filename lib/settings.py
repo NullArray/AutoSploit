@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import time
 import socket
@@ -50,11 +51,12 @@ mem[ory]/history        Display the command history
 exploit/run/attack      Run the exploits on the already gathered hosts
 search/api/gather       Search the API's for hosts
 exit/quit               Exit the terminal session
-single                  Load a single host into the file
+single                  Load a single host into the file, or multiple hosts separated by a comma (1,2,3,..)
 personal/custom         Load a custom host file
 tokens/reset            Reset API tokens if needed
 external                View loaded external commands
 ver[sion]               View the current version of the program
+clean/clear             Clean the hosts.txt file of duplicate IP addresses
 help/?                  Display this help
 """
 
@@ -69,6 +71,20 @@ HOST_FILE_BACKUP = "{}/backups".format(HOME)
 
 # autosploit command history file path
 HISTORY_FILE_PATH = "{}/.history".format(HOME)
+
+# we'll save the scans output for future use
+NMAP_XML_OUTPUT_BACKUP = "{}/nmap_scans".format(HOME)
+
+# regex to discover errors or warnings
+NMAP_ERROR_REGEX_WARNING = re.compile("^warning: .*", re.IGNORECASE)
+
+# possible options in nmap
+NMAP_OPTIONS_PATH = "{}/etc_text_files/nmap_opts.lst".format(CUR_DIR)
+
+# possible paths for nmap
+NMAP_POSSIBLE_PATHS = (
+    'nmap', '/usr/bin/nmap', '/usr/local/bin/nmap', '/sw/bin/nmap', '/opt/local/bin/nmap'
+)
 
 # link to the checksums
 CHECKSUM_LINK = open("{}/etc/text_files/checksum_link.txt".format(CUR_DIR)).read()
@@ -89,7 +105,8 @@ USAGE_AND_LEGAL_PATH = "{}/etc/text_files/general".format(CUR_DIR)
 # one bash script to rule them all takes an argument via the operating system
 START_SERVICES_PATH = "{}/etc/scripts/start_services.sh".format(CUR_DIR)
 
-RC_SCRIPTS_PATH = "{}/autosploit_out/".format(CUR_DIR)
+# path where we will keep the rc scripts
+RC_SCRIPTS_PATH = "{}/autosploit_out/".format(HOME)
 
 # path to the file that will contain our query
 QUERY_FILE_PATH = tempfile.NamedTemporaryFile(delete=False).name
@@ -293,15 +310,18 @@ def cmdline(command, is_msf=True):
     split_cmd = [x.strip() for x in command.split(" ") if x]
 
     sys.stdout.flush()
-
-    proc = Popen(split_cmd, stdout=PIPE, bufsize=1)
     stdout_buff = []
-    for stdout_line in iter(proc.stdout.readline, b''):
-        stdout_buff += [stdout_line.rstrip()]
-        if is_msf:
-            print("(msf)>> {}".format(stdout_line).rstrip())
-        else:
-            print("{}".format(stdout_line).rstrip())
+
+    try:
+       proc = Popen(split_cmd, stdout=PIPE, bufsize=1)
+       for stdout_line in iter(proc.stdout.readline, b''):
+           stdout_buff += [stdout_line.rstrip()]
+           if is_msf:
+               print("(msf)>> {}".format(stdout_line).rstrip())
+           else:
+               print("{}".format(stdout_line).rstrip())
+    except OSError as e:
+        stdout_buff += "ERROR: " + e
 
     return stdout_buff
 

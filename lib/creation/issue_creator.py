@@ -78,7 +78,7 @@ def check_version_number(current_version):
     try:
         req = requests.get("https://raw.githubusercontent.com/NullArray/AutoSploit/master/lib/banner.py")
         available_version = version_checker.search(req.content).group().split("=")[-1].split('"')[1]
-        if available_version != current_version:
+        if available_version > current_version:
             return False
         return True
     except Exception:
@@ -168,15 +168,25 @@ def hide_sensitive():
     args = sys.argv
     for item in sys.argv:
         if item in sensitive:
-            # TODO:/ we need to block the IP addresses in the -C argument
-            try:
-                item_index = args.index(item) + 1
-                hidden = ''.join([x.replace(x, "*") for x in str(args[item_index])])
-                args.pop(item_index)
-                args.insert(item_index, hidden)
+            if item in ["-C", "--config"]:
+                try:
+                    item_index = args.index("-C") + 1
+                except ValueError:
+                    item_index = args.index("--config") + 1
+                for _ in range(3):
+                    hidden = ''.join([x.replace(x, '*') for x in str(args[item_index])])
+                    args.pop(item_index+_)
+                    args.insert(item_index, hidden)
                 return ' '.join(args)
-            except:
-                return ' '.join([item for item in sys.argv])
+            else:
+                try:
+                    item_index = args.index(item) + 1
+                    hidden = ''.join([x.replace(x, "*") for x in str(args[item_index])])
+                    args.pop(item_index)
+                    args.insert(item_index, hidden)
+                    return ' '.join(args)
+                except:
+                    return ' '.join([item for item in sys.argv])
 
 
 def request_issue_creation(path, arguments, error_message):

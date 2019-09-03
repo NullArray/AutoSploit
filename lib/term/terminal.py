@@ -45,6 +45,8 @@ class AutoSploitTerminal(object):
         "reset", "tokens",
         # show the version number
         "ver", "version",
+        # clean the hosts file of duplicate IP's
+        "clean", "clear",
         # easter eggs!
         "idkwhatimdoing", "ethics", "skid"
     ]
@@ -64,7 +66,7 @@ class AutoSploitTerminal(object):
         self.modules = modules
         try:
             self.loaded_hosts = open(lib.settings.HOST_FILE).readlines()
-        except IOError:
+        except (IOError, Exception):
             lib.output.warning("no hosts file present")
             self.loaded_hosts = open(lib.settings.HOST_FILE, "a+").readlines()
 
@@ -148,6 +150,25 @@ class AutoSploitTerminal(object):
         """
         lib.settings.cmdline(command, is_msf=False)
 
+    def do_clean_hosts(self):
+        """
+        Clean the hosts.txt file of any duplicate IP addresses
+        """
+        retval = set()
+        current_size = len(self.loaded_hosts)
+        for host in self.loaded_hosts:
+            retval.add(host)
+        cleaned_size = len(retval)
+        with open(lib.settings.HOST_FILE, 'w') as hosts:
+            for item in list(retval):
+                hosts.write(item)
+        if current_size != cleaned_size:
+            lib.output.info("cleaned {} duplicate IP address(es) (total of {})".format(
+                current_size - cleaned_size, cleaned_size
+            )
+            )
+        self.__reload()
+
     def do_token_reset(self, api, token, username):
         """
         Explanation:
@@ -166,6 +187,12 @@ class AutoSploitTerminal(object):
         Censys ->  reset/tokens censys <token> <userID>
         Shodan ->  reset.tokens shodan <token>
         """
+        import sys
+
+        if sys.version_info > (3,):
+            token = token.encode("utf-8")
+            username = username.encode("utf-8")
+
         if api.lower() == "censys":
             lib.output.info("resetting censys API credentials")
             with open(lib.settings.API_KEYS["censys"][0], 'w') as token_:
@@ -261,7 +288,7 @@ class AutoSploitTerminal(object):
                         proxy=proxy,
                         agent=agent
                     ).search()
-                except lib.errors.AutoSploitAPIConnectionError as e:
+                except (lib.errors.AutoSploitAPIConnectionError, Exception) as e:
                     lib.settings.stop_animation = True
                     lib.output.error("error searching API: '{}', error message: '{}'".format(api, str(e)))
         lib.settings.stop_animation = True
@@ -287,6 +314,7 @@ class AutoSploitTerminal(object):
         Explanation:
         ------------
         Add a single host by IP address
+        Or a list of single hosts separatedd by a comma
 
         Parameters:
         -----------
@@ -294,15 +322,16 @@ class AutoSploitTerminal(object):
 
         Examples:
         ---------
-        single 89.76.12.124
+        single 89.76.12.124[,89.76.12.43,89.90.65.78,...]
         """
-        validated_ip = lib.settings.validate_ip_addr(ip)
-        if not validated_ip:
-            lib.output.error("provided IP '{}' is invalid, try again".format(ip))
-        else:
-            with open(lib.settings.HOST_FILE, "a+") as hosts:
-                hosts.write(ip + "\n")
-                lib.output.info("host '{}' saved to hosts file".format(ip))
+        for item in ip.split(","):
+            validated_ip = lib.settings.validate_ip_addr(item)
+            if not validated_ip:
+                lib.output.error("provided IP '{}' is invalid, try again".format(ip))
+            else:
+                with open(lib.settings.HOST_FILE, "a+") as hosts:
+                    hosts.write(item + "\n")
+                    lib.output.info("host '{}' saved to hosts file".format(item))
 
     def do_quit_terminal(self, save_history=True):
         """
@@ -475,6 +504,8 @@ class AutoSploitTerminal(object):
                             self.do_view_gathered()
                         elif any(c in choice for c in ("ver", "version")):
                             self.do_show_version_number()
+                        elif any(c in choice for c in ("clean", "clear")):
+                            self.do_clean_hosts()
                         elif "single" in choice:
                             try:
                                 if "help" in choice_data_list:
@@ -495,7 +526,7 @@ class AutoSploitTerminal(object):
                                 lib.output.error(
                                     "must provide at least LHOST, LPORT, workspace name with `{}` keyword "
                                     "(IE {} 127.0.0.1 9076 default [whitelist-path] [honeycheck])".format(
-                                        choice.strip(), choice.strip()
+                                        choice.split(" ")[0].strip(), choice.split(" ")[0].strip()
                                     )
                                 )
                             else:
@@ -537,7 +568,7 @@ class AutoSploitTerminal(object):
                                     print(self.do_load_custom_hosts.__doc__)
                             except TypeError:
                                 pass
-                            if len(choice_data_list) == 1:
+                            if choice_data_list is not None and len(choice_data_list) == 1:
                                 lib.output.error("must provide full path to file after `{}` keyword".format(choice))
                             else:
                                 self.do_load_custom_hosts(choice_data_list[-1])
@@ -551,7 +582,7 @@ class AutoSploitTerminal(object):
                                 lib.output.error(
                                     "must provide a list of API names after `{}` keyword and query "
                                     "(IE {} shodan,censys apache2)".format(
-                                        choice.strip(), choice.strip()
+                                        choice.split(" ")[0].strip(), choice.split(" ")[0].strip()
                                     )
                                 )
                             else:
@@ -582,7 +613,7 @@ class AutoSploitTerminal(object):
                                 lib.output.error(
                                     "must supply API name with `{}` keyword along with "
                                     "new token (IE {} shodan mytoken123 [userID (censys)])".format(
-                                        choice.strip(), choice.strip()
+                                        choice.split(" ")[0].strip(), choice.split(" ")[0].strip()
                                     )
                                 )
                             else:

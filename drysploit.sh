@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 
+#
+# this script dryruns autosploit. That's it, nothing special just a dry run
+#
+
 
 if [[ $# -lt 1 ]]; then
     echo "Syntax:"
-    echo -e "\t./dryrun_autosploit.sh <search_query> [whitelist]"
+    echo -e "\t./drysploit.sh <search_query> [whitelist]"
 	exit 1
 fi
-
-echo -e "[!] Make sure you are not on your localhost while running this script, press enter to continue";
-read
 
 WHITELIST=$2
 SEARCH_QUERY=$1

@@ -25,10 +25,10 @@ class AutoSploitParser(argparse.ArgumentParser):
         """
 
         parser = argparse.ArgumentParser(
-            usage="python autosploit.py -[c|z|s|a] -[q] QUERY\n"
-                  "{spacer}[-C] WORKSPACE LHOST LPORT [-e] [--whitewash] PATH\n"
-                  "{spacer}[--ruby-exec] [--msf-path] PATH [-E] EXPLOIT-FILE-PATH\n"
-                  "{spacer}[--rand-agent] [--proxy] PROTO://IP:PORT [-P] AGENT".format(
+            usage="python autosploit.py -c[z|s|a] -q QUERY [-O|A]\n"
+                  "{spacer}[-C WORKSPACE LHOST LPORT] [-e] [--whitewash PATH] [-H]\n"
+                  "{spacer}[--ruby-exec] [--msf-path] PATH [-E EXPLOIT-FILE-PATH]\n"
+                  "{spacer}[--rand-agent] [--proxy PROTO://IP:PORT] [-P AGENT] [-D QUERY,QUERY,..]".format(
                     spacer=" " * 28
             )
         )
@@ -42,8 +42,10 @@ class AutoSploitParser(argparse.ArgumentParser):
         se.add_argument("-a", "--all", action="store_true", dest="searchAll",
                         help="search all available search engines to gather hosts")
         save_results_args = se.add_mutually_exclusive_group(required=False)
-        save_results_args.add_argument("-O", "--overwrite", action="store_true", dest="overwriteHosts",
-                        help="When specified, start from scratch by overwriting the host file with new search results.")
+        save_results_args.add_argument(
+            "-O", "--overwrite", action="store_true", dest="overwriteHosts",
+            help="When specified, start from scratch by overwriting the host file with new search results."
+        )
         save_results_args.add_argument("-A", "--append", action="store_true", dest="appendHosts",
                                        help="When specified, append discovered hosts to the host file.")
 
@@ -65,7 +67,7 @@ class AutoSploitParser(argparse.ArgumentParser):
         exploit.add_argument("-e", "--exploit", action="store_true", dest="startExploit",
                              help="start exploiting the already gathered hosts")
         exploit.add_argument("-d", "--dry-run", action="store_true", dest="dryRun",
-                             help="Do not launch metasploit's exploits. Do everything else. msfconsole is never called.")
+                             help="msfconsole will never be called when this flag is passed")
         exploit.add_argument("-f", "--exploit-file-to-use", metavar="PATH", dest="exploitFile",
                              help="Run AutoSploit with provided exploit JSON file.")
         exploit.add_argument("-H", "--is-honeypot", type=float, default=1000, dest="checkIfHoneypot", metavar="HONEY-SCORE",
@@ -79,7 +81,7 @@ class AutoSploitParser(argparse.ArgumentParser):
         misc.add_argument("--ethics", action="store_true", dest="displayEthics",
                           help=argparse.SUPPRESS)  # easter egg!
         misc.add_argument("--whitelist", metavar="PATH", dest="whitelist",
-                             help="only exploit hosts listed in the whitelist file")
+                          help="only exploit hosts listed in the whitelist file")
         misc.add_argument("-D", "--download", nargs="+", metavar="SEARCH1 SEARCH2 ...", dest="downloadModules",
                           help="download new exploit modules with a provided search flag")
         opts = parser.parse_args()

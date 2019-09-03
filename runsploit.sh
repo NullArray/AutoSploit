@@ -1,9 +1,15 @@
 #!/bin/bash
 
+#
+# this script runs autosploit with default configs and default modules
+# protip be on a VPS when you run this because it's gonna start an attack
+# right away
+#
+
 
 if [[ $# -lt 1 ]]; then
     echo "Syntax:"
-    echo -e "\t./run_autosploit.sh PORT [WHITELIST]"
+    echo -e "\t./runsploit.sh PORT [WHITELIST]"
 	exit 1
 fi
 
