@@ -562,7 +562,7 @@ class AutoSploitTerminal(object):
                                     print(self.do_load_custom_hosts.__doc__)
                             except TypeError:
                                 pass
-                            if len(choice_data_list) == 1:
+                            if choice_data_list is not None and len(choice_data_list) == 1:
                                 lib.output.error("must provide full path to file after `{}` keyword".format(choice))
                             else:
                                 self.do_load_custom_hosts(choice_data_list[-1])
