@@ -1,7 +1,7 @@
 import os
 import random
 
-VERSION = "3.1.4"
+VERSION = "3.1.5"
 
 
 def banner_1(line_sep="#--", space=" " * 30):
