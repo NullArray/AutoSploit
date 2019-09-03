@@ -187,6 +187,12 @@ class AutoSploitTerminal(object):
         Censys ->  reset/tokens censys <token> <userID>
         Shodan ->  reset.tokens shodan <token>
         """
+        import sys
+
+        if sys.version_info > (3,):
+            token = token.encode("utf-8")
+            username = username.encode("utf-8")
+
         if api.lower() == "censys":
             lib.output.info("resetting censys API credentials")
             with open(lib.settings.API_KEYS["censys"][0], 'w') as token_:
