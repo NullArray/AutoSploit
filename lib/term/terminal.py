@@ -282,7 +282,7 @@ class AutoSploitTerminal(object):
                         proxy=proxy,
                         agent=agent
                     ).search()
-                except lib.errors.AutoSploitAPIConnectionError as e:
+                except (lib.errors.AutoSploitAPIConnectionError, Exception) as e:
                     lib.settings.stop_animation = True
                     lib.output.error("error searching API: '{}', error message: '{}'".format(api, str(e)))
         lib.settings.stop_animation = True
