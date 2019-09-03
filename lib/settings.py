@@ -310,15 +310,18 @@ def cmdline(command, is_msf=True):
     split_cmd = [x.strip() for x in command.split(" ") if x]
 
     sys.stdout.flush()
-
-    proc = Popen(split_cmd, stdout=PIPE, bufsize=1)
     stdout_buff = []
-    for stdout_line in iter(proc.stdout.readline, b''):
-        stdout_buff += [stdout_line.rstrip()]
-        if is_msf:
-            print("(msf)>> {}".format(stdout_line).rstrip())
-        else:
-            print("{}".format(stdout_line).rstrip())
+
+    try:
+       proc = Popen(split_cmd, stdout=PIPE, bufsize=1)
+       for stdout_line in iter(proc.stdout.readline, b''):
+           stdout_buff += [stdout_line.rstrip()]
+           if is_msf:
+               print("(msf)>> {}".format(stdout_line).rstrip())
+           else:
+               print("{}".format(stdout_line).rstrip())
+    except OSError as e:
+        stdout_buff += "ERROR: " + e
 
     return stdout_buff
 
