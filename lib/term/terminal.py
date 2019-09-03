@@ -66,7 +66,7 @@ class AutoSploitTerminal(object):
         self.modules = modules
         try:
             self.loaded_hosts = open(lib.settings.HOST_FILE).readlines()
-        except IOError:
+        except (IOError, Exception):
             lib.output.warning("no hosts file present")
             self.loaded_hosts = open(lib.settings.HOST_FILE, "a+").readlines()
 
