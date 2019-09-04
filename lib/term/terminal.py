@@ -1,4 +1,5 @@
 import os
+import json
 import datetime
 
 import lib.banner
@@ -48,7 +49,9 @@ class AutoSploitTerminal(object):
         # clean the hosts file of duplicate IP's
         "clean", "clear",
         # easter eggs!
-        "idkwhatimdoing", "ethics", "skid"
+        "idkwhatimdoing", "ethics", "skid",
+        # nmap arguments
+        "nmap", "mapper", "mappy"
     ]
     external_terminal_commands = lib.settings.load_external_commands()
     api_call_pointers = {
@@ -216,9 +219,14 @@ class AutoSploitTerminal(object):
         :param query: the query to be searched
         :param tokens: an argument dict that will contain the token information
 
+        Command Format:
+        --------------
+        search[/api/gather] API_NAME[API_NAME,...](shodan,censys,zoomeye) QUERY
+
         Examples:
         ---------
-        search/api/gather shodan[,censys[,zoomeye]] windows 10
+        search shodan,censys,zoomeye windows 10
+        search shodan windows 7
         """
         acceptable_api_names = ("shodan", "censys", "zoomeye")
         api_checker = lambda l: all(i.lower() in acceptable_api_names for i in l)
@@ -320,9 +328,13 @@ class AutoSploitTerminal(object):
         -----------
         :param ip: IP address to be added
 
+        Command Format:
+        --------------
+        single IP[,IP,IP,IP,IP,...]
+
         Examples:
         ---------
-        single 89.76.12.124[,89.76.12.43,89.90.65.78,...]
+        single 89.76.12.124,89.76.12.43
         """
         for item in ip.split(","):
             validated_ip = lib.settings.validate_ip_addr(item)
@@ -357,9 +369,13 @@ class AutoSploitTerminal(object):
         -----------
         :param workspace_info: a tuple of workspace information
 
+        Command Format:
+        --------------
+        exploit[/run/attack] IP PORT WORKSPACE_NAME [whitewash list]
+
         Examples:
         ---------
-        exploit/run/attack 127.0.0.1 9065 default [whitewash list]
+        exploit 127.0.0.1 9065 default whitelist.txt
         """
         if workspace_info[3] is not None and workspace_info[3] != "honeycheck":
             lib.output.misc_info("doing whitewash on hosts file")
@@ -420,9 +436,13 @@ class AutoSploitTerminal(object):
         -----------
         :param file_path: the full path to the loadable hosts file
 
+        Command Format:
+        --------------
+        custom[/personal] FILE_PATH
+
         Examples:
         ---------
-        custom/personal /some/path/to/myfile.txt
+        custom /some/path/to/myfile.txt
         """
         import shutil
 
@@ -437,7 +457,57 @@ class AutoSploitTerminal(object):
         lib.output.info("host file replaced, backup stored under '{}'".format(backup_path))
         self.loaded_hosts = open(lib.settings.HOST_FILE).readlines()
 
+    def do_nmap_scan(self, target, arguments):
+        """
+        Explanation:
+        -----------
+        Perform a nmap scan on a provided target, given that nmap is on your system.
+        If nmap is not on your system, this will not work, you may also provide
+        arguments known to nmap.
+
+        Parameters:
+        ----------
+        :param target: the target to attack
+        :param arguments: a string of arguments separated by a comma
+
+        Command Format:
+        --------------
+        nmap[/mapper/mappy] TARGET [ARGUMENTS]
+
+        Examples:
+        --------
+        nmap/mapper/mappy 10.0.1.1 -sV,--dns-servers 1.1.1.1,--reason,-A
+        nmap 10.0.1.1/24
+        """
+        import lib.scanner.nmap
+
+        sep = "-" * 30
+        if arguments is not None:
+            arguments = arguments.split(",")
+            passable_arguments = lib.scanner.nmap.parse_nmap_args(arguments)
+        else:
+            passable_arguments = None
+        try:
+            nmap_path = lib.scanner.nmap.find_nmap(lib.settings.NMAP_POSSIBLE_PATHS)
+        except lib.errors.NmapNotFoundException:
+            nmap_path = None
+            lib.output.error("nmap was not found on your system please install nmap first")
+            return
+        lib.output.info("performing nmap scan on {}".format(target))
+        try:
+            output, warnings, errors = lib.scanner.nmap.do_scan(target, nmap_path, arguments=passable_arguments)
+            formatted_results_output = lib.scanner.nmap.parse_xml_output(output, warnings, errors)
+            save_file = lib.scanner.nmap.write_data(target, formatted_results_output, is_xml=False)
+            lib.output.misc_info("JSON data dumped to file: '{}'".format(save_file))
+            print("{sep}\n{data}\n{sep}".format(
+                data=json.dumps(formatted_results_output["nmap_scan"][target], indent=4), sep=sep
+            ))
+        except lib.errors.NmapScannerError as e:
+            lib.output.error(str(e).strip())
+
     def terminal_main_display(self, tokens, extra_commands=None, save_history=True):
+        # idk what the fuck the problem is but this seems to fix it so...
+        import lib.output
         """
         terminal main display
         """
@@ -502,7 +572,7 @@ class AutoSploitTerminal(object):
                             self.do_quit_terminal(save_history=save_history)
                         elif any(c in choice for c in ("view", "show")):
                             self.do_view_gathered()
-                        elif any(c in choice for c in ("ver", "version")):
+                        elif any(c in choice for c in ("version",)):
                             self.do_show_version_number()
                         elif any(c in choice for c in ("clean", "clear")):
                             self.do_clean_hosts()
@@ -625,9 +695,54 @@ class AutoSploitTerminal(object):
                                     self.do_token_reset(api, token, username)
                                 else:
                                     lib.output.error("cannot reset {} API credentials".format(choice))
+                        elif any(c in choice for c in ["nmap", "mapper", "mappy"]):
+                            try:
+                                if "help" in choice_data_list:
+                                    print(self.do_nmap_scan.__doc__)
+                            except TypeError:
+                                pass
+                            target = choice_data_list[1]
+                            try:
+                                arguments = choice_data_list[2]
+                                lib.output.warning(
+                                    "arguments that have a space in them most likely will not be processed correctly, "
+                                    "(IE --dns-servers 1.1.1.1 will most likely cause issues)"
+                                )
+                            except IndexError:
+                                arguments = None
+                            # don't know how im going to implement ports yet
+                            # try:
+                            #     ports = choice_data_list[3]
+                            # except IndexError:
+                            #     ports = None
+
+                            self.do_nmap_scan(target, arguments)
                         self.history.append(choice)
                         self.__reload()
                 except KeyboardInterrupt:
                     lib.output.warning("use the `exit/quit` command to end terminal session")
             except IndexError:
                 pass
+            except Exception as e:
+                global stop_animation
+
+                stop_animation = True
+
+                import sys
+                import traceback
+                import lib.creation.issue_creator
+
+                print(
+                    "\033[31m[!] AutoSploit has hit an unhandled exception: '{}', "
+                    "in order for the developers to troubleshoot and repair the "
+                    "issue AutoSploit will need to gather your OS information, "
+                    "current arguments, the error message, and a traceback. "
+                    "None of this information can be used to identify you in any way\033[0m".format(str(e))
+                )
+                error_traceback = ''.join(traceback.format_tb(sys.exc_info()[2]))
+                error_class = str(e.__class__).split(" ")[1].split(".")[1].strip(">").strip("'")
+                error_file = lib.settings.save_error_to_file(str(error_traceback), str(e), error_class)
+                lib.creation.issue_creator.request_issue_creation(error_file, lib.creation.issue_creator.hide_sensitive(), str(e))
+                lib.output.info("continuing terminal session")
+                # this way if you're in the terminal already we won't quit out of it
+                continue

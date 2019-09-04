@@ -132,4 +132,5 @@ def main():
         error_traceback = ''.join(traceback.format_tb(sys.exc_info()[2]))
         error_class = str(e.__class__).split(" ")[1].split(".")[1].strip(">").strip("'")
         error_file = save_error_to_file(str(error_traceback), str(e), error_class)
-        request_issue_creation(error_file, hide_sensitive(), str(e))
+        print error_traceback
+        # request_issue_creation(error_file, hide_sensitive(), str(e))

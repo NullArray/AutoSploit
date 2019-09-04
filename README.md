@@ -185,7 +185,7 @@ If you would like to contribute to the development of this project please be sur
 
 Please, also, be sure to read our [contribution standards](https://github.com/NullArray/AutoSploit/wiki/Development-information#contribution-standards) before sending pull requests
 
-If you need some help understanding the code, or want to chat with some other AutoSploit community members, feel free to join our [Discord server](https://discord.gg/9BeeZQk).
+If you need some help understanding the code, or want to chat with some other AutoSploit community members, feel free to join our [Discord server](https://discord.gg/DZe4zr2).
 
 ### Note
 

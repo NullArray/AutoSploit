@@ -72,14 +72,17 @@ HOST_FILE_BACKUP = "{}/backups".format(HOME)
 # autosploit command history file path
 HISTORY_FILE_PATH = "{}/.history".format(HOME)
 
-# we'll save the scans output for future use
-NMAP_XML_OUTPUT_BACKUP = "{}/nmap_scans".format(HOME)
+# we'll save the scans xml output for future use
+NMAP_XML_OUTPUT_BACKUP = "{}/nmap_scans/xml".format(HOME)
+
+# we'll dump the generated dict data into JSON and save it into a file
+NMAP_JSON_OUTPUT_BACKUP = "{}/nmap_scans/json".format(HOME)
 
 # regex to discover errors or warnings
 NMAP_ERROR_REGEX_WARNING = re.compile("^warning: .*", re.IGNORECASE)
 
 # possible options in nmap
-NMAP_OPTIONS_PATH = "{}/etc_text_files/nmap_opts.lst".format(CUR_DIR)
+NMAP_OPTIONS_PATH = "{}/etc/text_files/nmap_opts.lst".format(CUR_DIR)
 
 # possible paths for nmap
 NMAP_POSSIBLE_PATHS = (
@@ -321,7 +324,7 @@ def cmdline(command, is_msf=True):
            else:
                print("{}".format(stdout_line).rstrip())
     except OSError as e:
-        stdout_buff += "ERROR: " + e
+        stdout_buff += "ERROR: " + str(e)
 
     return stdout_buff
 
