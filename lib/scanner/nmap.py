@@ -49,7 +49,7 @@ __last_modification__ = '2017.01.07'
 """
 
 import os
-import shlex
+import json
 import subprocess
 
 from xml.etree import ElementTree
@@ -60,18 +60,51 @@ import lib.output
 import lib.settings
 
 
-def write_xml_data(host, output):
-    if not os.path.exists(lib.settings.NMAP_XML_OUTPUT_BACKUP):
-        os.makedirs(lib.settings.NMAP_XML_OUTPUT_BACKUP)
-    file_path = "{}/{}_{}.xml".format(
-        lib.settings.NMAP_XML_OUTPUT_BACKUP, str(host), lib.jsonize.random_file_name(length=10)
+def parse_nmap_args(args):
+    """
+    parse the provided arguments and ask if they aren't in the `known` arguments list
+    """
+    runnable_args = []
+    known_args = [a.strip() for a in open(lib.settings.NMAP_OPTIONS_PATH).readlines()]
+    for arg in args:
+        if " " in arg:
+            tmparg = arg.split(" ")[0]
+        else:
+            tmparg = arg
+        if tmparg in known_args:
+            runnable_args.append(arg)
+        else:
+            choice = lib.output.prompt(
+                "argument: '{}' is not in the list of 'known' nmap arguments, "
+                "do you want to use it anyways[y/N]".format(arg)
+            )
+            if choice.lower() == "y":
+                runnable_args.append(tmparg)
+    return runnable_args
+
+
+def write_data(host, output, is_xml=True):
+    """
+    dump XML data to a file
+    """
+    if not os.path.exists(lib.settings.NMAP_XML_OUTPUT_BACKUP if is_xml else lib.settings.NMAP_JSON_OUTPUT_BACKUP):
+        os.makedirs(lib.settings.NMAP_XML_OUTPUT_BACKUP if is_xml else lib.settings.NMAP_JSON_OUTPUT_BACKUP)
+    file_path = "{}/{}_{}.{}".format(
+        lib.settings.NMAP_XML_OUTPUT_BACKUP if is_xml else lib.settings.NMAP_JSON_OUTPUT_BACKUP,
+        str(host), lib.jsonize.random_file_name(length=10), "xml" if is_xml else "json"
     )
     with open(file_path, 'a+') as results:
-        results.write(output)
+        if is_xml:
+            results.write(output)
+        else:
+            json.dump(output, results, indent=4)
     return file_path
 
 
 def find_nmap(search_paths):
+    """
+    check if nmap is on the system
+    """
     for path in search_paths:
         try:
             _ = subprocess.Popen([path, '-V'], bufsize=10000, stdout=subprocess.PIPE, close_fds=True)
@@ -83,13 +116,15 @@ def find_nmap(search_paths):
 
 
 def do_scan(host, nmap_path, ports=None, arguments=None):
+    """
+    perform the nmap scan
+    """
     if arguments is None:
         arguments = "-sV"
-    arguments_list = shlex.split(arguments)
     launch_arguments = [
         nmap_path, '-oX', '-', host,
         '-p ' + ports if ports is not None else "",
-    ] + arguments_list
+    ] + arguments
     to_launch = []
     for item in launch_arguments:
         if not item == "":
@@ -111,12 +146,14 @@ def do_scan(host, nmap_path, ports=None, arguments=None):
                     nmap_warn_tracestack.append(line + os.linesep)
                 else:
                     nmap_error_tracestack.append(line + os.linesep)
-    path = write_xml_data(host, output_data)
-    lib.output.misc_info("a copy of the output has been saved to: {}".format(path))
+    write_data(host, output_data, is_xml=True)
     return output_data, "".join(nmap_warn_tracestack), "".join(nmap_error_tracestack)
 
 
 def parse_xml_output(output, warnings, error):
+    """
+    parse the XML data out of the file into a dict
+    """
     results = {}
     try:
         root = ElementTree.fromstring(output)
