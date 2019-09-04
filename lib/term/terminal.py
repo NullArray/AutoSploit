@@ -715,8 +715,8 @@ class AutoSploitTerminal(object):
                             #     ports = choice_data_list[3]
                             # except IndexError:
                             #     ports = None
-
-                            self.do_nmap_scan(target, arguments)
+                            if "help" not in choice_data_list:
+                                self.do_nmap_scan(target, arguments)
                         self.history.append(choice)
                         self.__reload()
                 except KeyboardInterrupt:
