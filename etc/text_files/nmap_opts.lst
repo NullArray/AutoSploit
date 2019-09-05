@@ -89,6 +89,8 @@
 -oG
 -oA
 -v
+-vv
+-vvv
 -d
 --reason
 --open

@@ -45,7 +45,7 @@ class AutoSploitTerminal(object):
         # reset API tokens
         "reset", "tokens",
         # show the version number
-        "ver", "version",
+        "version",
         # clean the hosts file of duplicate IP's
         "clean", "clear",
         # easter eggs!
@@ -371,11 +371,11 @@ class AutoSploitTerminal(object):
 
         Command Format:
         --------------
-        exploit[/run/attack] IP PORT WORKSPACE_NAME [whitewash list]
+        exploit[/run/attack] IP PORT WORKSPACE_NAME [whitewash list] [honeycheck] [nmap]
 
         Examples:
         ---------
-        exploit 127.0.0.1 9065 default whitelist.txt
+        exploit 127.0.0.1 9065 default whitelist.txt honeycheck nmap
         """
         if workspace_info[3] is not None and workspace_info[3] != "honeycheck":
             lib.output.misc_info("doing whitewash on hosts file")
@@ -483,8 +483,11 @@ class AutoSploitTerminal(object):
 
         sep = "-" * 30
         if arguments is not None:
-            arguments = arguments.split(",")
-            passable_arguments = lib.scanner.nmap.parse_nmap_args(arguments)
+            if not type(arguments) == list:
+                arguments = arguments.split(",")
+                passable_arguments = lib.scanner.nmap.parse_nmap_args(arguments)
+            else:
+                passable_arguments = lib.scanner.nmap.parse_nmap_args(arguments)
         else:
             passable_arguments = None
         try:
@@ -499,18 +502,25 @@ class AutoSploitTerminal(object):
             formatted_results_output = lib.scanner.nmap.parse_xml_output(output, warnings, errors)
             save_file = lib.scanner.nmap.write_data(target, formatted_results_output, is_xml=False)
             lib.output.misc_info("JSON data dumped to file: '{}'".format(save_file))
-            print("{sep}\n{data}\n{sep}".format(
-                data=json.dumps(formatted_results_output["nmap_scan"][target], indent=4), sep=sep
-            ))
+            try:
+                print("{sep}\n{data}\n{sep}".format(
+                    data=json.dumps(formatted_results_output['scan'][target], indent=4), sep=sep
+                ))
+            except KeyError:
+                lib.output.error(
+                    formatted_results_output['nmap']['scaninfo']['error']
+                )
         except lib.errors.NmapScannerError as e:
             lib.output.error(str(e).strip())
 
     def terminal_main_display(self, tokens, extra_commands=None, save_history=True):
-        # idk what the fuck the problem is but this seems to fix it so...
-        import lib.output
         """
         terminal main display
         """
+        # idk what the fuck the problem is but this seems to fix it so...
+        # if you remove the lib.output the below warning will cause an Exception
+        # saying that lib.output was never imported, so like WHAT?!
+        import lib.output
         lib.output.warning(
             "no arguments have been parsed at run time, dropping into terminal session. "
             "to get help type `help` to quit type `exit/quit` to get help on "
@@ -595,7 +605,7 @@ class AutoSploitTerminal(object):
                             if choice_data_list is None or len(choice_data_list) < 4:
                                 lib.output.error(
                                     "must provide at least LHOST, LPORT, workspace name with `{}` keyword "
-                                    "(IE {} 127.0.0.1 9076 default [whitelist-path] [honeycheck])".format(
+                                    "(IE {} 127.0.0.1 9076 default [whitelist-path] [honeycheck] [nmap])".format(
                                         choice.split(" ")[0].strip(), choice.split(" ")[0].strip()
                                     )
                                 )
@@ -605,15 +615,17 @@ class AutoSploitTerminal(object):
                                         workspace = (
                                             choice_data_list[1], choice_data_list[2],
                                             choice_data_list[3], choice_data_list[4],
-                                            True if "honeycheck" in choice_data_list else False
+                                            True if "honeycheck" in choice_data_list else False,
+                                            True if "nmap" in choice_data_list else False,
                                         )
                                     except IndexError:
                                         workspace = (
                                             choice_data_list[1], choice_data_list[2],
                                             choice_data_list[3], None,
-                                            True if "honeycheck" in choice_data_list else False
+                                            True if "honeycheck" in choice_data_list else False,
+                                            True if "nmap" in choice_data_list else False
                                         )
-                                    if workspace[-1]:
+                                    if workspace[4]:
                                         honeyscore = None
                                         while honeyscore is None:
                                             honeyscore = lib.output.prompt(
@@ -624,6 +636,44 @@ class AutoSploitTerminal(object):
                                             except:
                                                 honeyscore = None
                                                 lib.output.error("honey score must be a float (IE 0.3)")
+                                    if workspace[5]:
+                                        # perform an nmap scan on every IP address before they're exploited.
+                                        # this will probably be really annoying, but you also get the option
+                                        # to skip them. I think the `nmap` command is probably a better idea
+                                        # given the circumstances of how it works. But really in the end
+                                        # it's completely up to you.
+                                        big_question = lib.output.prompt(
+                                            "do you want to initiate a port scan on all gathered IP addresses "
+                                            "before beginning the initial exploitation phase[y/N]"
+                                        )
+                                        if big_question.lower().startswith("y"):
+                                            lib.output.info("scanning gathered IP addresses before starting attacks")
+                                            self.__reload()
+                                            for ip in self.loaded_hosts:
+                                                ip = ip.strip()
+                                                option = lib.output.prompt(
+                                                    "scan IP address: {}[y/N]".format(ip), lowercase=True
+                                                )
+                                                if option.lower().startswith("y"):
+                                                    provided_arguments = []
+                                                    done_providing = False
+                                                    # pass arguments to nmap by being prompted by them
+                                                    # as soon as the prompt receives `STOP` it breaks out
+                                                    # of the loop and adds the arguments to the nmap
+                                                    # scan call.
+                                                    while not done_providing:
+                                                        argument = lib.output.prompt(
+                                                            "provide an argument that you want to pass to nmap "
+                                                            "(type 'STOP' to continue)",
+                                                            lowercase=False
+                                                        )
+                                                        if argument != "STOP":
+                                                            provided_arguments.append(argument)
+                                                        else:
+                                                            break
+                                                    self.do_nmap_scan(ip, provided_arguments)
+                                                else:
+                                                    lib.output.misc_info("skipping scan for {}".format(ip))
                                     self.do_exploit_targets(
                                         workspace, shodan_token=self.tokens["shodan"][0]
                                     )
@@ -696,27 +746,29 @@ class AutoSploitTerminal(object):
                                 else:
                                     lib.output.error("cannot reset {} API credentials".format(choice))
                         elif any(c in choice for c in ["nmap", "mapper", "mappy"]):
-                            try:
-                                if "help" in choice_data_list:
-                                    print(self.do_nmap_scan.__doc__)
-                            except TypeError:
-                                pass
-                            target = choice_data_list[1]
-                            try:
-                                arguments = choice_data_list[2]
+                            if choice_data_list is not None and not len(choice_data_list) == 1:
+                                try:
+                                    if "help" in choice_data_list:
+                                        print(self.do_nmap_scan.__doc__)
+                                except TypeError:
+                                    pass
+                                target = choice_data_list[1]
+                                try:
+                                    arguments = choice_data_list[2]
+                                    lib.output.warning(
+                                        "arguments that have a space in them most likely will not be processed correctly, "
+                                        "(IE --dns-servers 1.1.1.1 will most likely cause issues)"
+                                    )
+                                except IndexError:
+                                    arguments = None
+                                # to do ports just pass the -p flag to nmap, simple and easy. You're welcome
+                                if "help" not in choice_data_list:
+                                    self.do_nmap_scan(target, arguments)
+                            else:
                                 lib.output.warning(
-                                    "arguments that have a space in them most likely will not be processed correctly, "
-                                    "(IE --dns-servers 1.1.1.1 will most likely cause issues)"
+                                    "must supply at least an IP address to initiate a nmap scan "
+                                    "nmap IP [arg1,arg2,arg3]"
                                 )
-                            except IndexError:
-                                arguments = None
-                            # don't know how im going to implement ports yet
-                            # try:
-                            #     ports = choice_data_list[3]
-                            # except IndexError:
-                            #     ports = None
-                            if "help" not in choice_data_list:
-                                self.do_nmap_scan(target, arguments)
                         self.history.append(choice)
                         self.__reload()
                 except KeyboardInterrupt:

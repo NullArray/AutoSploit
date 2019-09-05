@@ -55,8 +55,9 @@ single                  Load a single host into the file, or multiple hosts sepa
 personal/custom         Load a custom host file
 tokens/reset            Reset API tokens if needed
 external                View loaded external commands
-ver[sion]               View the current version of the program
+version                 View the current version of the program
 clean/clear             Clean the hosts.txt file of duplicate IP addresses
+nmap/mapper/mappy       Run an nmap scan on a provided host
 help/?                  Display this help
 """
 
