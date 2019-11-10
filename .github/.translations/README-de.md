@@ -179,12 +179,6 @@ beautifulsoup4
 Wenn dir auffällt, dass du diese nicht installiert hast, kannst du sie über Pip installieren, wie nachfolgend gezeigt.
 
 ```bash
-pip install requests psutil beautifulsoup4
-```
-
-oder
-
-```bash
 pip install -r requirements.txt
 ```
 

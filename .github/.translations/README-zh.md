@@ -38,16 +38,16 @@ RCE选择了该工具提供的Metasploit模块。 您可以在本仓库的module
 
 AutoSploit依赖于以下Python2.7模块。
 
-```bash
-shodan
-blessings
+```
+requests
+psutil
+beautifulsoup4
 ```
 
 如果你发现你没有安装这些软件，就像这样用pip来获取它们。
 
 ```bash
-pip install shodan
-pip install blessings
+pip install -r requirements.txt
 ```
 由于程序调用了Metasploit框架的功能，所以你也需要安装它。 通过点击[这里](https://www.rapid7.com/products/metasploit/)从Rapid7获取它。
 

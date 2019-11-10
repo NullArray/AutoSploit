@@ -155,15 +155,10 @@ AutoSploit depends on the following Python2.7 modules.
 ```
 requests
 psutil
+beautifulsoup4
 ```
 
 Should you find you do not have these installed get them with pip like so.
-
-```bash
-pip install requests psutil
-```
-
-or
 
 ```bash
 pip install -r requirements.txt

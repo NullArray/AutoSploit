@@ -12,13 +12,13 @@ echo "                                                                    ";
 function installDebian () {
     sudo apt-get update;
     sudo apt-get -y install git python2.7 python-pip postgresql apache2;
-    pip2 install requests psutil;
+    pip2 install -r requirements.txt;
     installMSF;
 }
 
 function installFedora () {
     sudo yum -y install git python-pip;
-    pip2 install requests psutil;
+    pip2 install -r requirements.txt;
     installMSF;
 }
 
