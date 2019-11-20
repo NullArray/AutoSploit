@@ -51,7 +51,7 @@ docker build -t autosploit .
 docker run -it --network haknet -p 80:80 -p 443:443 -p 4444:4444 autosploit
 ```
 
-Dev team contributor [Khast3x](https://github.com/khast3x) recently improved Docker operations as well as add more details to the README.md in the `Docker` subdirectory. For more information on deploying AutoSploit with Docker please be sure to click [here](https://github.com/NullArray/AutoSploit/tree/master/Docker) 
+Dev team contributor [Khast3x](https://github.com/khast3x) recently improved Docker operations as well as add more details to the README.md in the `Docker` subdirectory. For more information on deploying AutoSploit with Docker please be sure to click [here](https://github.com/NullArray/AutoSploit/tree/master/Docker)
 
 
 ##### Cloning
@@ -98,10 +98,10 @@ Choosing option `2` will prompt you for a platform specific search query. Enter 
 As of version 2.0 AutoSploit can be started with a number of command line arguments/flags as well. Type `python autosploit.py -h` to display all the options available to you. I've posted the options below as well for reference.
 
 ```
-usage: python autosploit.py -[c|z|s|a] -[q] QUERY
-                            [-C] WORKSPACE LHOST LPORT [-e] [--whitewash] PATH
-                            [--ruby-exec] [--msf-path] PATH [-E] EXPLOIT-FILE-PATH
-                            [--rand-agent] [--proxy] PROTO://IP:PORT [-P] AGENT
+usage: python autosploit.py -c[z|s|a] -q QUERY [-O|A]
+                            [-C WORKSPACE LHOST LPORT] [-e] [--whitewash PATH] [-H]
+                            [--ruby-exec] [--msf-path] PATH [-E EXPLOIT-FILE-PATH]
+                            [--rand-agent] [--proxy PROTO://IP:PORT] [-P AGENT] [-D QUERY,QUERY,..]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -113,6 +113,10 @@ search engines:
   -z, --zoomeye         use zoomeye.org as the search engine to gather hosts
   -s, --shodan          use shodan.io as the search engine to gather hosts
   -a, --all             search all available search engines to gather hosts
+  -O, --overwrite       When specified, start from scratch by overwriting the
+                        host file with new search results.
+  -A, --append          When specified, append discovered hosts to the host
+                        file.
 
 requests:
   arguments to edit your requests
@@ -135,6 +139,12 @@ exploits:
                         set the configuration for MSF (IE -C default 127.0.0.1
                         8080)
   -e, --exploit         start exploiting the already gathered hosts
+  -d, --dry-run         msfconsole will never be called when this flag is
+                        passed
+  -f PATH, --exploit-file-to-use PATH
+                        Run AutoSploit with provided exploit JSON file.
+  -H HONEY-SCORE, --is-honeypot HONEY-SCORE
+                        Determine if the host is a honeypot or not
 
 misc arguments:
   arguments that don't fit anywhere else
@@ -144,6 +154,9 @@ misc arguments:
   --msf-path MSF-PATH   pass the path to your framework if it is not in your
                         ENV PATH
   --whitelist PATH      only exploit hosts listed in the whitelist file
+  -D SEARCH1 SEARCH2 ... [SEARCH1 SEARCH2 ... ...], --download SEARCH1 SEARCH2 ... [SEARCH1 SEARCH2 ... ...]
+                        download new exploit modules with a provided search
+                        flag
 ```
 
 
@@ -177,7 +190,7 @@ Special thanks to [Ekultek](https://github.com/Ekultek) without whoms contributi
 
 Thanks to [Khast3x](https://github.com/khast3x) for setting up Docker support.
 
-Last but certainly not least. Thanks to all who have submitted Pull Requests, bug reports, useful and productive contributions in general.  
+Last but certainly not least. Thanks to all who have submitted Pull Requests, bug reports, useful and productive contributions in general.
 
 ### Active Development
 
