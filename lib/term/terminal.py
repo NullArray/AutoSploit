@@ -205,12 +205,12 @@ class AutoSploitTerminal(object):
                 try:
                     token_.write(token)
                 except:
-                    lib.output.warning("issue writing token, is it blank?")
+                    lib.output.warning("issue writing token, is it blank? Try again")
             with open(lib.settings.API_KEYS["censys"][1], 'w') as username_:
                 try:
                     username_.write(username)
                 except:
-                    lib.output.warning("issue writing username, is it blank?")
+                    lib.output.warning("issue writing username, is it blank? Try again")
         else:
             with open(lib.settings.API_KEYS["shodan"][0], 'w') as token_:
                 token_.write(token)
@@ -465,7 +465,13 @@ class AutoSploitTerminal(object):
             return
         lib.output.warning("overwriting hosts file with provided, and backing up current")
         backup_path = lib.settings.backup_host_file(lib.settings.HOST_FILE, lib.settings.HOST_FILE_BACKUP)
-        shutil.copy(file_path, lib.settings.HOST_FILE)
+        try:
+            shutil.copy(file_path, lib.settings.HOST_FILE)
+        except Exception as e:
+            if "are the same file" in str(e):
+                lib.output.warning("there hasn't been any changes to the file since last save")
+            else:
+                raise e.__class__(str(e))
         lib.output.info("host file replaced, backup stored under '{}'".format(backup_path))
         self.loaded_hosts = open(lib.settings.HOST_FILE).readlines()
 
