@@ -74,7 +74,10 @@ class AutoSploitTerminal(object):
             self.loaded_hosts = open(lib.settings.HOST_FILE, "a+").readlines()
 
     def __reload(self):
-        self.loaded_hosts = open(lib.settings.HOST_FILE).readlines()
+        try:
+            self.loaded_hosts = open(lib.settings.HOST_FILE).readlines()
+        except IOError:
+            lib.output.warning("there's no hosts file to reload")
 
     def reflect_memory(self, max_memory=100):
         """
