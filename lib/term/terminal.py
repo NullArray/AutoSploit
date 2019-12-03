@@ -249,7 +249,10 @@ class AutoSploitTerminal(object):
             api_list = requested_api_data.split(",")
         except:
             api_list = [requested_api_data]
-        prompt_for_save = len(open(lib.settings.HOST_FILE).readlines()) != 0
+        try:
+            prompt_for_save = len(open(lib.settings.HOST_FILE).readlines()) != 0
+        except IOError:
+            prompt_for_save = False
         if prompt_for_save:
             save_mode = lib.output.prompt(
                 "would you like to [a]ppend or [o]verwrite the file[a/o]", lowercase=True
