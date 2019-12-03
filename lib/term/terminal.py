@@ -202,9 +202,15 @@ class AutoSploitTerminal(object):
         if api.lower() == "censys":
             lib.output.info("resetting censys API credentials")
             with open(lib.settings.API_KEYS["censys"][0], 'w') as token_:
-                token_.write(token)
+                try:
+                    token_.write(token)
+                except:
+                    lib.output.warning("issue writing token, is it blank?")
             with open(lib.settings.API_KEYS["censys"][1], 'w') as username_:
-                username_.write(username)
+                try:
+                    username_.write(username)
+                except:
+                    lib.output.warning("issue writing username, is it blank?")
         else:
             with open(lib.settings.API_KEYS["shodan"][0], 'w') as token_:
                 token_.write(token)
