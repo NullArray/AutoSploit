@@ -12,6 +12,7 @@ import api_calls.zoomeye
 import lib.exploitation.exploiter
 
 
+# I'm just pushing to say FUCK YOU @cryptollama
 class AutoSploitParser(argparse.ArgumentParser):
 
     def __init__(self):

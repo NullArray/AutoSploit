@@ -55,8 +55,9 @@ single                  Load a single host into the file, or multiple hosts sepa
 personal/custom         Load a custom host file
 tokens/reset            Reset API tokens if needed
 external                View loaded external commands
-ver[sion]               View the current version of the program
+version                 View the current version of the program
 clean/clear             Clean the hosts.txt file of duplicate IP addresses
+nmap/mapper/mappy       Run an nmap scan on a provided host
 help/?                  Display this help
 """
 
@@ -490,3 +491,17 @@ def find_similar(command, internal, external):
         if exter.startswith(first_char):
             retval.append(exter)
     return retval
+
+
+def we_dockered():
+    """
+    determine if we are inside a docker container or not
+    """
+    try:
+        with open("/proc/1/cgroup") as cgroup:
+            searcher = re.compile("docker", re.I)
+            if searcher.search(cgroup.read()) is not None:
+                return True
+            return False
+    except Exception:
+        return False
